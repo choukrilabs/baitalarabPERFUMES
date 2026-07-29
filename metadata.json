@@ -1,0 +1,6 @@
+{
+  "name": "عطور بيت العرب | Baitalarab Perfumes",
+  "description": "متجر عطور بيت العرب في حي الحبوس بالدار البيضاء: عطور شرقية فاخرة، عود، أزياء نسائية، وعسل حر.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

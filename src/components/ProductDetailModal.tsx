@@ -1,0 +1,172 @@
+import React from 'react';
+import { Product, SHOP_CONFIG } from '../types';
+import { X, MessageCircle, ShoppingBag, ShieldCheck, MapPin, Sparkles, Check } from 'lucide-react';
+
+interface ProductDetailModalProps {
+  product: Product | null;
+  onClose: () => void;
+  onAddToCart: (product: Product) => void;
+  isInCart?: boolean;
+}
+
+export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
+  product,
+  onClose,
+  onAddToCart,
+  isInCart,
+}) => {
+  if (!product) return null;
+
+  const whatsappMsg = encodeURIComponent(
+    `مرحباً عطور بيت العرب، استفسار عن المنتج:\n• *${product.name}*\n• السعر: ${product.price} درهم\n${product.volume ? `• الحجم: ${product.volume}\n` : ''}يرجى إفادتي بالتفاصيل وطريقة التوصيل.`
+  );
+
+  const directWhatsappUrl = `https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=${whatsappMsg}`;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
+      <div
+        className="relative bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl border border-gray-200 flex flex-col md:flex-row max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 left-4 z-10 w-9 h-9 rounded-full bg-[#1A1A1A]/80 text-white flex items-center justify-center hover:bg-[#8C7342] transition-colors shadow-md"
+          aria-label="إغلاق"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        {/* Product Image Side */}
+        <div className="md:w-1/2 bg-gray-100 relative aspect-square md:aspect-auto">
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-cover object-center"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src =
+                'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=800&q=80';
+            }}
+          />
+          {product.isFeatured && (
+            <span className="absolute top-4 right-4 gold-gradient text-white text-xs font-bold px-3 py-1 rounded-full shadow flex items-center gap-1">
+              <Sparkles className="w-3.5 h-3.5" /> منتج مميز
+            </span>
+          )}
+        </div>
+
+        {/* Product Information Side */}
+        <div className="md:w-1/2 p-6 sm:p-8 flex flex-col justify-between space-y-6">
+          <div className="space-y-4">
+            <div>
+              <span className="text-xs text-[#8C7342] font-bold bg-gray-100 px-2.5 py-1 rounded-md inline-block mb-2">
+                {product.category === 'perfumes' && 'عطور وعود شرقي'}
+                {product.category === 'abayas' && 'أزياء وقفاطين'}
+                {product.category === 'honey' && 'عسل حر طبيعي 100%'}
+                {product.category === 'other' && 'بخور وزيوت فاخرة'}
+              </span>
+
+              <h2 className="font-display font-bold text-2xl text-[#1A1A1A]">
+                {product.name}
+              </h2>
+
+              {product.volume && (
+                <p className="text-xs text-gray-500 font-medium mt-1">
+                  الحجم/الكمية: {product.volume}
+                </p>
+              )}
+            </div>
+
+            {/* Price Badge */}
+            <div className="flex items-baseline gap-3 pb-3 border-b border-gray-200">
+              <span className="font-display font-extrabold text-2xl text-[#8C7342]">
+                {product.price} <span className="text-sm font-normal text-[#1A1A1A]">درهم مغربي</span>
+              </span>
+              {product.originalPrice && product.originalPrice > product.price && (
+                <span className="text-sm text-gray-400 line-through">
+                  {product.originalPrice} درهم
+                </span>
+              )}
+            </div>
+
+            {/* Description */}
+            <div className="space-y-2">
+              <h4 className="text-xs font-bold text-[#8C7342] uppercase tracking-wider">
+                الوصف والمميزات:
+              </h4>
+              <p className="text-sm text-gray-500 leading-relaxed">
+                {product.description}
+              </p>
+            </div>
+
+            {/* Fragrance Notes / Product Specs */}
+            {product.notes && product.notes.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-xs font-bold text-[#8C7342] uppercase tracking-wider">
+                  المكونات / النوتات العطرية:
+                </h4>
+                <div className="flex flex-wrap gap-1.5">
+                  {product.notes.map((note, idx) => (
+                    <span
+                      key={idx}
+                      className="bg-[#F5F5F5] text-[#1A1A1A] border border-gray-200 text-xs px-2.5 py-1 rounded-lg font-medium"
+                    >
+                      • {note}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Trust Badges */}
+            <div className="pt-2 flex items-center gap-4 text-xs text-gray-600 border-t border-gray-200">
+              <div className="flex items-center gap-1">
+                <ShieldCheck className="w-4 h-4 text-[#8C7342]" />
+                <span>ضمان الجودة</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <MapPin className="w-4 h-4 text-[#8C7342]" />
+                <span>متجرنا بالحبوس</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Buttons */}
+          <div className="space-y-2 pt-2">
+            <a
+              href={directWhatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white py-3 rounded-xl font-bold text-sm shadow-md flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
+            >
+              <MessageCircle className="w-5 h-5" />
+              <span>طلب مباشر عبر واتساب</span>
+            </a>
+
+            <button
+              onClick={() => onAddToCart(product)}
+              className={`w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
+                isInCart
+                  ? 'bg-[#1E5C48] text-white'
+                  : 'bg-[#1A1A1A] hover:bg-[#2A2A2A] text-white'
+              }`}
+            >
+              {isInCart ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  <span>تمت الإضافة لسلة الطلبات</span>
+                </>
+              ) : (
+                <>
+                  <ShoppingBag className="w-4 h-4 text-[#8C7342]" />
+                  <span>إضافة لسلة الطلبات</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

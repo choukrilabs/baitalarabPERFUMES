@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Tajawal', sans-serif;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: 'Reem Kufi', 'Tajawal', serif;
+  }
+}
+
+/* Custom scrollbar for sleek feel */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #FAF9F6;
+}
+::-webkit-scrollbar-thumb {
+  background: #8C7342;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #1A1A1A;
+}
+
+/* Base utilities overridden for the sleek theme */
+.gold-gradient {
+  background: #8C7342;
+}
+
+.gold-text-gradient {
+  color: #8C7342;
+}
+
+.dark-amber-gradient {
+  background: #1A1A1A;
+}
+
