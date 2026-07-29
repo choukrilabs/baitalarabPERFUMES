@@ -148,7 +148,7 @@ export const LocationContact: React.FC = () => {
           {/* Map Embed Column */}
           <div className="lg:col-span-7 bg-white rounded-3xl overflow-hidden border border-gray-200 shadow-sm relative min-h-[380px] flex flex-col">
             <iframe
-              src="https://maps.google.com/maps?q=33.5761991,-7.6042523&z=16&output=embed"
+              src="https://maps.google.com/maps?q=33.576269,-7.604217&z=16&output=embed"
               className="w-full flex-1 border-0 min-h-[360px]"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"

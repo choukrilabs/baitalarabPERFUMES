@@ -51,7 +51,7 @@ export const SHOP_CONFIG: ShopInfo = {
   whatsappNumber: '212667235559',
   facebookUrl: 'https://web.facebook.com/people/Baitalarab-Perfumes/61592644231147/',
   instagramUrl: 'https://www.instagram.com/perfumes.bait.al.arab/',
-  googleMapsUrl: 'https://maps.app.goo.gl/VZ6yURzux41NksJb8',
+  googleMapsUrl: 'https://maps.app.goo.gl/h65LqSZAQh3QtjTw9',
   address: 'زنقة مولاي إسماعيل، حي الحبوس',
   city: 'الدار البيضاء 20250',
   neighborhood: 'حي الحبوس التاريخي',

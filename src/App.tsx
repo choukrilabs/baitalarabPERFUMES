@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Product, CartItem } from './types';
-import { loadProducts, saveProducts, resetToDefaultProducts } from './services/storage';
+import { useProducts } from './hooks/useProducts';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { ProductGrid } from './components/ProductGrid';
@@ -13,28 +13,20 @@ import { Footer } from './components/Footer';
 import { FloatingWhatsApp } from './components/FloatingWhatsApp';
 
 export default function App() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const { products, updateProducts, resetToDefault } = useProducts();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // Load catalog on mount
-  useEffect(() => {
-    const loaded = loadProducts();
-    setProducts(loaded);
-  }, []);
-
   // Save changes to storage whenever products update
   const handleSaveProducts = (updatedProducts: Product[]) => {
-    setProducts(updatedProducts);
-    saveProducts(updatedProducts);
+    updateProducts(updatedProducts);
   };
 
   const handleResetProducts = () => {
-    const defaultCatalog = resetToDefaultProducts();
-    setProducts(defaultCatalog);
+    resetToDefault();
   };
 
   // Cart operations
