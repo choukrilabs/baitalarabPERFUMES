@@ -1,6 +1,23 @@
 import React from 'react';
-import { Product, SHOP_CONFIG } from '../types';
-import { X, MessageCircle, ShoppingBag, ShieldCheck, MapPin, Sparkles, Check } from 'lucide-react';
+import { Product, SHOP_CONFIG, Review } from '../types';
+import { X, MessageCircle, ShoppingBag, ShieldCheck, MapPin, Sparkles, Check, Star } from 'lucide-react';
+
+const MOCK_REVIEWS: Review[] = [
+  {
+    id: 'r1',
+    authorName: 'أحمد م.',
+    rating: 5,
+    comment: 'عطر ممتاز وثباته قوي جداً. أنصح به بشدة!',
+    date: 'منذ أسبوعين'
+  },
+  {
+    id: 'r2',
+    authorName: 'سارة خ.',
+    rating: 4,
+    comment: 'رائحة جميلة وفخمة ومميزة.',
+    date: 'منذ شهر'
+  },
+];
 
 interface ProductDetailModalProps {
   product: Product | null;
@@ -44,6 +61,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             src={product.image}
             alt={product.name}
             className="w-full h-full object-cover object-center"
+            loading="lazy"
             onError={(e) => {
               (e.target as HTMLImageElement).src =
                 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=800&q=80';
@@ -130,6 +148,42 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 <span>متجرنا بالحبوس</span>
               </div>
             </div>
+
+            {/* Reviews Section */}
+            {product.category === 'perfumes' && (
+              <div className="pt-4 space-y-3 border-t border-gray-200">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-[#8C7342] uppercase tracking-wider">
+                    آراء العملاء:
+                  </h4>
+                  <div className="flex items-center gap-1 text-sm font-bold text-[#1A1A1A]">
+                    <span>4.5</span>
+                    <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  {MOCK_REVIEWS.map((review) => (
+                    <div key={review.id} className="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-xs font-bold text-[#1A1A1A]">{review.authorName}</span>
+                        <div className="flex gap-0.5">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-3 h-3 ${
+                                i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-600 leading-relaxed">{review.comment}</p>
+                      <span className="text-[10px] text-gray-400 block mt-1">{review.date}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Buttons */}

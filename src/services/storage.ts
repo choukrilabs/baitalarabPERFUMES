@@ -2,8 +2,6 @@ import { Product } from '../types';
 import { INITIAL_PRODUCTS } from '../data/initialCatalog';
 
 const STORAGE_KEY = 'baitalarab_products_catalog';
-const ADMIN_PIN_KEY = 'baitalarab_admin_pin';
-export const DEFAULT_PIN = '2580';
 
 export const loadProducts = (): Product[] => {
   try {
@@ -39,10 +37,6 @@ export const resetToDefaultProducts = (): Product[] => {
   return INITIAL_PRODUCTS;
 };
 
-export const getAdminPin = (): string => {
-  return localStorage.getItem(ADMIN_PIN_KEY) || DEFAULT_PIN;
-};
-
-export const setAdminPin = (newPin: string): void => {
-  localStorage.setItem(ADMIN_PIN_KEY, newPin);
+export const getAdminPassword = (): string => {
+  return import.meta.env.VITE_ADMIN_PASSWORD || '';
 };

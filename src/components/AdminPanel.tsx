@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Product, CategoryType } from '../types';
-import { getAdminPin, setAdminPin } from '../services/storage';
+import { getAdminPassword } from '../services/storage';
 import { generateProductDescription } from '../services/aiHelper';
 import {
   X,
@@ -47,21 +47,23 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [newNotes, setNewNotes] = useState('');
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
 
-  // PIN change state
-  const [showPinChange, setShowPinChange] = useState(false);
-  const [newPinValue, setNewPinValue] = useState('');
-  const [pinSuccessMsg, setPinSuccessMsg] = useState('');
+  // Remove PIN change logic
 
   if (!isOpen) return null;
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const correctPin = getAdminPin();
-    if (pinInput === correctPin) {
+    const correctPassword = getAdminPassword();
+    if (!correctPassword) {
+      setPinError('لم يتم إعداد كلمة المرور للمسؤول. يرجى إضافتها في الإعدادات.');
+      return;
+    }
+    
+    if (pinInput === correctPassword) {
       setIsAuthenticated(true);
       setPinError('');
     } else {
-      setPinError('رمز الدخول غير صحيح. الرمز الافتراضي هو 2580');
+      setPinError('كلمة المرور غير صحيحة.');
     }
   };
 
@@ -92,15 +94,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       name: newName.trim(),
       category: newCategory,
       price: priceNum,
-      originalPrice: origPriceNum,
-      volume: newVolume.trim() || undefined,
       description:
         newDescription.trim() ||
         'منتج عالي الجودة من عطور بيت العرب، حي الحبوس، الدار البيضاء.',
       image: newImage.trim() || defaultImages[newCategory],
       active: true,
-      notes: notesArray.length > 0 ? notesArray : undefined,
     };
+
+    if (origPriceNum !== undefined) newProd.originalPrice = origPriceNum;
+    if (newVolume.trim()) newProd.volume = newVolume.trim();
+    if (notesArray.length > 0) newProd.notes = notesArray;
 
     const updated = [newProd, ...products];
     onSaveProducts(updated);
@@ -182,17 +185,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     }
   };
 
-  const handleChangePin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newPinValue.length < 4) {
-      alert('يجب أن يتكون رمز PIN من 4 أرقام على الأقل.');
-      return;
-    }
-    setAdminPin(newPinValue);
-    setPinSuccessMsg('تم تغيير رمز PIN بنجاح!');
-    setNewPinValue('');
-    setTimeout(() => setPinSuccessMsg(''), 3000);
-  };
+
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-md flex items-start justify-center p-4 sm:p-6 animate-fadeIn">
@@ -233,11 +226,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
             <div className="space-y-2">
               <h3 className="font-display font-bold text-xl text-[#1A1A1A]">
-                أدخل رمز الدخول (PIN)
+                أدخل كلمة المرور
               </h3>
-              <p className="text-xs text-gray-500">
-                الرمز الافتراضي للوحة التحكم هو: <strong className="text-[#8C7342]">2580</strong>
-              </p>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-4">
@@ -246,9 +236,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   type="password"
                   value={pinInput}
                   onChange={(e) => setPinInput(e.target.value)}
-                  placeholder="****"
-                  maxLength={6}
-                  className="w-full text-center text-2xl font-bold tracking-widest bg-[#F5F5F5] border-2 border-gray-200 focus:border-[#8C7342] rounded-2xl py-3 text-[#1A1A1A] focus:outline-none"
+                  placeholder="كلمة المرور"
+                  className="w-full text-center text-xl font-bold tracking-widest bg-[#F5F5F5] border-2 border-gray-200 focus:border-[#8C7342] rounded-2xl py-3 text-[#1A1A1A] focus:outline-none"
                   autoFocus
                 />
               </div>
@@ -279,14 +268,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setShowPinChange(!showPinChange)}
-                  className="text-xs bg-[#F4EAD9] hover:bg-[#E5D7BF] text-[#24160F] px-3 py-2 rounded-xl font-bold flex items-center gap-1 transition-colors"
-                >
-                  <KeyRound className="w-3.5 h-3.5 text-[#C1841A]" />
-                  <span>تغيير رمز PIN</span>
-                </button>
-
-                <button
                   onClick={() => {
                     if (window.confirm('هل تريد استعادة البيانات الافتراضية للمنتجات؟')) {
                       onResetProducts();
@@ -299,39 +280,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 </button>
               </div>
             </div>
-
-            {/* Change PIN Form */}
-            {showPinChange && (
-              <form
-                onSubmit={handleChangePin}
-                className="bg-white p-4 rounded-2xl border border-[#C1841A]/40 space-y-3 animate-fadeIn"
-              >
-                <h4 className="font-bold text-xs text-[#24160F] flex items-center gap-1">
-                  <KeyRound className="w-4 h-4 text-[#C1841A]" />
-                  <span>تغيير رمز PIN للوحة التحكم</span>
-                </h4>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="password"
-                    value={newPinValue}
-                    onChange={(e) => setNewPinValue(e.target.value)}
-                    placeholder="رمز PIN جديد (مثال: 1234)"
-                    className="flex-1 bg-[#FAF5EC] border border-[#E5D7BF] rounded-xl px-3 py-2 text-xs text-[#24160F]"
-                  />
-                  <button
-                    type="submit"
-                    className="bg-[#24160F] text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-[#C1841A]"
-                  >
-                    حفظ الرمز
-                  </button>
-                </div>
-                {pinSuccessMsg && (
-                  <p className="text-xs text-emerald-600 font-bold flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> {pinSuccessMsg}
-                  </p>
-                )}
-              </form>
-            )}
 
             {/* Add New Product Box */}
             <div className="bg-white p-6 rounded-3xl border border-[#E5D7BF] shadow-sm space-y-4">
