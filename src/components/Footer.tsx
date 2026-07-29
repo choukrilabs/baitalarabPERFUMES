@@ -32,7 +32,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onSelectCategory })
             </div>
 
             <p className="text-sm leading-relaxed max-w-md text-gray-400">
-              متجر متخصص في عطور العود والمسك الشرقية الفاخرة، والقفاطين والأزياء النسائية المغربية، بالإضافة إلى أجود أنواع العسل الحر الطبيعي من قلب حي الحبوس بالدار البيضاء.
+              متجر متخصص في عطور العود والمسك الشرقية الفاخرة، بالإضافة إلى تشكيلة مختارة من البخور والزيوت الطبيعية والملابس من قلب حي الحبوس بالدار البيضاء.
             </p>
 
             <div className="flex items-center gap-2 text-xs text-[#8C7342]">
@@ -69,23 +69,34 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onSelectCategory })
               <li>
                 <button
                   onClick={() => {
-                    onSelectCategory('abayas');
+                    onSelectCategory('incense');
                     scrollToSection('catalog');
                   }}
                   className="hover:text-[#8C7342] transition-colors"
                 >
-                  الأزياء والقفاطين
+                  البخور
                 </button>
               </li>
               <li>
                 <button
                   onClick={() => {
-                    onSelectCategory('honey');
+                    onSelectCategory('clothes');
                     scrollToSection('catalog');
                   }}
                   className="hover:text-[#8C7342] transition-colors"
                 >
-                  العسل الحر الطبيعي
+                  الملابس
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => {
+                    onSelectCategory('oils');
+                    scrollToSection('catalog');
+                  }}
+                  className="hover:text-[#8C7342] transition-colors"
+                >
+                  الزيوت الطبيعية
                 </button>
               </li>
             </ul>

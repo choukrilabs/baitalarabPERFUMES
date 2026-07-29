@@ -1,4 +1,4 @@
-export type CategoryType = 'perfumes' | 'abayas' | 'honey' | 'other';
+export type CategoryType = 'perfumes' | 'incense' | 'clothes' | 'oils' | 'other';
 
 export interface Review {
   id: string;
@@ -52,15 +52,15 @@ export interface ShopInfo {
 
 export const SHOP_CONFIG: ShopInfo = {
   name: 'عطور بيت العرب',
-  subtitle: 'عطور شرقية أصيلة، أزياء نسائية، وعسل حر',
+  subtitle: 'عطور شرقية أصيلة، بخور، زيوت طبيعية، وملابس',
   email: 'perfumes.bait.al.arab@gmail.com',
   phone: '+212667235559',
   phoneFormatted: '+212 6 67 23 55 59',
   whatsappNumber: '212667235559',
   facebookUrl: 'https://web.facebook.com/people/Baitalarab-Perfumes/61592644231147/',
   instagramUrl: 'https://www.instagram.com/perfumes.bait.al.arab/',
-  googleMapsUrl: 'https://maps.app.goo.gl/h65LqSZAQh3QtjTw9',
+  googleMapsUrl: 'https://maps.app.goo.gl/VZ6yURzux41NksJb8',
   address: 'زنقة مولاي إسماعيل، حي الحبوس',
-  city: 'الدار البيضاء 20250',
+  city: 'الدار البيضاء 20000',
   neighborhood: 'حي الحبوس التاريخي',
 };

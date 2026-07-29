@@ -80,9 +80,10 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             <div>
               <span className="text-xs text-[#8C7342] font-bold bg-gray-100 px-2.5 py-1 rounded-md inline-block mb-2">
                 {product.category === 'perfumes' && 'عطور وعود شرقي'}
-                {product.category === 'abayas' && 'أزياء وقفاطين'}
-                {product.category === 'honey' && 'عسل حر طبيعي 100%'}
-                {product.category === 'other' && 'بخور وزيوت فاخرة'}
+                {product.category === 'incense' && 'بخور'}
+                {product.category === 'clothes' && 'ملابس'}
+                {product.category === 'oils' && 'زيوت طبيعية'}
+                {product.category === 'other' && 'منتجات أخرى'}
               </span>
 
               <h2 className="font-display font-bold text-2xl text-[#1A1A1A]">

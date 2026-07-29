@@ -33,8 +33,8 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
             {/* Paragraph Description */}
             <p className="text-base sm:text-lg text-gray-300 leading-relaxed max-w-2xl mx-auto lg:mx-0 font-normal">
               وجهتكم الأولى لأفخر أنواع <span className="text-[#8C7342] font-medium">العود والعطور الشرقية الأصيلة</span>، 
-              و<span className="text-[#8C7342] font-medium">الأزياء النسائية والقفاطين الأنيقة</span>، بالإضافة إلى 
-              <span className="text-[#8C7342] font-medium"> العسل الحر الطبيعي 100%</span> المستخرج من جبال الأطلس المغربي.
+              و<span className="text-[#8C7342] font-medium">البخور والزيوت الطبيعية</span>، بالإضافة إلى 
+              <span className="text-[#8C7342] font-medium">تشكيلة مختارة من الملابس</span>.
             </p>
 
             {/* Feature Highlights Grid */}
@@ -45,7 +45,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
               </div>
               <div className="flex items-center gap-2 justify-center lg:justify-start bg-[#2A2A2A]/60 p-2.5 rounded-xl border border-[#8C7342]/20">
                 <Award className="w-4 h-4 text-[#8C7342] shrink-0" />
-                <span>عسل حر طبيعي 100%</span>
+                <span>زيوت طبيعية وبخور</span>
               </div>
               <div className="flex items-center gap-2 justify-center lg:justify-start bg-[#2A2A2A]/60 p-2.5 rounded-xl border border-[#8C7342]/20 col-span-2 sm:col-span-1">
                 <Heart className="w-4 h-4 text-[#8C7342] shrink-0" />

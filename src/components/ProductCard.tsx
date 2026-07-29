@@ -77,9 +77,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           {/* Notes or Category tag */}
           <div className="flex items-center gap-1 text-[11px] text-[#8C7342] font-semibold mb-1">
             {product.category === 'perfumes' && '✨ عطور وعود'}
-            {product.category === 'abayas' && '👗 أزياء وقِفاطين'}
-            {product.category === 'honey' && '🍯 عسل حر طبيعي 100%'}
-            {product.category === 'other' && '🌿 بخور وزيوت'}
+            {product.category === 'incense' && '💨 بخور'}
+            {product.category === 'clothes' && '👗 ملابس'}
+            {product.category === 'oils' && '🌿 زيوت طبيعية'}
+            {product.category === 'other' && '✨ منتجات أخرى'}
           </div>
 
           <h3 className="font-display font-bold text-base text-[#1A1A1A] line-clamp-1 group-hover:text-[#8C7342] transition-colors">
