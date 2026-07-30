@@ -21,6 +21,26 @@ export default function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
+  // Dynamically update SEO metadata based on current category "page"
+  useEffect(() => {
+    let title = 'عطور بيت العرب - عطور شرقية وعود أصلي الدار البيضاء';
+    let desc = 'تأسس بيت العرب عام 1984 في حي الحبوس بالدار البيضاء. نقدم عطور شرقية، عود، وبخور أصلية 100%. اكتشف دفء الأصالة المغربية للبيع بالتجزئة والجملة.';
+
+    if (selectedCategory === 'perfumes' || selectedCategory === 'oils') {
+      title = 'زيوت عود أصلية 100% - شراء العود الأصلي في المغرب';
+      desc = 'اكتشف مجموعتنا الفاخرة من زيوت العود الأصلية. نضمن لك ثبات الرائحة والجودة العالية من عطور بيت العرب، وجهتك الموثوقة في الدار البيضاء منذ 1984.';
+    } else if (selectedCategory === 'wholesale') {
+      title = 'موردي زيوت العطور والعود بالجملة المغرب - بيت العرب';
+      desc = 'كن شريكاً لعلامة تجارية عريقة بخبرة 40 عاماً. نوفر العطور الشرقية، البخور، والزيوت الطبيعية بالجملة للشركات مع ضمان الجودة العالية والأصالة.';
+    }
+
+    document.title = title;
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute('content', desc);
+    }
+  }, [selectedCategory]);
+
   // Save changes to storage whenever products update
   const handleSaveProducts = (updatedProducts: Product[]) => {
     updateProducts(updatedProducts);

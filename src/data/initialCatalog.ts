@@ -36,6 +36,12 @@ export const CATEGORIES: CategoryInfo[] = [
     descriptionAr: 'زيوت طبيعية أصلية للعناية بالجسم والشعر',
   },
   {
+    id: 'wholesale',
+    nameAr: 'البيع بالجملة',
+    iconName: 'Store',
+    descriptionAr: 'عطور شرقية، بخور، وزيوت طبيعية بالجملة للشركات مع ضمان الجودة العالية',
+  },
+  {
     id: 'other',
     nameAr: 'منتجات أخرى',
     iconName: 'Flower2',
