@@ -1,6 +1,6 @@
 import React from 'react';
 import { SHOP_CONFIG } from '../types';
-import { Lock, Phone, MapPin, Instagram, Facebook } from 'lucide-react';
+import { Lock, Phone, MapPin, Instagram, Facebook, Star } from 'lucide-react';
 
 interface FooterProps {
   onOpenAdmin: () => void;
@@ -147,6 +147,18 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onSelectCategory })
                   aria-label="فيسبوك"
                 >
                   <Facebook className="w-4 h-4" />
+                </a>
+              </div>
+              
+              <div className="pt-2">
+                <a
+                  href="https://g.page/r/CTQkkxcTLbUJEBI/review"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 bg-[#4285F4]/10 text-[#4285F4] border border-[#4285F4]/30 px-4 py-2 rounded-lg text-sm font-bold hover:bg-[#4285F4]/20 transition-colors"
+                >
+                  <Star className="w-4 h-4 fill-current" />
+                  <span>تقييمنا على جوجل</span>
                 </a>
               </div>
             </div>

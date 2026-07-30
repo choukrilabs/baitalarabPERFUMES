@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, Lock, Menu, X, MapPin, Phone, Search } from 'lucide-react';
+import { ShoppingBag, Lock, Menu, X, MapPin, Phone, Search, Star } from 'lucide-react';
 import { SHOP_CONFIG, CartItem } from '../types';
 
 interface HeaderProps {
@@ -120,6 +120,18 @@ export const Header: React.FC<HeaderProps> = ({
               <Search className="w-4 h-4 text-[#8C7342] absolute right-3.5 top-2 pointer-events-none" />
             </div>
 
+            {/* Google Review Button */}
+            <a
+              href="https://g.page/r/CTQkkxcTLbUJEBI/review"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden lg:flex items-center gap-1.5 bg-[#4285F4]/10 hover:bg-[#4285F4]/20 text-[#4285F4] px-3.5 py-2 rounded-full text-xs font-bold transition-transform hover:scale-105 border border-[#4285F4]/30"
+              title="تقييم متجرنا على جوجل"
+            >
+              <Star className="w-3.5 h-3.5 fill-current" />
+              <span>تقييم جوجل</span>
+            </a>
+
             {/* Direct WhatsApp Callout Button */}
             <a
               href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}`}
@@ -206,6 +218,16 @@ export const Header: React.FC<HeaderProps> = ({
             >
               الموقع والتواصل
             </button>
+
+            <a
+              href="https://g.page/r/CTQkkxcTLbUJEBI/review"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 bg-[#4285F4]/10 text-[#4285F4] border border-[#4285F4]/30 py-2.5 rounded-lg text-sm font-bold mt-2 hover:bg-[#4285F4]/20 transition-colors"
+            >
+              <Star className="w-4 h-4 fill-current" />
+              <span>تقييمنا على جوجل</span>
+            </a>
 
             <a
               href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}`}
