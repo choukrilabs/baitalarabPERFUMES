@@ -1,4 +1,4 @@
-export type CategoryType = 'perfumes' | 'incense' | 'clothes' | 'oils' | 'other';
+export type CategoryType = 'perfumes' | 'incense' | 'clothes' | 'oils' | 'wholesale' | 'other';
 
 export interface Review {
   id: string;

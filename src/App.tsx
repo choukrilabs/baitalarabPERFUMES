@@ -11,6 +11,7 @@ import { AboutSection } from './components/AboutSection';
 import { LocationContact } from './components/LocationContact';
 import { Footer } from './components/Footer';
 import { FloatingWhatsApp } from './components/FloatingWhatsApp';
+import { categorySEO, updateMetaTags, defaultSEO } from './utils/seo';
 
 export default function App() {
   const { products, updateProducts, resetToDefault } = useProducts();
@@ -21,25 +22,32 @@ export default function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // Dynamically update SEO metadata based on current category "page"
+  // Check URL query string for ?product=id and open it when products are loaded
   useEffect(() => {
-    let title = 'عطور بيت العرب - عطور شرقية وعود أصلي الدار البيضاء';
-    let desc = 'تأسس بيت العرب عام 1984 في حي الحبوس بالدار البيضاء. نقدم عطور شرقية، عود، وبخور أصلية 100%. اكتشف دفء الأصالة المغربية للبيع بالتجزئة والجملة.';
-
-    if (selectedCategory === 'perfumes' || selectedCategory === 'oils') {
-      title = 'زيوت عود أصلية 100% - شراء العود الأصلي في المغرب';
-      desc = 'اكتشف مجموعتنا الفاخرة من زيوت العود الأصلية. نضمن لك ثبات الرائحة والجودة العالية من عطور بيت العرب، وجهتك الموثوقة في الدار البيضاء منذ 1984.';
-    } else if (selectedCategory === 'wholesale') {
-      title = 'موردي زيوت العطور والعود بالجملة المغرب - بيت العرب';
-      desc = 'كن شريكاً لعلامة تجارية عريقة بخبرة 40 عاماً. نوفر العطور الشرقية، البخور، والزيوت الطبيعية بالجملة للشركات مع ضمان الجودة العالية والأصالة.';
+    if (products.length === 0) return;
+    
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get('product');
+    if (productId && !quickViewProduct) {
+      const p = products.find(prod => prod.id === productId);
+      if (p) {
+        setQuickViewProduct(p);
+      }
     }
+  }, [products]);
 
-    document.title = title;
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.setAttribute('content', desc);
+  // Dynamically update SEO metadata based on current category "page" or viewed product
+  useEffect(() => {
+    if (quickViewProduct) {
+      updateMetaTags(
+        quickViewProduct.name,
+        quickViewProduct.description || quickViewProduct.name
+      );
+    } else {
+      const seoInfo = categorySEO[selectedCategory] || defaultSEO;
+      updateMetaTags(seoInfo.title, seoInfo.description);
     }
-  }, [selectedCategory]);
+  }, [selectedCategory, quickViewProduct]);
 
   // Save changes to storage whenever products update
   const handleSaveProducts = (updatedProducts: Product[]) => {
@@ -89,6 +97,15 @@ export default function App() {
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const handleQuickView = (product: Product | null) => {
+    setQuickViewProduct(product);
+    if (product) {
+      window.history.pushState({}, '', `/?product=${product.id}`);
+    } else {
+      window.history.pushState({}, '', '/');
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF9F6] text-[#1A1A1A] font-['Tajawal',sans-serif]">
       {/* Navigation Bar */}
@@ -111,7 +128,7 @@ export default function App() {
           products={products}
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
-          onQuickView={(prod) => setQuickViewProduct(prod)}
+          onQuickView={handleQuickView}
           onAddToCart={handleAddToCart}
           cartItems={cartItems}
           searchQuery={searchQuery}
@@ -137,7 +154,7 @@ export default function App() {
       {/* Quick View Modal */}
       <ProductDetailModal
         product={quickViewProduct}
-        onClose={() => setQuickViewProduct(null)}
+        onClose={() => handleQuickView(null)}
         onAddToCart={handleAddToCart}
         isInCart={quickViewProduct ? cartItems.some((i) => i.product.id === quickViewProduct.id) : false}
       />
