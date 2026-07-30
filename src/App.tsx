@@ -15,6 +15,7 @@ import { FloatingWhatsApp } from './components/FloatingWhatsApp';
 export default function App() {
   const { products, updateProducts, resetToDefault } = useProducts();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
@@ -76,6 +77,8 @@ export default function App() {
         onOpenCart={() => setIsCartOpen(true)}
         onOpenAdmin={() => setIsAdminOpen(true)}
         onSelectCategory={(cat) => setSelectedCategory(cat)}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
       />
 
       {/* Main Content Sections */}
@@ -91,6 +94,8 @@ export default function App() {
           onQuickView={(prod) => setQuickViewProduct(prod)}
           onAddToCart={handleAddToCart}
           cartItems={cartItems}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
         />
 
         {/* About Section */}

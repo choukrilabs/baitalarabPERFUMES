@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, Lock, Menu, X, MapPin, Phone } from 'lucide-react';
+import { ShoppingBag, Lock, Menu, X, MapPin, Phone, Search } from 'lucide-react';
 import { SHOP_CONFIG, CartItem } from '../types';
 
 interface HeaderProps {
@@ -7,6 +7,8 @@ interface HeaderProps {
   onOpenCart: () => void;
   onOpenAdmin: () => void;
   onSelectCategory?: (category: string) => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -14,6 +16,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenCart,
   onOpenAdmin,
   onSelectCategory,
+  searchQuery,
+  onSearchChange,
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -99,6 +103,23 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Right Action Buttons */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Search Input */}
+            <div className="relative hidden md:block">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  onSearchChange(e.target.value);
+                  if (e.target.value) {
+                    scrollToSection('catalog');
+                  }
+                }}
+                placeholder="ابحث..."
+                className="w-32 lg:w-48 bg-[#2A2A2A] border border-[#8C7342]/30 focus:border-[#8C7342] rounded-full pr-10 pl-4 py-2 text-xs text-[#FAF9F6] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C7342]/50 transition-all"
+              />
+              <Search className="w-4 h-4 text-[#8C7342] absolute right-3.5 top-2 pointer-events-none" />
+            </div>
+
             {/* Direct WhatsApp Callout Button */}
             <a
               href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}`}
@@ -141,6 +162,23 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Mobile Dropdown Nav */}
         {mobileMenuOpen && (
           <div className="md:hidden mt-4 pt-4 border-t border-[#8C7342]/20 pb-2 space-y-3 font-medium text-right animate-fadeIn">
+            {/* Mobile Search */}
+            <div className="relative mb-4">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  onSearchChange(e.target.value);
+                  if (e.target.value) {
+                    scrollToSection('catalog');
+                  }
+                }}
+                placeholder="ابحث عن عطر، بخور، زيوت طبيعية..."
+                className="w-full bg-[#2A2A2A] border border-[#8C7342]/30 focus:border-[#8C7342] rounded-full pr-10 pl-4 py-2.5 text-sm text-[#FAF9F6] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C7342]/50 transition-all"
+              />
+              <Search className="w-4 h-4 text-[#8C7342] absolute right-3.5 top-3 pointer-events-none" />
+            </div>
+
             <button
               onClick={() => scrollToSection('hero')}
               className="block w-full text-right py-2 px-3 rounded-lg hover:bg-[#2A2A2A] text-sm"

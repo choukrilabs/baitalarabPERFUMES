@@ -1,6 +1,7 @@
 import React from 'react';
 import { Sparkles, MessageCircle, MapPin, Award, ShieldCheck, Heart } from 'lucide-react';
 import { SHOP_CONFIG } from '../types';
+import heroImage from '../assets/images/generic_oud_perfume_1785362643211.jpg';
 
 interface HeroProps {
   onExploreClick: () => void;
@@ -102,7 +103,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
             <div className="relative mx-auto max-w-sm rounded-3xl p-3 bg-gradient-to-b from-[#8C7342]/40 to-[#1A1A1A] shadow-2xl border border-[#8C7342]/30">
               <div className="relative rounded-2xl overflow-hidden aspect-[4/5] bg-[#0A0A0A]">
                 <img
-                  src="https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=800&q=80"
+                  src={heroImage}
                   alt="عطور بيت العرب"
                   className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-700"
                 />

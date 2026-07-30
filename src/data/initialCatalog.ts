@@ -2,6 +2,7 @@ import { Product, CategoryInfo } from '../types';
 
 import royalOudImg from '../assets/images/royal_oud_perfume_1785349659426.jpg';
 import amberPerfumeImg from '../assets/images/amber_perfume_1785349675867.jpg';
+import lattafaBlackEditionImg from '../assets/images/lattafa_black_edition_1785362819475.jpg';
 
 export const CATEGORIES: CategoryInfo[] = [
   {
@@ -141,6 +142,18 @@ export const INITIAL_PRODUCTS: Product[] = [
     active: true,
     isFeatured: false,
     notes: ['نحاس خالص أصيل', 'صناعة يدوية بالحُبوس', 'هدية فاخرة'],
+  },
+  {
+    id: 'p9',
+    name: 'لطافة خص للرجال الإصدار الأسود (Lattafa Khas Lil Rijal Black Edition)',
+    category: 'perfumes',
+    price: 450,
+    volume: '100 ml',
+    description: 'عطر أو دي بارفان (EDP) ينتمي لعائلة العطور الشرقية/فوجير (للجنسين). يفتتح بنوتات الفلفل الأسود واللافندر، وقلب من الزعفران والمريمية، وقاعدة غنية من المر، العنبر، العود، خشب الأرز، والأمبروكسان.',
+    image: lattafaBlackEditionImg,
+    active: true,
+    isFeatured: true,
+    notes: ['الفلفل الأسود، اللافندر', 'الزعفران، المريمية', 'المر، العنبر، العود، الأمبروكسان'],
   }
 ];
 

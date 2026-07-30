@@ -11,6 +11,8 @@ interface ProductGridProps {
   onQuickView: (product: Product) => void;
   onAddToCart: (product: Product) => void;
   cartItems: CartItem[];
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
 }
 
 export const ProductGrid: React.FC<ProductGridProps> = ({
@@ -20,8 +22,9 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   onQuickView,
   onAddToCart,
   cartItems,
+  searchQuery,
+  onSearchChange,
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'featured' | 'price-asc' | 'price-desc' | 'newest'>('featured');
 
   const cartProductIds = useMemo(
@@ -79,7 +82,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => onSearchChange(e.target.value)}
               placeholder="ابحث عن عطر، بخور، زيوت طبيعية، ملابس..."
               className="w-full bg-[#FAF9F6] border border-gray-200 focus:border-[#8C7342] rounded-xl pr-10 pl-4 py-2.5 text-sm text-[#1A1A1A] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8C7342]/20 transition-all"
             />
@@ -131,7 +134,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
             </p>
             <button
               onClick={() => {
-                setSearchQuery('');
+                onSearchChange('');
                 onSelectCategory('all');
               }}
               className="gold-gradient text-white px-6 py-2 rounded-xl text-xs font-bold hover:scale-105 transition-transform"
