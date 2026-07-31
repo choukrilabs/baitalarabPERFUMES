@@ -1,7 +1,8 @@
 import React from 'react';
 import { Sparkles, MessageCircle, MapPin, Award, ShieldCheck, Heart } from 'lucide-react';
 import { SHOP_CONFIG } from '../types';
-import heroImage from '../assets/images/generic_oud_perfume_1785362643211.jpg';
+
+const heroImage = '/images/generic_oud_perfume_1785362643211.jpg';
 
 interface HeroProps {
   onExploreClick: () => void;

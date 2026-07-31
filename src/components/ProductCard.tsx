@@ -1,5 +1,5 @@
 import React from 'react';
-import { Product, SHOP_CONFIG } from '../types';
+import { Product, SHOP_CONFIG, getSafeImageUrl } from '../types';
 import { ShoppingBag, Eye, MessageCircle, Sparkles, Check } from 'lucide-react';
 
 interface ProductCardProps {
@@ -28,7 +28,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       {/* Top Image Container */}
       <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
         <img
-          src={product.image}
+          src={getSafeImageUrl(product.image)}
           alt={product.name}
           className="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-700"
           loading={priority ? "eager" : "lazy"}

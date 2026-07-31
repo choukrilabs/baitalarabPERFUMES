@@ -1,8 +1,8 @@
 import { Product, CategoryInfo } from '../types';
 
-import royalOudImg from '../assets/images/royal_oud_perfume_1785349659426.jpg';
-import amberPerfumeImg from '../assets/images/amber_perfume_1785349675867.jpg';
-import lattafaBlackEditionImg from '../assets/images/lattafa_black_edition_1785362819475.jpg';
+const royalOudImg = '/images/royal_oud_perfume_1785349659426.jpg';
+const amberPerfumeImg = '/images/amber_perfume_1785349675867.jpg';
+const lattafaBlackEditionImg = '/images/lattafa_black_edition_1785362819475.jpg';
 
 export const CATEGORIES: CategoryInfo[] = [
   {

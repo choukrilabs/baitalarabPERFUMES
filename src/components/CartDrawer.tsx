@@ -1,5 +1,5 @@
 import React from 'react';
-import { CartItem, SHOP_CONFIG } from '../types';
+import { CartItem, SHOP_CONFIG, getSafeImageUrl } from '../types';
 import { X, Trash2, Plus, Minus, MessageCircle, ShoppingBag, ArrowRight } from 'lucide-react';
 
 interface CartDrawerProps {
@@ -70,7 +70,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   className="bg-white rounded-2xl p-3 border border-gray-200 shadow-sm flex items-center gap-3"
                 >
                   <img
-                    src={item.product.image}
+                    src={getSafeImageUrl(item.product.image)}
                     alt={item.product.name}
                     className="w-16 h-16 object-cover rounded-xl bg-gray-100"
                     onError={(e) => {
@@ -80,9 +80,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   />
 
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-bold text-sm text-[#1A1A1A] truncate">
+                    <h3 className="font-bold text-sm text-[#1A1A1A] truncate">
                       {item.product.name}
-                    </h4>
+                    </h3>
                     <p className="text-xs text-[#8C7342] font-extrabold mt-0.5">
                       {item.product.price} درهم
                     </p>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Product, CategoryType } from '../types';
+import { Product, CategoryType, getSafeImageUrl } from '../types';
 import { getAdminPassword } from '../services/storage';
 import { generateProductDescription } from '../services/aiHelper';
 import {
@@ -238,7 +238,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
+                <label htmlFor="admin-pin" className="sr-only">كلمة المرور</label>
                 <input
+                  id="admin-pin"
+                  name="adminPin"
                   type="password"
                   value={pinInput}
                   onChange={(e) => setPinInput(e.target.value)}
@@ -301,6 +304,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     اسم المنتج *
                   </label>
                   <input
+                    id="new-product-name"
+                    name="newProductName"
                     type="text"
                     required
                     value={newName}
@@ -335,6 +340,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     السعر (بالدرهم المغربي) *
                   </label>
                   <input
+                    id="new-product-price"
+                    name="newProductPrice"
                     type="number"
                     required
                     min="0"
@@ -352,6 +359,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     السعر السابق قبل التخفيض (اختياري)
                   </label>
                   <input
+                    id="new-original-price"
+                    name="newOriginalPrice"
                     type="number"
                     min="0"
                     step="1"
@@ -368,6 +377,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     الحجم أو الوزن (اختياري)
                   </label>
                   <input
+                    id="new-product-volume"
+                    name="newProductVolume"
                     type="text"
                     value={newVolume}
                     onChange={(e) => setNewVolume(e.target.value)}
@@ -383,6 +394,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   </label>
                   <div className="flex gap-2">
                     <input
+                      id="new-product-image"
+                      name="newProductImage"
                       type="url"
                       value={newImage}
                       onChange={(e) => setNewImage(e.target.value)}
@@ -392,6 +405,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <label className="cursor-pointer shrink-0 bg-[#F4EAD9] hover:bg-[#E5D7BF] border border-[#E5D7BF] rounded-xl px-4 py-2.5 text-xs font-bold text-[#8F5D0F] flex items-center justify-center transition-colors">
                       رفع صورة
                       <input
+                        id="new-product-image-upload"
+                        name="newProductImageUpload"
                         type="file"
                         accept="image/*"
                         onChange={handleImageUpload}
@@ -407,6 +422,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     المكونات والنوتات العطرية (مفصولة بفاصلة)
                   </label>
                   <input
+                    id="new-product-notes"
+                    name="newProductNotes"
                     type="text"
                     value={newNotes}
                     onChange={(e) => setNewNotes(e.target.value)}
@@ -476,7 +493,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <label className="relative cursor-pointer group">
                           <img
-                            src={p.image}
+                            src={getSafeImageUrl(p.image)}
                             alt={p.name}
                             className="w-14 h-14 object-cover rounded-xl bg-[#F4EAD9] shrink-0 group-hover:opacity-75 transition-opacity"
                             onError={(e) => {
@@ -488,6 +505,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             <span className="bg-black/60 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">تغيير</span>
                           </div>
                           <input
+                            id={`edit-image-upload-${p.id}`}
+                            name={`editImageUpload_${p.id}`}
                             type="file"
                             accept="image/*"
                             onChange={(e) => handleEditImageUpload(p.id, e)}
@@ -497,7 +516,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                         <div className="space-y-1 min-w-0 flex-1">
                           {/* Name Input */}
+                          <label htmlFor={`edit-name-${p.id}`} className="sr-only">اسم المنتج</label>
                           <input
+                            id={`edit-name-${p.id}`}
+                            name={`editName_${p.id}`}
                             type="text"
                             value={p.name}
                             onChange={(e) =>
@@ -539,8 +561,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         
                         {/* Price Input */}
                         <div className="flex items-center gap-1">
-                          <label className="text-xs text-[#8F5D0F] font-bold">السعر:</label>
+                          <label htmlFor={`edit-price-${p.id}`} className="text-xs text-[#8F5D0F] font-bold">السعر:</label>
                           <input
+                            id={`edit-price-${p.id}`}
+                            name={`editPrice_${p.id}`}
                             type="number"
                             min="0"
                             value={p.price}

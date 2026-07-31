@@ -1,5 +1,5 @@
 import React from 'react';
-import { Product, SHOP_CONFIG, Review } from '../types';
+import { Product, SHOP_CONFIG, Review, getSafeImageUrl } from '../types';
 import { X, MessageCircle, ShoppingBag, ShieldCheck, MapPin, Sparkles, Check, Star } from 'lucide-react';
 
 const MOCK_REVIEWS: Review[] = [
@@ -58,7 +58,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
         {/* Product Image Side */}
         <div className="md:w-1/2 bg-gray-100 relative aspect-square md:aspect-auto">
           <img
-            src={product.image}
+            src={getSafeImageUrl(product.image)}
             alt={product.name}
             className="w-full h-full object-cover object-center"
             loading="lazy"
@@ -111,9 +111,9 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
             {/* Description */}
             <div className="space-y-2">
-              <h4 className="text-xs font-bold text-[#8C7342] uppercase tracking-wider">
+              <h3 className="text-xs font-bold text-[#8C7342] uppercase tracking-wider">
                 الوصف والمميزات:
-              </h4>
+              </h3>
               <p className="text-sm text-gray-600 leading-relaxed">
                 {product.description}
               </p>
@@ -122,9 +122,9 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             {/* Fragrance Notes / Product Specs */}
             {product.notes && product.notes.length > 0 && (
               <div className="space-y-2">
-                <h4 className="text-xs font-bold text-[#8C7342] uppercase tracking-wider">
+                <h3 className="text-xs font-bold text-[#8C7342] uppercase tracking-wider">
                   المكونات / النوتات العطرية:
-                </h4>
+                </h3>
                 <div className="flex flex-wrap gap-1.5">
                   {product.notes.map((note, idx) => (
                     <span
@@ -154,9 +154,9 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             {product.category === 'perfumes' && (
               <div className="pt-4 space-y-3 border-t border-gray-200">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-[#8C7342] uppercase tracking-wider">
+                  <h3 className="text-xs font-bold text-[#8C7342] uppercase tracking-wider">
                     آراء العملاء:
-                  </h4>
+                  </h3>
                   <div className="flex items-center gap-1 text-sm font-bold text-[#1A1A1A]">
                     <span>4.5</span>
                     <Star className="w-4 h-4 text-yellow-400 fill-current" />

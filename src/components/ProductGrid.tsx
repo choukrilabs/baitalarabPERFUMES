@@ -79,7 +79,10 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
           
           {/* Search Box */}
           <div className="relative w-full md:w-96">
+            <label htmlFor="grid-search" className="sr-only">ابحث عن عطر</label>
             <input
+              id="grid-search"
+              name="search"
               type="text"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}

@@ -105,7 +105,10 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Search Input */}
             <div className="relative hidden md:block">
+              <label htmlFor="header-search" className="sr-only">ابحث</label>
               <input
+                id="header-search"
+                name="headerSearch"
                 type="text"
                 value={searchQuery}
                 onChange={(e) => {
@@ -176,7 +179,10 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="md:hidden mt-4 pt-4 border-t border-[#8C7342]/20 pb-2 space-y-3 font-medium text-right animate-fadeIn">
             {/* Mobile Search */}
             <div className="relative mb-4">
+              <label htmlFor="mobile-search" className="sr-only">ابحث</label>
               <input
+                id="mobile-search"
+                name="mobileSearch"
                 type="text"
                 value={searchQuery}
                 onChange={(e) => {
