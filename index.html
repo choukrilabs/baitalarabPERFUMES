@@ -12,6 +12,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400..700&family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
   </head>
   <body class="bg-[#FAF9F6] text-[#1A1A1A] antialiased selection:bg-[#8C7342] selection:text-white font-['Tajawal',sans-serif]">
+    <script>
+      // Suppress expected Vite websocket connection errors in AI Studio
+      const originalConsoleError = console.error;
+      console.error = function(...args) {
+        if (args[0] && typeof args[0] === 'string' && args[0].includes('failed to connect to websocket')) return;
+        if (args[0] && typeof args[0] === 'string' && args[0].includes('WebSocket closed without opened')) return;
+        if (args[0] instanceof Error && args[0].message.includes('WebSocket closed without opened')) return;
+        originalConsoleError.apply(console, args);
+      };
+      window.addEventListener('unhandledrejection', function(event) {
+        if (event.reason && event.reason.message && event.reason.message.includes('WebSocket closed without opened')) {
+          event.preventDefault();
+        }
+      });
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
