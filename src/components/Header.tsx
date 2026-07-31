@@ -57,14 +57,14 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <div className="w-12 h-12 rounded-full gold-gradient p-0.5 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300">
               <div className="w-full h-full rounded-full overflow-hidden">
-                <img src="/logo.png" alt="عطور بيت العرب" className="w-full h-full object-cover" />
+                <img src="/logo_small.webp" alt="عطور بيت العرب" width="141" height="77" className="w-full h-full object-cover" />
               </div>
             </div>
             <div>
-              <h1 className="font-display font-bold text-xl sm:text-2xl text-[#FAF9F6] group-hover:text-[#8C7342] transition-colors">
+              <span className="font-display font-bold text-xl sm:text-2xl text-[#FAF9F6] group-hover:text-[#C6A664] transition-colors">
                 {SHOP_CONFIG.name}
-              </h1>
-              <p className="text-xs text-[#8C7342] font-medium flex items-center gap-1">
+              </span>
+              <p className="text-xs text-[#C6A664] font-medium flex items-center gap-1">
                 <MapPin className="w-3 h-3 inline" /> {SHOP_CONFIG.neighborhood}
               </p>
             </div>
@@ -74,7 +74,7 @@ export const Header: React.FC<HeaderProps> = ({
           <nav className="hidden md:flex items-center gap-8 font-medium text-sm">
             <button
               onClick={() => scrollToSection('hero')}
-              className="hover:text-[#8C7342] transition-colors py-1 relative after:absolute after:bottom-0 after:right-0 after:left-0 after:h-0.5 after:bg-[#8C7342] after:scale-x-0 hover:after:scale-x-100 after:transition-transform"
+              className="hover:text-[#C6A664] transition-colors py-1 relative after:absolute after:bottom-0 after:right-0 after:left-0 after:h-0.5 after:bg-[#C6A664] after:scale-x-0 hover:after:scale-x-100 after:transition-transform"
             >
               الرئيسية
             </button>
@@ -83,19 +83,19 @@ export const Header: React.FC<HeaderProps> = ({
                 if (onSelectCategory) onSelectCategory('all');
                 scrollToSection('catalog');
               }}
-              className="hover:text-[#8C7342] transition-colors py-1 relative after:absolute after:bottom-0 after:right-0 after:left-0 after:h-0.5 after:bg-[#8C7342] after:scale-x-0 hover:after:scale-x-100 after:transition-transform"
+              className="hover:text-[#C6A664] transition-colors py-1 relative after:absolute after:bottom-0 after:right-0 after:left-0 after:h-0.5 after:bg-[#C6A664] after:scale-x-0 hover:after:scale-x-100 after:transition-transform"
             >
               تصفّح المنتجات
             </button>
             <button
               onClick={() => scrollToSection('about')}
-              className="hover:text-[#8C7342] transition-colors py-1 relative after:absolute after:bottom-0 after:right-0 after:left-0 after:h-0.5 after:bg-[#8C7342] after:scale-x-0 hover:after:scale-x-100 after:transition-transform"
+              className="hover:text-[#C6A664] transition-colors py-1 relative after:absolute after:bottom-0 after:right-0 after:left-0 after:h-0.5 after:bg-[#C6A664] after:scale-x-0 hover:after:scale-x-100 after:transition-transform"
             >
               من نحن
             </button>
             <button
               onClick={() => scrollToSection('contact')}
-              className="hover:text-[#8C7342] transition-colors py-1 relative after:absolute after:bottom-0 after:right-0 after:left-0 after:h-0.5 after:bg-[#8C7342] after:scale-x-0 hover:after:scale-x-100 after:transition-transform"
+              className="hover:text-[#C6A664] transition-colors py-1 relative after:absolute after:bottom-0 after:right-0 after:left-0 after:h-0.5 after:bg-[#C6A664] after:scale-x-0 hover:after:scale-x-100 after:transition-transform"
             >
               الموقع والتواصل
             </button>
@@ -117,7 +117,7 @@ export const Header: React.FC<HeaderProps> = ({
                 placeholder="ابحث..."
                 className="w-32 lg:w-48 bg-[#2A2A2A] border border-[#8C7342]/30 focus:border-[#8C7342] rounded-full pr-10 pl-4 py-2 text-xs text-[#FAF9F6] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C7342]/50 transition-all"
               />
-              <Search className="w-4 h-4 text-[#8C7342] absolute right-3.5 top-2 pointer-events-none" />
+              <Search className="w-4 h-4 text-[#C6A664] absolute right-3.5 top-2 pointer-events-none" />
             </div>
 
             {/* Google Review Button */}
@@ -137,7 +137,7 @@ export const Header: React.FC<HeaderProps> = ({
               href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden lg:flex items-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white px-3.5 py-2 rounded-full text-xs font-bold transition-transform hover:scale-105 shadow-md"
+              className="hidden lg:flex items-center gap-2 bg-[#128C7E] hover:bg-[#075E54] text-white px-3.5 py-2 rounded-full text-xs font-bold transition-transform hover:scale-105 shadow-md"
             >
               <Phone className="w-3.5 h-3.5" />
               <span>{SHOP_CONFIG.phoneFormatted}</span>
@@ -150,9 +150,9 @@ export const Header: React.FC<HeaderProps> = ({
               title="سلة الطلبات"
               aria-label="فتح سلة الطلبات"
             >
-              <ShoppingBag className="w-5 h-5 text-[#8C7342]" />
+              <ShoppingBag className="w-5 h-5 text-[#C6A664]" />
               {totalCartCount > 0 && (
-                <span className="absolute -top-1 -left-1 bg-[#8C7342] text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#1A1A1A] animate-pulse">
+                <span className="absolute -top-1 -left-1 bg-[#C6A664] text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#1A1A1A] animate-pulse">
                   {totalCartCount}
                 </span>
               )}
@@ -188,7 +188,7 @@ export const Header: React.FC<HeaderProps> = ({
                 placeholder="ابحث عن عطر، بخور، زيوت طبيعية..."
                 className="w-full bg-[#2A2A2A] border border-[#8C7342]/30 focus:border-[#8C7342] rounded-full pr-10 pl-4 py-2.5 text-sm text-[#FAF9F6] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C7342]/50 transition-all"
               />
-              <Search className="w-4 h-4 text-[#8C7342] absolute right-3.5 top-3 pointer-events-none" />
+              <Search className="w-4 h-4 text-[#C6A664] absolute right-3.5 top-3 pointer-events-none" />
             </div>
 
             <button
@@ -202,7 +202,7 @@ export const Header: React.FC<HeaderProps> = ({
                 if (onSelectCategory) onSelectCategory('all');
                 scrollToSection('catalog');
               }}
-              className="block w-full text-right py-2 px-3 rounded-lg hover:bg-[#2A2A2A] text-sm text-[#8C7342]"
+              className="block w-full text-right py-2 px-3 rounded-lg hover:bg-[#2A2A2A] text-sm text-[#C6A664]"
             >
               تصفّح المنتجات
             </button>
@@ -233,7 +233,7 @@ export const Header: React.FC<HeaderProps> = ({
               href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 bg-[#25D366] text-white py-2.5 rounded-lg text-sm font-bold mt-2 shadow"
+              className="flex items-center justify-center gap-2 bg-[#128C7E] text-white py-2.5 rounded-lg text-sm font-bold mt-2 shadow"
             >
               <Phone className="w-4 h-4" />
               <span>واتساب: {SHOP_CONFIG.phoneFormatted}</span>

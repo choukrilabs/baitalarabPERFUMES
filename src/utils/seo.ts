@@ -31,10 +31,60 @@ export const categorySEO: Record<string, { title: string, description: string }>
   }
 };
 
-export function updateMetaTags(title: string, description: string) {
+export function updateMetaTags(title: string, description: string, product?: any) {
   document.title = title;
   const metaDesc = document.querySelector('meta[name="description"]');
   if (metaDesc) {
     metaDesc.setAttribute('content', description);
   }
+
+  // Inject or update JSON-LD Structured Data
+  let script = document.getElementById('structured-data') as HTMLScriptElement;
+  if (!script) {
+    script = document.createElement('script');
+    script.id = 'structured-data';
+    script.type = 'application/ld+json';
+    document.head.appendChild(script);
+  }
+
+  const storeSchema = {
+    "@context": "https://schema.org",
+    "@type": "Store",
+    "name": "عطور بيت العرب",
+    "image": "https://baitalarab-perfumes.vercel.app/logo_small.webp", // Replace with real domain if available
+    "description": "تأسس بيت العرب عام 1984 في حي الحبوس بالدار البيضاء. نقدم عطور شرقية، عود، وبخور أصلية 100%.",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "حي الحبوس",
+      "addressLocality": "الدار البيضاء",
+      "addressRegion": "Casablanca-Settat",
+      "addressCountry": "MA"
+    },
+    "telephone": "+212-000000000", // Update with real number if available
+    "priceRange": "$$"
+  };
+
+  let schemaData: any = storeSchema;
+
+  if (product) {
+    schemaData = [
+      storeSchema,
+      {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": product.name,
+        "image": product.image ? (product.image.startsWith('http') ? product.image : `https://baitalarab.com${product.image}`) : "",
+        "description": product.description || product.name,
+        "offers": {
+          "@type": "Offer",
+          "priceCurrency": "MAD",
+          "price": product.price,
+          "availability": "https://schema.org/InStock",
+          "url": `https://baitalarab.com/?product=${product.id}`
+        }
+      }
+    ];
+  }
+
+  script.textContent = JSON.stringify(schemaData);
 }

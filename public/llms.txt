@@ -1,0 +1,16 @@
+# عطور بيت العرب - Bait Alarab Perfumes
+
+مرحباً بك في بيت العرب. نقدم تشكيلة فاخرة من العطور الشرقية، العود والبخور منذ عام 1984.
+Welcome to Bait Alarab Perfumes. We offer a luxurious collection of oriental perfumes, oud, and incense since 1984.
+
+## Categories / المنتجات
+
+- [العطور والزيوت (Perfumes & Oils)](/?category=perfumes)
+- [البخور والعود (Incense & Oud)](/?category=incense)
+- [البيع بالجملة (Wholesale)](/?category=wholesale)
+- [أزياء (Clothes)](/?category=clothes)
+
+## Featured Links / روابط مهمة
+
+- [Home Page](/)
+- [Sitemap](/sitemap.xml)

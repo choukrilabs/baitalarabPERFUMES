@@ -73,7 +73,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
                 className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${
                   isSelected
                     ? 'bg-[#2A2A2A] text-[#8C7342]'
-                    : 'bg-gray-100 text-gray-500'
+                    : 'bg-gray-100 text-gray-600'
                 }`}
               >
                 {count} منتج

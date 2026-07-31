@@ -1,15 +1,25 @@
-import { getFirestore, collection, getDocs } from 'firebase/firestore/lite';
-import { initializeApp } from 'firebase/app';
+import fs from 'fs';
+import path from 'path';
 // @ts-ignore
 import config from '../firebase-applet-config.json';
 
-const app = initializeApp(config);
-const db = getFirestore(app, config.firestoreDatabaseId);
-
 export default async function handler(req: any, res: any) {
   try {
-    const snapshot = await getDocs(collection(db, 'products'));
-    const products = snapshot.docs.map(doc => doc.data());
+    const projectId = config.projectId;
+    const databaseId = config.firestoreDatabaseId || '(default)';
+    
+    // Fetch products using REST API
+    const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/${databaseId}/documents/products?key=${config.apiKey}`;
+    
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch products: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    const products = (data.documents || []).map((doc: any) => {
+      return { id: doc.name.split('/').pop() };
+    });
     
     const host = req.headers.host || 'localhost:3000';
     const protocol = host.includes('localhost') ? 'http' : 'https';

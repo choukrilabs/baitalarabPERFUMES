@@ -12,7 +12,7 @@ export const FloatingWhatsApp: React.FC = () => {
       href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-6 right-6 z-40 bg-[#25D366] hover:bg-[#20bd5a] text-white p-3.5 rounded-full shadow-2xl hover:scale-110 transition-all duration-300 flex items-center justify-center border-2 border-white group animate-bounce"
+      className="fixed bottom-6 right-6 z-40 bg-[#128C7E] hover:bg-[#075E54] text-white p-3.5 rounded-full shadow-2xl hover:scale-110 transition-all duration-300 flex items-center justify-center border-2 border-white group animate-bounce"
       aria-label="تواصل معنا عبر الواتساب المباشر"
       title="مراسلة عبر الواتساب المباشر"
     >

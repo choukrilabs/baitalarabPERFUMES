@@ -119,7 +119,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               ))
             ) : (
               <div className="text-center py-16 space-y-3">
-                <div className="w-16 h-16 bg-gray-100 text-gray-500 rounded-full flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 bg-gray-100 text-gray-600 rounded-full flex items-center justify-center mx-auto">
                   <ShoppingBag className="w-8 h-8" />
                 </div>
                 <h3 className="font-display font-bold text-base text-[#1A1A1A]">
@@ -145,7 +145,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   href={generateWhatsappMessage()}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white py-3.5 rounded-xl font-bold text-sm shadow-lg flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
+                  className="w-full bg-[#128C7E] hover:bg-[#075E54] text-white py-3.5 rounded-xl font-bold text-sm shadow-lg flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
                 >
                   <MessageCircle className="w-5 h-5" />
                   <span>إرسال الطلب عبر واتساب ({cartItems.length})</span>
@@ -153,7 +153,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
                 <button
                   onClick={onClearCart}
-                  className="w-full text-xs text-gray-500 hover:text-red-500 py-1 transition-colors text-center"
+                  className="w-full text-xs text-gray-600 hover:text-red-500 py-1 transition-colors text-center"
                 >
                   تفريغ السلة
                 </button>

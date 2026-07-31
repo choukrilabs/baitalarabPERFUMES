@@ -41,7 +41,8 @@ export default function App() {
     if (quickViewProduct) {
       updateMetaTags(
         quickViewProduct.name,
-        quickViewProduct.description || quickViewProduct.name
+        quickViewProduct.description || quickViewProduct.name,
+        quickViewProduct
       );
     } else {
       const seoInfo = categorySEO[selectedCategory] || defaultSEO;

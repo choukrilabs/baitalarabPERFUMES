@@ -91,7 +91,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               </h2>
 
               {product.volume && (
-                <p className="text-xs text-gray-500 font-medium mt-1">
+                <p className="text-xs text-gray-600 font-medium mt-1">
                   الحجم/الكمية: {product.volume}
                 </p>
               )}
@@ -103,7 +103,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 {product.price} <span className="text-sm font-normal text-[#1A1A1A]">درهم مغربي</span>
               </span>
               {product.originalPrice && product.originalPrice > product.price && (
-                <span className="text-sm text-gray-400 line-through">
+                <span className="text-sm text-gray-500 line-through">
                   {product.originalPrice} درهم
                 </span>
               )}
@@ -114,7 +114,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               <h4 className="text-xs font-bold text-[#8C7342] uppercase tracking-wider">
                 الوصف والمميزات:
               </h4>
-              <p className="text-sm text-gray-500 leading-relaxed">
+              <p className="text-sm text-gray-600 leading-relaxed">
                 {product.description}
               </p>
             </div>
@@ -193,7 +193,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               href={directWhatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white py-3 rounded-xl font-bold text-sm shadow-md flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
+              className="w-full bg-[#128C7E] hover:bg-[#075E54] text-white py-3 rounded-xl font-bold text-sm shadow-md flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
             >
               <MessageCircle className="w-5 h-5" />
               <span>طلب مباشر عبر واتساب</span>

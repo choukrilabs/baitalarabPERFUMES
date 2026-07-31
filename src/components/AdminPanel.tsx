@@ -312,10 +312,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                 {/* Category */}
                 <div>
-                  <label className="block text-xs font-bold text-[#8F5D0F] mb-1">
+                  <label htmlFor="category-select" className="block text-xs font-bold text-[#8F5D0F] mb-1">
                     القسم *
                   </label>
                   <select
+                    id="category-select"
                     value={newCategory}
                     onChange={(e) => setNewCategory(e.target.value as CategoryType)}
                     className="w-full bg-[#FAF5EC] border border-[#E5D7BF] focus:border-[#C1841A] rounded-xl px-3 py-2.5 text-xs text-[#24160F]"
@@ -505,9 +506,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             className="font-bold text-sm text-[#24160F] bg-transparent border-b border-transparent hover:border-[#C1841A] focus:border-[#C1841A] focus:bg-[#FAF5EC] px-1 rounded transition-colors w-full"
                           />
 
-                          <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                          <div className="flex flex-wrap items-center gap-2 text-xs text-gray-600">
                             {/* Category Selector */}
+                            <label htmlFor={`cat-select-${p.id}`} className="sr-only">تغيير القسم</label>
                             <select
+                              id={`cat-select-${p.id}`}
+                              aria-label="تغيير القسم"
                               value={p.category}
                               onChange={(e) =>
                                 handleUpdateField(p.id, 'category', e.target.value)
@@ -549,7 +553,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             }
                             className="w-20 bg-[#FAF5EC] border border-[#E5D7BF] focus:border-[#C1841A] rounded-xl px-2.5 py-1 text-xs font-bold text-[#24160F] text-center"
                           />
-                          <span className="text-xs text-gray-500">درهم</span>
+                          <span className="text-xs text-gray-600">درهم</span>
                         </div>
 
                         {/* Visibility Toggle Button */}
