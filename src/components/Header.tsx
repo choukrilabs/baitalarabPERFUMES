@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, Lock, Menu, X, MapPin, Phone, Search, Star } from 'lucide-react';
+import { ShoppingBag, Lock, Menu, X, MapPin, Phone, Search, Star, Droplet } from 'lucide-react';
 import { SHOP_CONFIG, CartItem } from '../types';
 
 interface HeaderProps {
@@ -56,8 +56,8 @@ export const Header: React.FC<HeaderProps> = ({
             className="flex items-center gap-3 cursor-pointer group"
           >
             <div className="w-12 h-12 rounded-full gold-gradient p-0.5 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300">
-              <div className="w-full h-full rounded-full overflow-hidden">
-                <img src="/logo_small.webp" alt="عطور بيت العرب" width="141" height="77" className="w-full h-full object-cover" />
+              <div className="w-full h-full rounded-full overflow-hidden bg-white">
+                <img src="/logo_small.webp" alt="عطور بيت العرب" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
               </div>
             </div>
             <div>

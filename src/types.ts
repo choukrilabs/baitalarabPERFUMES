@@ -67,6 +67,7 @@ export const SHOP_CONFIG: ShopInfo = {
 
 export function getSafeImageUrl(url: string): string {
   if (!url) return '';
+  
   // Fix legacy hashed asset URLs that are broken after moving images to public
   if (url.startsWith('/assets/') && url.match(/-[a-zA-Z0-9]+\.jpg$/)) {
     return url.replace('/assets/', '/images/').replace(/-[a-zA-Z0-9]+\.jpg$/, '.jpg');

@@ -496,6 +496,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             src={getSafeImageUrl(p.image)}
                             alt={p.name}
                             className="w-14 h-14 object-cover rounded-xl bg-[#F4EAD9] shrink-0 group-hover:opacity-75 transition-opacity"
+                            referrerPolicy="no-referrer"
                             onError={(e) => {
                               (e.target as HTMLImageElement).src =
                                 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=800&q=80';

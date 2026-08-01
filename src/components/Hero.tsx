@@ -107,6 +107,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
                   src={heroImage}
                   alt="عطور بيت العرب"
                   className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-700"
+                  referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] via-transparent to-transparent opacity-90" />
                 

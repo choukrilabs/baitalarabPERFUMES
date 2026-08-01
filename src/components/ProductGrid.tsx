@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { Product, CartItem } from '../types';
-import { ProductCard } from './ProductCard';
+import { ProductCard, ProductCardSkeleton } from './ProductCard';
 import { CategoryFilter } from './CategoryFilter';
-import { Search, SlidersHorizontal, PackageX, Sparkles } from 'lucide-react';
+import { Search, SlidersHorizontal, PackageX } from 'lucide-react';
 
 interface ProductGridProps {
   products: Product[];
+  isLoading?: boolean;
   selectedCategory: string;
   onSelectCategory: (category: string) => void;
   onQuickView: (product: Product) => void;
@@ -17,6 +18,7 @@ interface ProductGridProps {
 
 export const ProductGrid: React.FC<ProductGridProps> = ({
   products,
+  isLoading = false,
   selectedCategory,
   onSelectCategory,
   onQuickView,
@@ -114,8 +116,14 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
           </div>
         </div>
 
-        {/* Product Grid / Empty State */}
-        {filteredProducts.length > 0 ? (
+        {/* Product Grid / Loading Skeleton / Empty State */}
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <ProductCardSkeleton key={index} />
+            ))}
+          </div>
+        ) : filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredProducts.map((product, index) => (
               <ProductCard

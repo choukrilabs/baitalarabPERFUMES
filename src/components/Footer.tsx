@@ -23,7 +23,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onSelectCategory })
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full gold-gradient p-0.5 flex items-center justify-center">
                 <div className="w-full h-full rounded-full overflow-hidden">
-                  <img src="/logo_small.webp" alt="عطور بيت العرب" className="w-full h-full object-cover" />
+                  <img src="/logo_small.webp" alt="عطور بيت العرب" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                 </div>
               </div>
               <h2 className="font-display font-bold text-2xl text-white">

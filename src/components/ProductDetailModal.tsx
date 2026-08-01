@@ -62,6 +62,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             alt={product.name}
             className="w-full h-full object-cover object-center"
             loading="lazy"
+            referrerPolicy="no-referrer"
             onError={(e) => {
               (e.target as HTMLImageElement).src =
                 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=800&q=80';

@@ -14,7 +14,7 @@ import { FloatingWhatsApp } from './components/FloatingWhatsApp';
 import { categorySEO, updateMetaTags, defaultSEO } from './utils/seo';
 
 export default function App() {
-  const { products, updateProducts, resetToDefault } = useProducts();
+  const { products, loading, updateProducts, resetToDefault } = useProducts();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -127,6 +127,7 @@ export default function App() {
         {/* Product Catalog Grid */}
         <ProductGrid
           products={products}
+          isLoading={loading}
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
           onQuickView={handleQuickView}

@@ -18,6 +18,7 @@ export const AboutSection: React.FC = () => {
                   src={lattafaBlackEditionImg}
                   alt="Lattafa Khas Lil Rijal Black Edition"
                   className="w-full h-full object-cover object-center"
+                  referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] via-transparent to-transparent opacity-80" />
                 
