@@ -1,12 +1,16 @@
 import React from 'react';
+import { ProductImage } from './ProductImage';
 import { Sparkles, MessageCircle, MapPin, Award, ShieldCheck, Heart } from 'lucide-react';
 import { SHOP_CONFIG } from '../types';
 
+import { Product } from "../types";
 interface HeroProps {
+  products: Product[];
   onExploreClick: () => void;
 }
 
-export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
+export const Hero: React.FC<HeroProps> = ({ onExploreClick, products }) => {
+  const heroImg = products.find(p => p.image && p.image.startsWith("data:"))?.image || products.find(p => p.image)?.image;
   return (
     <section id="hero" className="relative dark-amber-gradient text-[#FAF9F6] overflow-hidden py-16 lg:py-24 border-b border-[#8C7342]/30">
       {/* Decorative Golden Ambient Circles */}
@@ -101,11 +105,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
           <div className="lg:col-span-5 relative">
             <div className="relative mx-auto max-w-sm rounded-3xl p-3 bg-gradient-to-b from-[#8C7342]/40 to-[#1A1A1A] shadow-2xl border border-[#8C7342]/30">
               <div className="relative rounded-2xl overflow-hidden aspect-[4/5] bg-[#0A0A0A]">
-                <img
-                  src={'/images/generic_oud_perfume_1785362643211.jpg'}
-                  alt="عطور بيت العرب"
-                  className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-700"
-                />
+                <ProductImage src={heroImg} alt="عطور بيت العرب" className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-700" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] via-transparent to-transparent opacity-90" />
                 
                 {/* Overlay Card Details */}

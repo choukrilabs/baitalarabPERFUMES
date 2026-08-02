@@ -122,7 +122,7 @@ export default function App() {
       {/* Main Content Sections */}
       <main className="flex-1">
         {/* Hero Section */}
-        <Hero onExploreClick={scrollToCatalog} />
+        <Hero onExploreClick={scrollToCatalog} products={products} />
 
         {/* Product Catalog Grid */}
         <ProductGrid
@@ -137,7 +137,7 @@ export default function App() {
         />
 
         {/* About Section */}
-        <AboutSection />
+        <AboutSection products={products} />
 
         {/* Map & Location / Contact Section */}
         <LocationContact />

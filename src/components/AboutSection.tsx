@@ -1,8 +1,11 @@
 import React from 'react';
 import { SHOP_CONFIG } from '../types';
+import { ProductImage } from './ProductImage';
 import { Award, ShieldCheck, Heart, MapPin, Store, Sparkles } from 'lucide-react';
+import { Product } from '../types';
 
-export const AboutSection: React.FC = () => {
+export const AboutSection: React.FC<{products: Product[]}> = ({products}) => {
+  const aboutImg = products.find(p => p.image && p.image.startsWith("data:"))?.image || products.find(p => p.image)?.image;
   return (
     <section id="about" className="py-16 bg-[#1A1A1A] text-[#FAF9F6] relative overflow-hidden border-t border-[#8C7342]/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -12,11 +15,7 @@ export const AboutSection: React.FC = () => {
           <div className="lg:col-span-5 relative order-2 lg:order-1">
             <div className="relative rounded-3xl p-3 bg-gradient-to-b from-[#8C7342]/40 to-[#2A2A2A] shadow-2xl border border-[#8C7342]/30">
               <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-[#0A0A0A] relative">
-                <img
-                  src={'/images/lattafa_black_edition_1785362819475.jpg'}
-                  alt="Lattafa Khas Lil Rijal Black Edition"
-                  className="w-full h-full object-cover object-center"
-                />
+                <ProductImage src={aboutImg} alt="متجر عطور بيت العرب" className="w-full h-full object-cover object-center" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] via-transparent to-transparent opacity-80" />
                 
                 <div className="absolute bottom-4 right-4 left-4 p-4 rounded-xl bg-[#1A1A1A]/90 backdrop-blur-md border border-[#8C7342]/30 text-right">

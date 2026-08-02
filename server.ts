@@ -1,4 +1,5 @@
 import express from 'express';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 import path from 'path';
 import fs from 'fs';
 import { createServer as createViteServer } from 'vite';
@@ -14,6 +15,12 @@ const db = getFirestore(appFirebase, config.firestoreDatabaseId);
 async function startServer() {
   const app = express();
   const PORT = 3000;
+
+  app.use('/firebase-storage', createProxyMiddleware({
+    target: 'https://firebasestorage.googleapis.com',
+    changeOrigin: true,
+    pathRewrite: { '^/firebase-storage': '' }
+  }));
 
   // Sitemap route
   app.get('/sitemap.xml', async (req, res) => {
