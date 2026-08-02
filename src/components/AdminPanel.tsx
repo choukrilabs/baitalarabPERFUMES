@@ -71,7 +71,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   const handleAddProduct = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newName.trim() || !newPrice) return;
+    if (!newName.trim() || !newPrice) {
+      alert('الرجاء تعبئة جميع الحقول الأساسية');
+      return;
+    }
+    if (!newImage) {
+      alert('الرجاء إضافة صورة للمنتج');
+      return;
+    }
 
     const priceNum = parseFloat(newPrice);
     const origPriceNum = newOriginalPrice ? parseFloat(newOriginalPrice) : undefined;
@@ -79,15 +86,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       .split(',')
       .map((n) => n.trim())
       .filter(Boolean);
-
-    const defaultImages: Record<CategoryType, string> = {
-      perfumes: '/images/royal_oud_perfume_1785349659426.jpg',
-      incense: '/images/royal_incense_1785685019594.jpg',
-      clothes: '/images/cotton_shirt_1785685067991.jpg',
-      oils: '/images/argan_oil_1785685036915.jpg',
-      wholesale: '/images/royal_oud_perfume_1785349659426.jpg',
-      other: '/images/brass_incense_burner_1785685102939.jpg',
-    };
 
     const newProd: Product = {
       id: 'prod_' + Date.now(),
@@ -97,7 +95,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       description:
         newDescription.trim() ||
         'منتج عالي الجودة من عطور بيت العرب، حي الحبوس، الدار البيضاء.',
-      image: newImage.trim() || defaultImages[newCategory],
+      image: newImage.trim(),
       active: true,
     };
 
