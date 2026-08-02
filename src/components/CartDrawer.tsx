@@ -75,7 +75,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                     className="w-16 h-16 object-cover rounded-xl bg-gray-100"
                     referrerPolicy="no-referrer"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/images/dehn_oud_royal.jpg';
+                      (e.target as HTMLImageElement).src =
+                        'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=800&q=80';
                     }}
                   />
 

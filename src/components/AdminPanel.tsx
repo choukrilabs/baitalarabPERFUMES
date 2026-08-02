@@ -79,12 +79,18 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       .filter(Boolean);
 
     const defaultImages: Record<CategoryType, string> = {
-      perfumes: '/images/dehn_oud_royal.jpg',
-      incense: '/images/incense_bakhoor_royal.jpg',
-      clothes: '/images/cotton_shirt_clothes.jpg',
-      oils: '/images/argan_oil_natural.jpg',
-      wholesale: '/images/hero_oriental_perfume.jpg',
-      other: '/images/brass_censer_mabkhara.jpg',
+      perfumes:
+        'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=800&q=80',
+      incense:
+        'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=800&q=80',
+      clothes:
+        'https://images.unsplash.com/photo-1583391733956-6c78276477e2?auto=format&fit=crop&w=800&q=80',
+      oils:
+        'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=800&q=80',
+      wholesale:
+        'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=800&q=80',
+      other:
+        'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=800&q=80',
     };
 
     const newProd: Product = {
@@ -492,7 +498,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             className="w-14 h-14 object-cover rounded-xl bg-[#F4EAD9] shrink-0 group-hover:opacity-75 transition-opacity"
                             referrerPolicy="no-referrer"
                             onError={(e) => {
-                              (e.target as HTMLImageElement).src = '/images/dehn_oud_royal.jpg';
+                              (e.target as HTMLImageElement).src =
+                                'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=800&q=80';
                             }}
                           />
                           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">

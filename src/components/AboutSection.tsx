@@ -2,7 +2,7 @@ import React from 'react';
 import { SHOP_CONFIG } from '../types';
 import { Award, ShieldCheck, Heart, MapPin, Store, Sparkles } from 'lucide-react';
 
-const aboutLuxuryImg = '/images/about_house_luxury.jpg';
+const lattafaBlackEditionImg = '/images/lattafa_black_edition_1785362819475.jpg';
 
 export const AboutSection: React.FC = () => {
   return (
@@ -15,8 +15,8 @@ export const AboutSection: React.FC = () => {
             <div className="relative rounded-3xl p-3 bg-gradient-to-b from-[#8C7342]/40 to-[#2A2A2A] shadow-2xl border border-[#C6A664]/30">
               <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-[#0A0A0A] relative">
                 <img
-                  src={aboutLuxuryImg}
-                  alt="دار عطور بيت العرب - العود والبخور والزيوت"
+                  src={lattafaBlackEditionImg}
+                  alt="Lattafa Khas Lil Rijal Black Edition"
                   className="w-full h-full object-cover object-center"
                   referrerPolicy="no-referrer"
                 />

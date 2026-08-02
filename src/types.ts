@@ -66,25 +66,8 @@ export const SHOP_CONFIG: ShopInfo = {
 };
 
 export function getSafeImageUrl(url: string): string {
-  if (!url) return '/images/dehn_oud_royal.jpg';
+  if (!url) return '';
   
-  // Map legacy URLs to the new clean unbranded luxury images
-  if (url.includes('royal_oud_perfume') || url.includes('dehn_oud')) {
-    return '/images/dehn_oud_royal.jpg';
-  }
-  if (url.includes('amber_perfume')) {
-    return '/images/amber_perfume_luxury.jpg';
-  }
-  if (url.includes('lattafa_black') || url.includes('black_edition')) {
-    return '/images/black_edition_perfume.jpg';
-  }
-  if (url.includes('generic_oud_perfume')) {
-    return '/images/hero_oriental_perfume.jpg';
-  }
-  if (url.includes('unsplash.com')) {
-    return '/images/dehn_oud_royal.jpg';
-  }
-
   // Fix legacy hashed asset URLs that are broken after moving images to public
   if (url.startsWith('/assets/') && url.match(/-[a-zA-Z0-9]+\.jpg$/)) {
     return url.replace('/assets/', '/images/').replace(/-[a-zA-Z0-9]+\.jpg$/, '.jpg');

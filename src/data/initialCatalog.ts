@@ -1,14 +1,8 @@
 import { Product, CategoryInfo } from '../types';
 
-const royalOudImg = '/images/dehn_oud_royal.jpg';
-const amberPerfumeImg = '/images/amber_perfume_luxury.jpg';
-const incenseBakhoorImg = '/images/incense_bakhoor_royal.jpg';
-const arganOilImg = '/images/argan_oil_natural.jpg';
-const jasmineRoseImg = '/images/jasmine_rose_perfume.jpg';
-const cottonShirtImg = '/images/cotton_shirt_clothes.jpg';
-const roseEssentialOilImg = '/images/rose_essential_oil.jpg';
-const brassCenserImg = '/images/brass_censer_mabkhara.jpg';
-const blackEditionImg = '/images/black_edition_perfume.jpg';
+const royalOudImg = '/images/royal_oud_perfume_1785349659426.jpg';
+const amberPerfumeImg = '/images/amber_perfume_1785349675867.jpg';
+const lattafaBlackEditionImg = '/images/lattafa_black_edition_1785362819475.jpg';
 
 export const CATEGORIES: CategoryInfo[] = [
   {
@@ -89,7 +83,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     price: 150,
     volume: '250 جرام',
     description: 'رقائق عود معطرة بزيوت الورد والمسك لتعطير المنزل والمجالس برائحة مهدئة ودافئة.',
-    image: incenseBakhoorImg,
+    image: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=800&q=80',
     active: true,
     isFeatured: true,
     notes: ['عود عالي الجودة', 'زيوت عطرية نقية', 'دخان عطر يدوم طويلاً'],
@@ -102,7 +96,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     originalPrice: 150,
     volume: '100 مل',
     description: 'زيت طبيعي نقي 100% ممتاز للتدليك والعناية بالبشرة.',
-    image: arganOilImg,
+    image: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=800&q=80',
     active: true,
     isFeatured: true,
     notes: ['طبيعي نقي', 'غني بالفيتامينات', 'ترطيب عميق'],
@@ -114,7 +108,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     price: 280,
     volume: '75 مل',
     description: 'تركيبة عطرية فواحة تجمع بين أريج الياسمين الأبيض والورد البلدي المغربي مع لمسات مسكية ناعمة.',
-    image: jasmineRoseImg,
+    image: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=800&q=80',
     active: true,
     isFeatured: false,
     notes: ['ياسمين أبيض', 'ورد بلدي مغربي', 'مسك حرير'],
@@ -126,7 +120,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     price: 180,
     volume: 'مقاسات متنوعة',
     description: 'قميص قطني مريح يناسب الإطلالات اليومية بألوان متنوعة.',
-    image: cottonShirtImg,
+    image: 'https://images.unsplash.com/photo-1583391733956-6c78276477e2?auto=format&fit=crop&w=800&q=80',
     active: true,
     isFeatured: false,
     notes: ['قطن 100%', 'مريح وعملي', 'ألوان صيفية'],
@@ -138,7 +132,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     price: 90,
     volume: '30 مل',
     description: 'زيت أساسي برائحة الورد المنعشة، يستخدم في تعطير الجو أو التدليك عند تخفيفه.',
-    image: roseEssentialOilImg,
+    image: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=800&q=80',
     active: true,
     isFeatured: false,
     notes: ['رائحة منعشة', 'متعدد الاستخدامات'],
@@ -150,7 +144,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     price: 290,
     volume: 'طقم كامل',
     description: 'مبخرة نحاسية مغربية مصنوعة يدوياً بنقوش عريقة مع علبة بخور عود كمبودي مجانية.',
-    image: brassCenserImg,
+    image: 'https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&w=800&q=80',
     active: true,
     isFeatured: false,
     notes: ['نحاس خالص أصيل', 'صناعة يدوية بالحُبوس', 'هدية فاخرة'],
@@ -162,7 +156,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     price: 450,
     volume: '100 ml',
     description: 'عطر أو دي بارفان (EDP) ينتمي لعائلة العطور الشرقية/فوجير (للجنسين). يفتتح بنوتات الفلفل الأسود واللافندر، وقلب من الزعفران والمريمية، وقاعدة غنية من المر، العنبر، العود، خشب الأرز، والأمبروكسان.',
-    image: blackEditionImg,
+    image: lattafaBlackEditionImg,
     active: true,
     isFeatured: true,
     notes: ['الفلفل الأسود، اللافندر', 'الزعفران، المريمية', 'المر، العنبر، العود، الأمبروكسان'],
