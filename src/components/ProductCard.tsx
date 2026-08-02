@@ -32,8 +32,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           loading="lazy"
           onError={(e) => {
             // Fallback placeholder image if URL fails
-            (e.target as HTMLImageElement).src =
-              'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=800&q=80';
+            (e.target as HTMLImageElement).src = '/images/royal_oud_perfume_1785349659426.jpg';
           }}
         />
 

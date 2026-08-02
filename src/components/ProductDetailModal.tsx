@@ -63,8 +63,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             className="w-full h-full object-cover object-center"
             loading="lazy"
             onError={(e) => {
-              (e.target as HTMLImageElement).src =
-                'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=800&q=80';
+              (e.target as HTMLImageElement).src = '/images/royal_oud_perfume_1785349659426.jpg';
             }}
           />
           {product.isFeatured && (
