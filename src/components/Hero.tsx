@@ -1,8 +1,7 @@
 import React from 'react';
 import { Sparkles, MessageCircle, MapPin, Award, ShieldCheck, Heart } from 'lucide-react';
 import { SHOP_CONFIG } from '../types';
-
-const heroImage = '/images/generic_oud_perfume_1785362643211.jpg';
+import heroImage from '../assets/images/generic_oud_perfume_1785362643211.jpg';
 
 interface HeroProps {
   onExploreClick: () => void;
@@ -22,8 +21,8 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
           <div className="lg:col-span-7 text-center lg:text-right space-y-6">
             
             {/* Tagline Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#2A2A2A]/90 border border-[#C6A664]/40 text-[#C6A664] text-xs sm:text-sm font-semibold shadow-inner">
-              <Sparkles className="w-4 h-4 text-[#C6A664]" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#2A2A2A]/90 border border-[#8C7342]/40 text-[#8C7342] text-xs sm:text-sm font-semibold shadow-inner">
+              <Sparkles className="w-4 h-4 text-[#8C7342]" />
               <span>من قلب حي الحبوس العريق • الدار البيضاء</span>
             </div>
 
@@ -34,23 +33,23 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
 
             {/* Paragraph Description */}
             <p className="text-base sm:text-lg text-gray-300 leading-relaxed max-w-2xl mx-auto lg:mx-0 font-normal">
-              وجهتكم الأولى لأفخر أنواع <span className="text-[#C6A664] font-medium">العود والعطور الشرقية الأصيلة</span>، 
-              و<span className="text-[#C6A664] font-medium">البخور والزيوت الطبيعية</span>، بالإضافة إلى 
-              <span className="text-[#C6A664] font-medium">تشكيلة مختارة من الملابس</span>.
+              وجهتكم الأولى لأفخر أنواع <span className="text-[#8C7342] font-medium">العود والعطور الشرقية الأصيلة</span>، 
+              و<span className="text-[#8C7342] font-medium">البخور والزيوت الطبيعية</span>، بالإضافة إلى 
+              <span className="text-[#8C7342] font-medium">تشكيلة مختارة من الملابس</span>.
             </p>
 
             {/* Feature Highlights Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2 text-xs sm:text-sm font-medium">
               <div className="flex items-center gap-2 justify-center lg:justify-start bg-[#2A2A2A]/60 p-2.5 rounded-xl border border-[#8C7342]/20">
-                <ShieldCheck className="w-4 h-4 text-[#C6A664] shrink-0" />
+                <ShieldCheck className="w-4 h-4 text-[#8C7342] shrink-0" />
                 <span>عطور ثابته وأصيلة</span>
               </div>
               <div className="flex items-center gap-2 justify-center lg:justify-start bg-[#2A2A2A]/60 p-2.5 rounded-xl border border-[#8C7342]/20">
-                <Award className="w-4 h-4 text-[#C6A664] shrink-0" />
+                <Award className="w-4 h-4 text-[#8C7342] shrink-0" />
                 <span>زيوت طبيعية وبخور</span>
               </div>
               <div className="flex items-center gap-2 justify-center lg:justify-start bg-[#2A2A2A]/60 p-2.5 rounded-xl border border-[#8C7342]/20 col-span-2 sm:col-span-1">
-                <Heart className="w-4 h-4 text-[#C6A664] shrink-0" />
+                <Heart className="w-4 h-4 text-[#8C7342] shrink-0" />
                 <span>بيع بالجملة والتفصيل</span>
               </div>
             </div>
@@ -69,7 +68,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
                 href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=${encodeURIComponent('مرحباً عطور بيت العرب، أود الاستفسار عن المنتجات والعروض المتاحة.')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-[#128C7E] hover:bg-[#075E54] text-white px-7 py-3.5 rounded-full font-bold text-base shadow-lg hover:scale-105 transition-all duration-300 flex items-center gap-2"
+                className="bg-[#25D366] hover:bg-[#20bd5a] text-white px-7 py-3.5 rounded-full font-bold text-base shadow-lg hover:scale-105 transition-all duration-300 flex items-center gap-2"
               >
                 <MessageCircle className="w-5 h-5" />
                 <span>تواصل عبر واتساب</span>
@@ -83,7 +82,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
                 href={SHOP_CONFIG.instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-[#C6A664] underline flex items-center gap-1 transition-colors"
+                className="hover:text-[#8C7342] underline flex items-center gap-1 transition-colors"
               >
                 انستغرام
               </a>
@@ -92,7 +91,7 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
                 href={SHOP_CONFIG.facebookUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-[#C6A664] underline flex items-center gap-1 transition-colors"
+                className="hover:text-[#8C7342] underline flex items-center gap-1 transition-colors"
               >
                 فيسبوك
               </a>
@@ -107,17 +106,16 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick }) => {
                   src={heroImage}
                   alt="عطور بيت العرب"
                   className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-700"
-                  referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] via-transparent to-transparent opacity-90" />
                 
                 {/* Overlay Card Details */}
                 <div className="absolute bottom-4 right-4 left-4 p-4 rounded-xl bg-[#1A1A1A]/90 backdrop-blur-md border border-[#8C7342]/30 text-right space-y-1">
-                  <div className="flex items-center justify-between text-[#C6A664] text-xs font-bold">
+                  <div className="flex items-center justify-between text-[#8C7342] text-xs font-bold">
                     <span>مجموعة العود والمسك</span>
                     <span className="bg-[#8C7342]/30 px-2 py-0.5 rounded-full">أصلي 100%</span>
                   </div>
-                  <h2 className="font-display font-bold text-lg text-white">حي الحبوس • الدار البيضاء</h2>
+                  <h3 className="font-display font-bold text-lg text-white">حي الحبوس • الدار البيضاء</h3>
                   <p className="text-xs text-gray-300">زنقة مولاي إسماعيل، متجر عطور بيت العرب</p>
                 </div>
               </div>

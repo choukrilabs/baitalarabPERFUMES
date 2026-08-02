@@ -79,10 +79,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
           
           {/* Search Box */}
           <div className="relative w-full md:w-96">
-            <label htmlFor="grid-search" className="sr-only">ابحث عن عطر</label>
             <input
-              id="grid-search"
-              name="search"
               type="text"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
@@ -99,10 +96,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
               <span>ترتيب حسب:</span>
             </div>
 
-            <label htmlFor="sort-select" className="sr-only">ترتيب المنتجات</label>
             <select
-              id="sort-select"
-              aria-label="ترتيب المنتجات"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
               className="bg-[#FAF9F6] border border-gray-200 text-[#1A1A1A] text-xs font-medium rounded-xl px-3 py-2 focus:outline-none focus:border-[#8C7342] cursor-pointer"
@@ -117,14 +111,13 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
         {/* Product Grid / Empty State */}
         {filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProducts.map((product, index) => (
+            {filteredProducts.map((product) => (
               <ProductCard
                 key={product.id}
                 product={product}
                 onQuickView={onQuickView}
                 onAddToCart={onAddToCart}
                 isInCart={cartProductIds.has(product.id)}
-                priority={index === 0}
               />
             ))}
           </div>
@@ -136,7 +129,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
             <h3 className="font-display font-bold text-lg text-[#1A1A1A]">
               لم يتم العثور على نتائج
             </h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-500">
               جرّب التفتيش بكلمات أخرى أو اختر قسم آخر من الأقسام أعلاه.
             </p>
             <button

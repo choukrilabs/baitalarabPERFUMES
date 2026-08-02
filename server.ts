@@ -56,10 +56,7 @@ async function startServer() {
   let vite: any;
   if (process.env.NODE_ENV !== 'production') {
     vite = await createViteServer({
-      server: { 
-        middlewareMode: true,
-        hmr: process.env.DISABLE_HMR === 'true' ? false : undefined 
-      },
+      server: { middlewareMode: true },
       appType: 'spa',
     });
     // Let Vite handle assets and non-HTML files

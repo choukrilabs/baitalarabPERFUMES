@@ -1,5 +1,5 @@
 import React from 'react';
-import { Product, SHOP_CONFIG, getSafeImageUrl } from '../types';
+import { Product, SHOP_CONFIG } from '../types';
 import { ShoppingBag, Eye, MessageCircle, Sparkles, Check } from 'lucide-react';
 
 interface ProductCardProps {
@@ -7,7 +7,6 @@ interface ProductCardProps {
   onQuickView: (product: Product) => void;
   onAddToCart: (product: Product) => void;
   isInCart?: boolean;
-  priority?: boolean;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
@@ -15,7 +14,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onQuickView,
   onAddToCart,
   isInCart,
-  priority = false,
 }) => {
   const whatsappMsg = encodeURIComponent(
     `مرحباً عطور بيت العرب، أود طلب المنتج:\n• *${product.name}*\n• السعر: ${product.price} درهم\n${product.volume ? `• الحجم/الوزن: ${product.volume}\n` : ''}الرجاء تأكيد الطلب والتوصيل.`
@@ -28,12 +26,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       {/* Top Image Container */}
       <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
         <img
-          src={getSafeImageUrl(product.image)}
+          src={product.image}
           alt={product.name}
           className="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-700"
-          loading={priority ? "eager" : "lazy"}
-          referrerPolicy="no-referrer"
-          {...(priority ? { fetchPriority: 'high' as any } : {})}
+          loading="lazy"
           onError={(e) => {
             // Fallback placeholder image if URL fails
             (e.target as HTMLImageElement).src =
@@ -91,7 +87,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             {product.name}
           </h3>
 
-          <p className="text-xs text-gray-600 line-clamp-2 mt-1 leading-relaxed">
+          <p className="text-xs text-gray-500 line-clamp-2 mt-1 leading-relaxed">
             {product.description}
           </p>
 
@@ -101,7 +97,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               {product.notes.slice(0, 3).map((note, idx) => (
                 <span
                   key={idx}
-                  className="bg-gray-100 text-gray-600 text-[10px] font-medium px-2 py-0.5 rounded-md"
+                  className="bg-gray-100 text-gray-500 text-[10px] font-medium px-2 py-0.5 rounded-md"
                 >
                   {note}
                 </span>
@@ -119,7 +115,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 <span className="text-xs font-normal text-[#8C7342]">درهم</span>
               </span>
               {product.originalPrice && product.originalPrice > product.price && (
-                <span className="text-xs text-gray-500 line-through">
+                <span className="text-xs text-gray-400 line-through">
                   {product.originalPrice} درهم
                 </span>
               )}
@@ -132,7 +128,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               href={directWhatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-[#128C7E] hover:bg-[#075E54] text-white py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 shadow-sm"
+              className="bg-[#25D366] hover:bg-[#20bd5a] text-white py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 shadow-sm"
               title="طلب مباشر عبر واتساب"
             >
               <MessageCircle className="w-3.5 h-3.5" />

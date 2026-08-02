@@ -51,7 +51,7 @@ export function updateMetaTags(title: string, description: string, product?: any
     "@context": "https://schema.org",
     "@type": "Store",
     "name": "عطور بيت العرب",
-    "image": "https://baitalarab-perfumes.vercel.app/logo_small.webp", // Replace with real domain if available
+    "image": "https://baitalarab.com/logo.png", // Replace with real domain if available
     "description": "تأسس بيت العرب عام 1984 في حي الحبوس بالدار البيضاء. نقدم عطور شرقية، عود، وبخور أصلية 100%.",
     "address": {
       "@type": "PostalAddress",

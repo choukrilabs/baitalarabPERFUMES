@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Product, CategoryType, getSafeImageUrl } from '../types';
+import { Product, CategoryType } from '../types';
 import { getAdminPassword } from '../services/storage';
 import { generateProductDescription } from '../services/aiHelper';
 import {
@@ -238,10 +238,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label htmlFor="admin-pin" className="sr-only">كلمة المرور</label>
                 <input
-                  id="admin-pin"
-                  name="adminPin"
                   type="password"
                   value={pinInput}
                   onChange={(e) => setPinInput(e.target.value)}
@@ -304,8 +301,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     اسم المنتج *
                   </label>
                   <input
-                    id="new-product-name"
-                    name="newProductName"
                     type="text"
                     required
                     value={newName}
@@ -317,11 +312,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                 {/* Category */}
                 <div>
-                  <label htmlFor="category-select" className="block text-xs font-bold text-[#8F5D0F] mb-1">
+                  <label className="block text-xs font-bold text-[#8F5D0F] mb-1">
                     القسم *
                   </label>
                   <select
-                    id="category-select"
                     value={newCategory}
                     onChange={(e) => setNewCategory(e.target.value as CategoryType)}
                     className="w-full bg-[#FAF5EC] border border-[#E5D7BF] focus:border-[#C1841A] rounded-xl px-3 py-2.5 text-xs text-[#24160F]"
@@ -340,8 +334,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     السعر (بالدرهم المغربي) *
                   </label>
                   <input
-                    id="new-product-price"
-                    name="newProductPrice"
                     type="number"
                     required
                     min="0"
@@ -359,8 +351,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     السعر السابق قبل التخفيض (اختياري)
                   </label>
                   <input
-                    id="new-original-price"
-                    name="newOriginalPrice"
                     type="number"
                     min="0"
                     step="1"
@@ -377,8 +367,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     الحجم أو الوزن (اختياري)
                   </label>
                   <input
-                    id="new-product-volume"
-                    name="newProductVolume"
                     type="text"
                     value={newVolume}
                     onChange={(e) => setNewVolume(e.target.value)}
@@ -394,8 +382,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   </label>
                   <div className="flex gap-2">
                     <input
-                      id="new-product-image"
-                      name="newProductImage"
                       type="url"
                       value={newImage}
                       onChange={(e) => setNewImage(e.target.value)}
@@ -405,8 +391,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     <label className="cursor-pointer shrink-0 bg-[#F4EAD9] hover:bg-[#E5D7BF] border border-[#E5D7BF] rounded-xl px-4 py-2.5 text-xs font-bold text-[#8F5D0F] flex items-center justify-center transition-colors">
                       رفع صورة
                       <input
-                        id="new-product-image-upload"
-                        name="newProductImageUpload"
                         type="file"
                         accept="image/*"
                         onChange={handleImageUpload}
@@ -422,8 +406,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     المكونات والنوتات العطرية (مفصولة بفاصلة)
                   </label>
                   <input
-                    id="new-product-notes"
-                    name="newProductNotes"
                     type="text"
                     value={newNotes}
                     onChange={(e) => setNewNotes(e.target.value)}
@@ -493,10 +475,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <label className="relative cursor-pointer group">
                           <img
-                            src={getSafeImageUrl(p.image)}
+                            src={p.image}
                             alt={p.name}
                             className="w-14 h-14 object-cover rounded-xl bg-[#F4EAD9] shrink-0 group-hover:opacity-75 transition-opacity"
-                            referrerPolicy="no-referrer"
                             onError={(e) => {
                               (e.target as HTMLImageElement).src =
                                 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=800&q=80';
@@ -506,8 +487,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             <span className="bg-black/60 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">تغيير</span>
                           </div>
                           <input
-                            id={`edit-image-upload-${p.id}`}
-                            name={`editImageUpload_${p.id}`}
                             type="file"
                             accept="image/*"
                             onChange={(e) => handleEditImageUpload(p.id, e)}
@@ -517,10 +496,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
                         <div className="space-y-1 min-w-0 flex-1">
                           {/* Name Input */}
-                          <label htmlFor={`edit-name-${p.id}`} className="sr-only">اسم المنتج</label>
                           <input
-                            id={`edit-name-${p.id}`}
-                            name={`editName_${p.id}`}
                             type="text"
                             value={p.name}
                             onChange={(e) =>
@@ -529,12 +505,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             className="font-bold text-sm text-[#24160F] bg-transparent border-b border-transparent hover:border-[#C1841A] focus:border-[#C1841A] focus:bg-[#FAF5EC] px-1 rounded transition-colors w-full"
                           />
 
-                          <div className="flex flex-wrap items-center gap-2 text-xs text-gray-600">
+                          <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
                             {/* Category Selector */}
-                            <label htmlFor={`cat-select-${p.id}`} className="sr-only">تغيير القسم</label>
                             <select
-                              id={`cat-select-${p.id}`}
-                              aria-label="تغيير القسم"
                               value={p.category}
                               onChange={(e) =>
                                 handleUpdateField(p.id, 'category', e.target.value)
@@ -562,10 +535,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                         
                         {/* Price Input */}
                         <div className="flex items-center gap-1">
-                          <label htmlFor={`edit-price-${p.id}`} className="text-xs text-[#8F5D0F] font-bold">السعر:</label>
+                          <label className="text-xs text-[#8F5D0F] font-bold">السعر:</label>
                           <input
-                            id={`edit-price-${p.id}`}
-                            name={`editPrice_${p.id}`}
                             type="number"
                             min="0"
                             value={p.price}
@@ -578,7 +549,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                             }
                             className="w-20 bg-[#FAF5EC] border border-[#E5D7BF] focus:border-[#C1841A] rounded-xl px-2.5 py-1 text-xs font-bold text-[#24160F] text-center"
                           />
-                          <span className="text-xs text-gray-600">درهم</span>
+                          <span className="text-xs text-gray-500">درهم</span>
                         </div>
 
                         {/* Visibility Toggle Button */}

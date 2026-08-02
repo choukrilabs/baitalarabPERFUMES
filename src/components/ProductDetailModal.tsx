@@ -1,5 +1,5 @@
 import React from 'react';
-import { Product, SHOP_CONFIG, Review, getSafeImageUrl } from '../types';
+import { Product, SHOP_CONFIG, Review } from '../types';
 import { X, MessageCircle, ShoppingBag, ShieldCheck, MapPin, Sparkles, Check, Star } from 'lucide-react';
 
 const MOCK_REVIEWS: Review[] = [
@@ -58,11 +58,10 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
         {/* Product Image Side */}
         <div className="md:w-1/2 bg-gray-100 relative aspect-square md:aspect-auto">
           <img
-            src={getSafeImageUrl(product.image)}
+            src={product.image}
             alt={product.name}
             className="w-full h-full object-cover object-center"
             loading="lazy"
-            referrerPolicy="no-referrer"
             onError={(e) => {
               (e.target as HTMLImageElement).src =
                 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=800&q=80';
@@ -92,7 +91,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               </h2>
 
               {product.volume && (
-                <p className="text-xs text-gray-600 font-medium mt-1">
+                <p className="text-xs text-gray-500 font-medium mt-1">
                   الحجم/الكمية: {product.volume}
                 </p>
               )}
@@ -104,7 +103,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 {product.price} <span className="text-sm font-normal text-[#1A1A1A]">درهم مغربي</span>
               </span>
               {product.originalPrice && product.originalPrice > product.price && (
-                <span className="text-sm text-gray-500 line-through">
+                <span className="text-sm text-gray-400 line-through">
                   {product.originalPrice} درهم
                 </span>
               )}
@@ -112,10 +111,10 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
             {/* Description */}
             <div className="space-y-2">
-              <h3 className="text-xs font-bold text-[#8C7342] uppercase tracking-wider">
+              <h4 className="text-xs font-bold text-[#8C7342] uppercase tracking-wider">
                 الوصف والمميزات:
-              </h3>
-              <p className="text-sm text-gray-600 leading-relaxed">
+              </h4>
+              <p className="text-sm text-gray-500 leading-relaxed">
                 {product.description}
               </p>
             </div>
@@ -123,9 +122,9 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             {/* Fragrance Notes / Product Specs */}
             {product.notes && product.notes.length > 0 && (
               <div className="space-y-2">
-                <h3 className="text-xs font-bold text-[#8C7342] uppercase tracking-wider">
+                <h4 className="text-xs font-bold text-[#8C7342] uppercase tracking-wider">
                   المكونات / النوتات العطرية:
-                </h3>
+                </h4>
                 <div className="flex flex-wrap gap-1.5">
                   {product.notes.map((note, idx) => (
                     <span
@@ -155,9 +154,9 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             {product.category === 'perfumes' && (
               <div className="pt-4 space-y-3 border-t border-gray-200">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold text-[#8C7342] uppercase tracking-wider">
+                  <h4 className="text-xs font-bold text-[#8C7342] uppercase tracking-wider">
                     آراء العملاء:
-                  </h3>
+                  </h4>
                   <div className="flex items-center gap-1 text-sm font-bold text-[#1A1A1A]">
                     <span>4.5</span>
                     <Star className="w-4 h-4 text-yellow-400 fill-current" />
@@ -194,7 +193,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               href={directWhatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full bg-[#128C7E] hover:bg-[#075E54] text-white py-3 rounded-xl font-bold text-sm shadow-md flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
+              className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white py-3 rounded-xl font-bold text-sm shadow-md flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
             >
               <MessageCircle className="w-5 h-5" />
               <span>طلب مباشر عبر واتساب</span>

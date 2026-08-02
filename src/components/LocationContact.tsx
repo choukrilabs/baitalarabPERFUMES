@@ -14,7 +14,7 @@ export const LocationContact: React.FC = () => {
           <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[#1A1A1A]">
             موقع المتجر ووسائل التواصل
           </h2>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-500">
             يسعدنا استقبالكم في متجرنا بالحبوس بالدار البيضاء، أو الإجابة على استفساراتكم عبر الواتساب ومواقع التواصل الاجتماعي.
           </p>
         </div>
@@ -31,10 +31,10 @@ export const LocationContact: React.FC = () => {
                   <MapPin className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="font-display font-bold text-base text-[#1A1A1A]">
+                  <h4 className="font-display font-bold text-base text-[#1A1A1A]">
                     عنوان المتجر
-                  </h3>
-                  <p className="text-sm text-gray-600 mt-0.5">
+                  </h4>
+                  <p className="text-sm text-gray-500 mt-0.5">
                     {SHOP_CONFIG.address}
                   </p>
                   <p className="text-xs text-[#8C7342] font-semibold">
@@ -45,22 +45,22 @@ export const LocationContact: React.FC = () => {
 
               {/* WhatsApp & Phone */}
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-[#E8F8EE] text-[#128C7E] flex items-center justify-center shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-[#E8F8EE] text-[#25D366] flex items-center justify-center shrink-0">
                   <Phone className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="font-display font-bold text-base text-[#1A1A1A]">
+                  <h4 className="font-display font-bold text-base text-[#1A1A1A]">
                     الهاتف والواتساب المباشر
-                  </h3>
+                  </h4>
                   <a
                     href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-base font-bold text-[#128C7E] hover:underline dir-ltr inline-block mt-0.5"
+                    className="text-base font-bold text-[#25D366] hover:underline dir-ltr inline-block mt-0.5"
                   >
                     {SHOP_CONFIG.phoneFormatted}
                   </a>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-gray-500">
                     متاح للطلبات والاستفسارات يومياً
                   </p>
                 </div>
@@ -74,9 +74,9 @@ export const LocationContact: React.FC = () => {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-display font-bold text-base text-[#1A1A1A]">
+                  <h4 className="font-display font-bold text-base text-[#1A1A1A]">
                     البريد الإلكتروني
-                  </h3>
+                  </h4>
                   <a
                     href={`mailto:${SHOP_CONFIG.email}`}
                     className="text-sm font-medium text-[#8C7342] hover:underline mt-0.5 inline-block"
@@ -92,10 +92,10 @@ export const LocationContact: React.FC = () => {
                   <Clock className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="font-display font-bold text-base text-[#1A1A1A]">
+                  <h4 className="font-display font-bold text-base text-[#1A1A1A]">
                     أوقات العمل
-                  </h3>
-                  <p className="text-sm text-gray-600 mt-0.5">
+                  </h4>
+                  <p className="text-sm text-gray-500 mt-0.5">
                     يومياً: من 9:00 صباحاً حتى 8:30 مساءً
                   </p>
                 </div>
@@ -105,9 +105,9 @@ export const LocationContact: React.FC = () => {
 
             {/* Social Media Links */}
             <div className="pt-6 border-t border-gray-200 space-y-3">
-              <h3 className="font-bold text-xs text-[#8C7342] uppercase tracking-wider">
+              <h4 className="font-bold text-xs text-[#8C7342] uppercase tracking-wider">
                 حساباتنا الرسمية على مواقع التواصل:
-              </h3>
+              </h4>
 
               <div className="grid grid-cols-2 gap-3">
                 {/* Instagram */}
@@ -137,7 +137,7 @@ export const LocationContact: React.FC = () => {
                 href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=${encodeURIComponent('مرحباً عطور بيت العرب، أود الاستفسار عن متجركم في الحبوس.')}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full bg-[#128C7E] hover:bg-[#075E54] text-white p-3 rounded-xl font-bold text-xs shadow flex items-center justify-center gap-2 transition-all"
+                className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white p-3 rounded-xl font-bold text-xs shadow flex items-center justify-center gap-2 transition-all"
               >
                 <MessageCircle className="w-4 h-4" />
                 <span>مراسلة عبر الواتساب المباشر</span>
