@@ -2,7 +2,7 @@ import React from 'react';
 import { SHOP_CONFIG } from '../types';
 import { Award, ShieldCheck, Heart, MapPin, Store, Sparkles } from 'lucide-react';
 
-const lattafaBlackEditionImg = '/images/lattafa_black_edition_1785362819475.jpg';
+const lattafaBlackEditionImg = '/images/black_edition_perfume.jpg';
 
 export const AboutSection: React.FC = () => {
   return (

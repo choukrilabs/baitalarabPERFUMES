@@ -100,8 +100,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           onError={(e) => {
             setImageLoaded(true);
             // Fallback placeholder image if URL fails
-            (e.target as HTMLImageElement).src =
-              'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=800&q=80';
+            (e.target as HTMLImageElement).src = '/images/dehn_oud_royal.jpg';
           }}
           {...(priority ? { fetchPriority: 'high' as any } : {})}
         />
