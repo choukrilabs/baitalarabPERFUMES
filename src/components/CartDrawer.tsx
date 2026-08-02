@@ -2,6 +2,8 @@ import React from 'react';
 import { CartItem, SHOP_CONFIG } from '../types';
 import { X, Trash2, Plus, Minus, MessageCircle, ShoppingBag, ArrowRight } from 'lucide-react';
 
+import { ProductImage } from './ProductImage';
+
 interface CartDrawerProps {
   isOpen: boolean;
   onClose: () => void;
@@ -69,14 +71,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   key={item.product.id}
                   className="bg-white rounded-2xl p-3 border border-gray-200 shadow-sm flex items-center gap-3"
                 >
-                  <img
-                    src={item.product.image}
-                    alt={item.product.name}
-                    className="w-16 h-16 object-cover rounded-xl bg-gray-100"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/images/royal_oud_perfume_1785349659426.jpg';
-                    }}
-                  />
+                  <div className="w-16 h-16 shrink-0">
+                    <ProductImage
+                      src={item.product.image}
+                      alt={item.product.name}
+                      className="w-full h-full object-cover rounded-xl bg-gray-100"
+                    />
+                  </div>
 
                   <div className="flex-1 min-w-0">
                     <h4 className="font-bold text-sm text-[#1A1A1A] truncate">

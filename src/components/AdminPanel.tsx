@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 
 import { compressImage } from '../utils/imageUtils';
+import { ProductImage } from './ProductImage';
 
 interface AdminPanelProps {
   isOpen: boolean;
@@ -472,14 +473,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       {/* Product Thumbnail & Basic Info */}
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <label className="relative cursor-pointer group">
-                          <img
-                            src={p.image}
-                            alt={p.name}
-                            className="w-14 h-14 object-cover rounded-xl bg-[#F4EAD9] shrink-0 group-hover:opacity-75 transition-opacity"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = '/images/royal_oud_perfume_1785349659426.jpg';
-                            }}
-                          />
+                          <div className="w-14 h-14 shrink-0 overflow-hidden rounded-xl bg-[#F4EAD9]">
+                            <ProductImage
+                              src={p.image}
+                              alt={p.name}
+                              className="w-full h-full object-cover group-hover:opacity-75 transition-opacity"
+                            />
+                          </div>
                           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <span className="bg-black/60 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">تغيير</span>
                           </div>

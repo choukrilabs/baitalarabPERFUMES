@@ -2,6 +2,8 @@ import React from 'react';
 import { Product, SHOP_CONFIG } from '../types';
 import { ShoppingBag, Eye, MessageCircle, Sparkles, Check } from 'lucide-react';
 
+import { ProductImage } from './ProductImage';
+
 interface ProductCardProps {
   product: Product;
   onQuickView: (product: Product) => void;
@@ -25,15 +27,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     <div className="bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group relative">
       {/* Top Image Container */}
       <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
-        <img
+        <ProductImage
           src={product.image}
           alt={product.name}
           className="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-700"
-          loading="lazy"
-          onError={(e) => {
-            // Fallback placeholder image if URL fails
-            (e.target as HTMLImageElement).src = '/images/royal_oud_perfume_1785349659426.jpg';
-          }}
         />
 
         {/* Overlay Dark Blur Gradient */}

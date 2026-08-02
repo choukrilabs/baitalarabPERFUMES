@@ -2,6 +2,8 @@ import React from 'react';
 import { Product, SHOP_CONFIG, Review } from '../types';
 import { X, MessageCircle, ShoppingBag, ShieldCheck, MapPin, Sparkles, Check, Star } from 'lucide-react';
 
+import { ProductImage } from './ProductImage';
+
 const MOCK_REVIEWS: Review[] = [
   {
     id: 'r1',
@@ -57,14 +59,10 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
         {/* Product Image Side */}
         <div className="md:w-1/2 bg-gray-100 relative aspect-square md:aspect-auto">
-          <img
+          <ProductImage
             src={product.image}
             alt={product.name}
             className="w-full h-full object-cover object-center"
-            loading="lazy"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = '/images/royal_oud_perfume_1785349659426.jpg';
-            }}
           />
           {product.isFeatured && (
             <span className="absolute top-4 right-4 gold-gradient text-white text-xs font-bold px-3 py-1 rounded-full shadow flex items-center gap-1">
