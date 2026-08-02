@@ -17,6 +17,8 @@ import {
   Wand2,
 } from 'lucide-react';
 
+import { compressImage } from '../utils/imageUtils';
+
 interface AdminPanelProps {
   isOpen: boolean;
   onClose: () => void;
@@ -163,25 +165,29 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     setIsGeneratingAI(false);
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setNewImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      try {
+        const compressedBase64 = await compressImage(file, 600, 600, 0.7);
+        setNewImage(compressedBase64);
+      } catch (err) {
+        console.error('Failed to compress image', err);
+        alert('فشل في معالجة الصورة، يرجى المحاولة مرة أخرى بصورة أخرى.');
+      }
     }
   };
 
-  const handleEditImageUpload = (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEditImageUpload = async (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        handleUpdateField(id, 'image', reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      try {
+        const compressedBase64 = await compressImage(file, 600, 600, 0.7);
+        handleUpdateField(id, 'image', compressedBase64);
+      } catch (err) {
+        console.error('Failed to compress image', err);
+        alert('فشل في معالجة الصورة، يرجى المحاولة مرة أخرى بصورة أخرى.');
+      }
     }
   };
 
