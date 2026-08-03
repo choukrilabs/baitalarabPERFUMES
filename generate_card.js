@@ -1,4 +1,6 @@
-import React from 'react';
+import fs from 'fs';
+
+const code = `import React from 'react';
 import { Product, SHOP_CONFIG } from '../types';
 import { ShoppingBag, Eye, MessageCircle, Sparkles, Check, Star } from 'lucide-react';
 import { ProductImage } from './ProductImage';
@@ -7,10 +9,10 @@ const HighlightText = ({ text, highlight }: { text: string; highlight?: string }
   if (!highlight || !highlight.trim()) return <>{text}</>;
   
   const escapeRegExp = (string: string) => {
-    return string.replace(/[.*+?^${()|[\]\\]/g, '\\$&');
+    return string.replace(/[.*+?^$\{()|[\\]\\\\]/g, '\\\\$&');
   };
   
-  const regex = new RegExp(`(${escapeRegExp(highlight.trim())})`, 'gi');
+  const regex = new RegExp(\`(\${escapeRegExp(highlight.trim())})\`, 'gi');
   const parts = text.split(regex);
   
   return (
@@ -42,14 +44,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   searchQuery,
 }) => {
   const whatsappMsg = encodeURIComponent(
-    `مرحباً عطور بيت العرب، أود طلب المنتج:
-• *${product.name}*
-• السعر: ${product.price} درهم
-${product.volume ? `• الحجم/الوزن: ${product.volume}
-` : ''}الرجاء تأكيد الطلب والتوصيل.`
+    \`مرحباً عطور بيت العرب، أود طلب المنتج:
+• *\${product.name}*
+• السعر: \${product.price} درهم
+\${product.volume ? \`• الحجم/الوزن: \${product.volume}\n\` : ''}الرجاء تأكيد الطلب والتوصيل.\`
   );
   
-  const directWhatsappUrl = `https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=${whatsappMsg}`;
+  const directWhatsappUrl = \`https://wa.me/\${SHOP_CONFIG.whatsappNumber}?text=\${whatsappMsg}\`;
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group relative">
@@ -170,11 +171,11 @@ ${product.volume ? `• الحجم/الوزن: ${product.volume}
 
             <button
               onClick={() => onAddToCart(product)}
-              className={`py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 ${
+              className={\`py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 \${
                 isInCart
                   ? 'bg-[#1E5C48] text-white shadow-inner'
                   : 'bg-gray-100 hover:bg-[#8C7342] text-[#1A1A1A] hover:text-white'
-              }`}
+              }\`}
             >
               {isInCart ? (
                 <>
@@ -194,3 +195,6 @@ ${product.volume ? `• الحجم/الوزن: ${product.volume}
     </div>
   );
 };
+`;
+
+fs.writeFileSync('src/components/ProductCard.tsx', code);

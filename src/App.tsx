@@ -153,6 +153,8 @@ export default function App() {
       {/* Quick View Modal */}
       <ProductDetailModal
         product={quickViewProduct}
+        allProducts={products}
+        onProductSelect={handleQuickView}
         onClose={() => handleQuickView(null)}
         onAddToCart={handleAddToCart}
         isInCart={quickViewProduct ? cartItems.some((i) => i.product.id === quickViewProduct.id) : false}

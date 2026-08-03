@@ -8,6 +8,8 @@ import { ProductImage } from './ProductImage';
 
 
 interface ProductDetailModalProps {
+  allProducts?: Product[];
+  onProductSelect?: (product: Product) => void;
   product: Product | null;
   onClose: () => void;
   onAddToCart: (product: Product) => void;
@@ -19,6 +21,8 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   onClose,
   onAddToCart,
   isInCart,
+  allProducts = [],
+  onProductSelect,
 }) => {
   const [newReview, setNewReview] = useState({ authorName: '', rating: 5, comment: '' });
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
@@ -66,6 +70,11 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   );
 
   const directWhatsappUrl = `https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=${whatsappMsg}`;
+
+
+  const relatedProducts = allProducts
+    .filter(p => p.category === product.category && p.id !== product.id && p.active)
+    .slice(0, 2); // Show max 2 related products in the sidebar
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
@@ -273,6 +282,30 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 </div>
               </div>
           </div>
+
+          {/* Related Products Section */}
+          {relatedProducts.length > 0 && onProductSelect && (
+            <div className="pt-4 border-t border-gray-200">
+              <h4 className="text-xs font-bold text-[#8C7342] uppercase tracking-wider mb-3">منتجات مشابهة</h4>
+              <div className="grid grid-cols-2 gap-3">
+                {relatedProducts.map(rp => (
+                  <div 
+                    key={rp.id} 
+                    className="border border-gray-100 rounded-xl overflow-hidden cursor-pointer hover:border-[#8C7342] transition-colors group"
+                    onClick={() => onProductSelect(rp)}
+                  >
+                    <div className="aspect-square bg-gray-50 relative">
+                      <ProductImage src={rp.image} alt={rp.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                    </div>
+                    <div className="p-2">
+                      <h5 className="text-[10px] font-bold text-[#1A1A1A] line-clamp-1">{rp.name}</h5>
+                      <span className="text-[10px] text-[#8C7342] font-semibold">{rp.price} درهم</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Buttons */}
           <div className="space-y-2 pt-2">

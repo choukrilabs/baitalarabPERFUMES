@@ -118,6 +118,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                 onQuickView={onQuickView}
                 onAddToCart={onAddToCart}
                 isInCart={cartProductIds.has(product.id)}
+                searchQuery={searchQuery}
               />
             ))}
           </div>
