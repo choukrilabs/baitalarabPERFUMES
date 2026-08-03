@@ -21,6 +21,7 @@ export interface Product {
   isFeatured?: boolean;
   notes?: string[]; // Fragrance notes or product features (e.g. ["عود كمبودي", "مسك أبيض", "عنبر"])
   createdAt?: string;
+  reviews?: Review[];
 }
 
 export interface CategoryInfo {

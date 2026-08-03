@@ -24,7 +24,9 @@ interface AdminPanelProps {
   isOpen: boolean;
   onClose: () => void;
   products: Product[];
-  onSaveProducts: (updated: Product[]) => void;
+  onAddProduct: (product: Product) => void;
+  onEditProduct: (product: Product) => void;
+  onDeleteProduct: (id: string) => void;
   onResetProducts: () => void;
 }
 
@@ -32,12 +34,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   isOpen,
   onClose,
   products,
-  onSaveProducts,
+  onAddProduct,
+  onEditProduct,
+  onDeleteProduct,
   onResetProducts,
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [pinError, setPinError] = useState('');
+  const [deleteConfirm, setDeleteConfirm] = useState<{id: string, name: string} | null>(null);
+  const [resetConfirm, setResetConfirm] = useState(false);
+  const [actionMessage, setActionMessage] = useState('');
 
   // Form for New Product
   const [newName, setNewName] = useState('');
@@ -73,11 +80,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const handleAddProduct = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newName.trim() || !newPrice) {
-      alert('الرجاء تعبئة جميع الحقول الأساسية');
+      setActionMessage('الرجاء تعبئة جميع الحقول الأساسية');
       return;
     }
     if (!newImage) {
-      alert('الرجاء إضافة صورة للمنتج');
+      setActionMessage('الرجاء إضافة صورة للمنتج');
       return;
     }
 
@@ -104,8 +111,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     if (newVolume.trim()) newProd.volume = newVolume.trim();
     if (notesArray.length > 0) newProd.notes = notesArray;
 
-    const updated = [newProd, ...products];
-    onSaveProducts(updated);
+    onAddProduct(newProd);
 
     // Reset Form
     setNewName('');
@@ -118,29 +124,33 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   };
 
   const handleToggleActive = (id: string) => {
-    const updated = products.map((p) =>
-      p.id === id ? { ...p, active: !p.active } : p
-    );
-    onSaveProducts(updated);
+    const productToUpdate = products.find((p) => p.id === id);
+    if (productToUpdate) {
+      onEditProduct({ ...productToUpdate, active: !productToUpdate.active });
+    }
   };
 
   const handleUpdateField = (id: string, field: keyof Product, value: any) => {
-    const updated = products.map((p) =>
-      p.id === id ? { ...p, [field]: value } : p
-    );
-    onSaveProducts(updated);
+    const productToUpdate = products.find(p => p.id === id);
+    if (productToUpdate) {
+      onEditProduct({ ...productToUpdate, [field]: value });
+    }
   };
 
   const handleDeleteProduct = (id: string, name: string) => {
-    if (window.confirm(`هل أنت تأكد من حذف المنتج "${name}"؟`)) {
-      const updated = products.filter((p) => p.id !== id);
-      onSaveProducts(updated);
+    setDeleteConfirm({ id, name });
+  };
+  
+  const confirmDelete = () => {
+    if (deleteConfirm) {
+      onDeleteProduct(deleteConfirm.id);
+      setDeleteConfirm(null);
     }
   };
 
   const handleGenerateAIDesc = async () => {
     if (!newName.trim()) {
-      alert('يرجى إدخال اسم المنتج أولاً لتوليد الوصف.');
+      setActionMessage('يرجى إدخال اسم المنتج أولاً لتوليد الوصف.');
       return;
     }
     setIsGeneratingAI(true);
@@ -172,7 +182,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         setNewImage(compressedBase64);
       } catch (err) {
         console.error('Failed to compress image', err);
-        alert('فشل في معالجة الصورة، يرجى المحاولة مرة أخرى بصورة أخرى.');
+        setActionMessage('فشل في معالجة الصورة، يرجى المحاولة مرة أخرى بصورة أخرى.');
       }
     }
   };
@@ -185,7 +195,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         handleUpdateField(id, 'image', compressedBase64);
       } catch (err) {
         console.error('Failed to compress image', err);
-        alert('فشل في معالجة الصورة، يرجى المحاولة مرة أخرى بصورة أخرى.');
+        setActionMessage('فشل في معالجة الصورة، يرجى المحاولة مرة أخرى بصورة أخرى.');
       }
     }
   };
@@ -273,11 +283,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => {
-                    if (window.confirm('هل تريد استعادة البيانات الافتراضية للمنتجات؟')) {
-                      onResetProducts();
-                    }
-                  }}
+                  onClick={() => setResetConfirm(true)}
                   className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-xl font-bold flex items-center gap-1 transition-colors"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
@@ -592,6 +598,50 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           </div>
         )}
 
+
+        {/* Action Message Toast */}
+        {actionMessage && (
+          <div className="fixed bottom-4 right-4 bg-red-600 text-white px-4 py-2 rounded-xl shadow-xl flex items-center gap-2 z-[60]">
+            <span>{actionMessage}</span>
+            <button onClick={() => setActionMessage('')}><X className="w-4 h-4" /></button>
+          </div>
+        )}
+        
+        
+        {/* Reset Confirm Modal */}
+        {resetConfirm && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
+            <div className="bg-white p-6 rounded-3xl max-w-sm w-full text-center space-y-6">
+              <h3 className="text-xl font-bold text-gray-900">تأكيد الاستعادة</h3>
+              <p className="text-gray-600">هل أنت متأكد من استعادة البيانات الافتراضية؟ سيتم مسح جميع المنتجات الحالية واستبدالها بالمنتجات الأساسية.</p>
+              <div className="flex gap-4">
+                <button onClick={() => setResetConfirm(false)} className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition-colors">
+                  إلغاء
+                </button>
+                <button onClick={() => { onResetProducts(); setResetConfirm(false); }} className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-colors">
+                  نعم، استعادة
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+\n        {/* Delete Confirm Modal */}
+        {deleteConfirm && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
+            <div className="bg-white p-6 rounded-3xl max-w-sm w-full text-center space-y-6">
+              <h3 className="text-xl font-bold text-gray-900">تأكيد الحذف</h3>
+              <p className="text-gray-600">هل أنت متأكد من حذف المنتج "{deleteConfirm.name}"؟ لا يمكن التراجع عن هذه الخطوة.</p>
+              <div className="flex gap-4">
+                <button onClick={() => setDeleteConfirm(null)} className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition-colors">
+                  إلغاء
+                </button>
+                <button onClick={confirmDelete} className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-colors">
+                  نعم، احذف
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,25 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { db } from '../firebase';
 import { Product, SHOP_CONFIG, Review } from '../types';
 import { X, MessageCircle, ShoppingBag, ShieldCheck, MapPin, Sparkles, Check, Star } from 'lucide-react';
 
 import { ProductImage } from './ProductImage';
 
-const MOCK_REVIEWS: Review[] = [
-  {
-    id: 'r1',
-    authorName: 'أحمد م.',
-    rating: 5,
-    comment: 'عطر ممتاز وثباته قوي جداً. أنصح به بشدة!',
-    date: 'منذ أسبوعين'
-  },
-  {
-    id: 'r2',
-    authorName: 'سارة خ.',
-    rating: 4,
-    comment: 'رائحة جميلة وفخمة ومميزة.',
-    date: 'منذ شهر'
-  },
-];
 
 interface ProductDetailModalProps {
   product: Product | null;
@@ -34,7 +20,46 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   onAddToCart,
   isInCart,
 }) => {
+  const [newReview, setNewReview] = useState({ authorName: '', rating: 5, comment: '' });
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewSuccess, setReviewSuccess] = useState(false);
+
   if (!product) return null;
+
+  const handleSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newReview.authorName.trim() || !newReview.comment.trim()) return;
+    
+    setIsSubmittingReview(true);
+    try {
+      const review: Review = {
+        id: Date.now().toString(),
+        authorName: newReview.authorName,
+        rating: newReview.rating,
+        comment: newReview.comment,
+        date: new Date().toLocaleDateString('ar-MA')
+      };
+      
+      const docRef = doc(db, 'products', product.id);
+      await updateDoc(docRef, {
+        reviews: arrayUnion(review)
+      });
+      
+      setNewReview({ authorName: '', rating: 5, comment: '' });
+      setReviewSuccess(true);
+      setTimeout(() => setReviewSuccess(false), 3000);
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      alert('حدث خطأ أثناء إرسال التقييم');
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
+  const reviews = product.reviews || [];
+  const averageRating = reviews.length > 0 
+    ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
+    : 0;
 
   const whatsappMsg = encodeURIComponent(
     `مرحباً عطور بيت العرب، استفسار عن المنتج:\n• *${product.name}*\n• السعر: ${product.price} درهم\n${product.volume ? `• الحجم: ${product.volume}\n` : ''}يرجى إفادتي بالتفاصيل وطريقة التوصيل.`
@@ -148,19 +173,22 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             </div>
 
             {/* Reviews Section */}
-            {product.category === 'perfumes' && (
-              <div className="pt-4 space-y-3 border-t border-gray-200">
+            <div className="pt-4 space-y-3 border-t border-gray-200">
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-bold text-[#8C7342] uppercase tracking-wider">
                     آراء العملاء:
                   </h4>
-                  <div className="flex items-center gap-1 text-sm font-bold text-[#1A1A1A]">
-                    <span>4.5</span>
-                    <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                  </div>
+                  {reviews.length > 0 && (
+                    <div className="flex items-center gap-1 text-sm font-bold text-[#1A1A1A]">
+                      <span>{averageRating}</span>
+                      <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                      <span className="text-xs text-gray-500 font-normal">({reviews.length})</span>
+                    </div>
+                  )}
                 </div>
+
                 <div className="space-y-3">
-                  {MOCK_REVIEWS.map((review) => (
+                  {reviews.length > 0 ? reviews.map((review) => (
                     <div key={review.id} className="bg-gray-50 p-3 rounded-xl border border-gray-100">
                       <div className="flex items-center justify-between mb-1.5">
                         <span className="text-xs font-bold text-[#1A1A1A]">{review.authorName}</span>
@@ -178,10 +206,72 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                       <p className="text-xs text-gray-600 leading-relaxed">{review.comment}</p>
                       <span className="text-[10px] text-gray-400 block mt-1">{review.date}</span>
                     </div>
-                  ))}
+                  )) : (
+                    <p className="text-xs text-gray-500 italic">لا توجد تقييمات بعد. كن أول من يقيّم هذا المنتج!</p>
+                  )}
+                </div>
+
+                {/* Add Review Form */}
+                <div className="mt-6 pt-4 border-t border-gray-200">
+                  <h4 className="text-sm font-bold text-[#1A1A1A] mb-3">أضف تقييمك</h4>
+                  {reviewSuccess ? (
+                    <div className="bg-green-50 text-green-700 p-3 rounded-xl text-sm font-medium flex items-center justify-center gap-2">
+                      <Check className="w-4 h-4" />
+                      تم إضافة تقييمك بنجاح!
+                    </div>
+                  ) : (
+                    <form onSubmit={handleSubmitReview} className="space-y-3">
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">الاسم</label>
+                        <input
+                          type="text"
+                          required
+                          value={newReview.authorName}
+                          onChange={(e) => setNewReview({ ...newReview, authorName: e.target.value })}
+                          className="w-full border border-gray-200 rounded-lg p-2 text-sm focus:ring-1 focus:ring-[#8C7342] focus:border-[#8C7342]"
+                          placeholder="الاسم الكريم..."
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">التقييم</label>
+                        <div className="flex gap-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              type="button"
+                              key={star}
+                              onClick={() => setNewReview({ ...newReview, rating: star })}
+                              className="focus:outline-none"
+                            >
+                              <Star
+                                className={`w-6 h-6 transition-colors ${
+                                  star <= newReview.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                                }`}
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-600 mb-1">تعليق</label>
+                        <textarea
+                          required
+                          value={newReview.comment}
+                          onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+                          className="w-full border border-gray-200 rounded-lg p-2 text-sm h-20 resize-none focus:ring-1 focus:ring-[#8C7342] focus:border-[#8C7342]"
+                          placeholder="ما رأيك في المنتج؟"
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        disabled={isSubmittingReview}
+                        className="w-full bg-[#1A1A1A] text-white rounded-lg py-2 text-sm font-bold hover:bg-[#8C7342] transition-colors disabled:opacity-50"
+                      >
+                        {isSubmittingReview ? 'جاري الإرسال...' : 'إرسال التقييم'}
+                      </button>
+                    </form>
+                  )}
                 </div>
               </div>
-            )}
           </div>
 
           {/* Buttons */}

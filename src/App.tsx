@@ -14,7 +14,7 @@ import { FloatingWhatsApp } from './components/FloatingWhatsApp';
 import { categorySEO, updateMetaTags, defaultSEO } from './utils/seo';
 
 export default function App() {
-  const { products, updateProducts, resetToDefault } = useProducts();
+  const { products, addProduct, editProduct, deleteProduct, resetToDefault } = useProducts();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -51,9 +51,7 @@ export default function App() {
   }, [selectedCategory, quickViewProduct]);
 
   // Save changes to storage whenever products update
-  const handleSaveProducts = (updatedProducts: Product[]) => {
-    updateProducts(updatedProducts);
-  };
+
 
   const handleResetProducts = () => {
     resetToDefault();
@@ -175,7 +173,9 @@ export default function App() {
         isOpen={isAdminOpen}
         onClose={() => setIsAdminOpen(false)}
         products={products}
-        onSaveProducts={handleSaveProducts}
+        onAddProduct={addProduct}
+        onEditProduct={editProduct}
+        onDeleteProduct={deleteProduct}
         onResetProducts={handleResetProducts}
       />
     </div>

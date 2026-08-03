@@ -1,6 +1,6 @@
 import React from 'react';
 import { Product, SHOP_CONFIG } from '../types';
-import { ShoppingBag, Eye, MessageCircle, Sparkles, Check } from 'lucide-react';
+import { ShoppingBag, Eye, MessageCircle, Sparkles, Check, Star } from 'lucide-react';
 
 import { ProductImage } from './ProductImage';
 
@@ -82,6 +82,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <h3 className="font-display font-bold text-base text-[#1A1A1A] line-clamp-1 group-hover:text-[#8C7342] transition-colors">
             {product.name}
           </h3>
+          {product.reviews && product.reviews.length > 0 && (
+            <div className="flex items-center gap-1 mt-1">
+              <Star className="w-3.5 h-3.5 text-yellow-400 fill-current" />
+              <span className="text-xs font-bold text-gray-700">
+                {(product.reviews.reduce((acc, r) => acc + r.rating, 0) / product.reviews.length).toFixed(1)}
+              </span>
+              <span className="text-[10px] text-gray-400">({product.reviews.length})</span>
+            </div>
+          )}
 
           <p className="text-xs text-gray-500 line-clamp-2 mt-1 leading-relaxed">
             {product.description}
