@@ -13,7 +13,7 @@ export const LocationContact: React.FC = () => {
     : 'مرحباً عطور بيت العرب، أود الاستفسار عن متجركم في الحبوس.';
 
   return (
-    <section id="contact" className="py-16 bg-[#FAF9F6]">
+    <section id="contact" className="py-16 bg-[#FAF9F6]" dir={isFrench ? 'ltr' : 'rtl'}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
@@ -65,9 +65,10 @@ export const LocationContact: React.FC = () => {
                     href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-base font-bold text-[#25D366] hover:underline dir-ltr inline-block"
+                    className="text-base font-bold text-[#25D366] hover:underline inline-block"
+                    dir={isFrench ? 'ltr' : 'rtl'}
                   >
-                    {SHOP_CONFIG.phoneFormatted}
+                    <span dir="ltr">{SHOP_CONFIG.phoneFormatted}</span>
                   </a>
                   <p className="text-xs text-gray-500">
                     {t('contact.phone_sub')}

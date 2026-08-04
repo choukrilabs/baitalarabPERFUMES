@@ -131,7 +131,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onSelectCategory, o
           </div>
 
           {/* Contact & Socials */}
-          <div className="space-y-3">
+          <div className="space-y-3" dir={isFrench ? 'ltr' : 'rtl'}>
             <h4 className="font-display font-bold text-base text-white">
               {t('footer.contact_us')}
             </h4>
@@ -140,20 +140,20 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onSelectCategory, o
                 href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`flex items-center gap-2 text-[#25D366] hover:underline font-bold dir-ltr ${isFrench ? 'justify-start' : 'justify-end'}`}
+                className="flex items-center gap-2 text-[#25D366] hover:underline font-bold"
               >
-                <span>{SHOP_CONFIG.phoneFormatted}</span>
-                <Phone className="w-4 h-4" />
+                <Phone className="w-4 h-4 shrink-0" />
+                <span dir="ltr">{SHOP_CONFIG.phoneFormatted}</span>
               </a>
 
               <a
                 href={`mailto:${SHOP_CONFIG.email}`}
-                className={`flex items-center gap-2 text-gray-400 hover:text-[#8C7342] transition-colors dir-ltr ${isFrench ? 'justify-start' : 'justify-end'}`}
+                className="flex items-center gap-2 text-gray-400 hover:text-[#8C7342] transition-colors"
               >
-                <span>{SHOP_CONFIG.email}</span>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                 </svg>
+                <span dir="ltr">{SHOP_CONFIG.email}</span>
               </a>
 
               <div className="flex items-center gap-3 pt-2">
@@ -185,7 +185,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onSelectCategory, o
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 bg-[#4285F4]/10 text-[#4285F4] border border-[#4285F4]/30 px-4 py-2 rounded-lg text-sm font-bold hover:bg-[#4285F4]/20 transition-colors"
                 >
-                  <Star className="w-4 h-4 fill-current" />
+                  <Star className="w-4 h-4 fill-current shrink-0" />
                   <span>{t('contact.google_rate')}</span>
                 </a>
               </div>
@@ -195,12 +195,9 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onSelectCategory, o
         </div>
 
         {/* Bottom Copyright */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-500 gap-4">
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-center text-center text-xs text-gray-500 gap-4">
           <p onDoubleClick={onOpenAdmin} className="cursor-default">
             © {new Date().getFullYear()} {storeName} — {t('footer.rights')}
-          </p>
-          <p className="text-gray-600">
-            {t('footer.currency')}
           </p>
         </div>
       </div>

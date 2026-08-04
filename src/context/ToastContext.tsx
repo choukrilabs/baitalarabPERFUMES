@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { ToastItem } from '../types';
 import { CheckCircle2, AlertCircle, Info, AlertTriangle, X, Sparkles } from 'lucide-react';
+import { useLanguage } from './LanguageContext';
 
 interface ToastContextType {
   toasts: ToastItem[];
@@ -18,6 +19,7 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const { isFrench } = useLanguage();
 
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -55,8 +57,9 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       {children}
       {/* Toast Render Container */}
       <div
-        className="fixed bottom-5 left-5 z-[9999] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"
-        dir="rtl"
+        id="app-toast-container"
+        className="fixed bottom-5 left-5 sm:left-6 z-[9999] flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"
+        dir={isFrench ? 'ltr' : 'rtl'}
         aria-live="polite"
       >
         {toasts.map((t) => (

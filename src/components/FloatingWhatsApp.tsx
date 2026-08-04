@@ -5,7 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 
 export const FloatingWhatsApp: React.FC = () => {
   const [shouldPulse, setShouldPulse] = useState(false);
-  const { t, isFrench } = useLanguage();
+  const { isFrench } = useLanguage();
 
   useEffect(() => {
     // Trigger subtle attention pulse after user has been on page for 10 seconds
@@ -23,10 +23,17 @@ export const FloatingWhatsApp: React.FC = () => {
   const whatsappUrl = `https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
 
   return (
-    <div className={`fixed bottom-6 ${isFrench ? 'right-6 items-end' : 'right-6 items-end'} z-40 flex flex-col gap-2`} dir={isFrench ? 'ltr' : 'rtl'}>
+    <div
+      id="floating-whatsapp-widget"
+      className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2"
+      dir={isFrench ? 'ltr' : 'rtl'}
+    >
       {/* Gentle Floating Prompt Badge after 10s */}
       {shouldPulse && (
-        <div className="hidden sm:flex items-center gap-1.5 bg-white/95 backdrop-blur-md text-[#1A1A1A] text-xs font-bold px-3 py-1.5 rounded-full shadow-lg border border-[#8C7342]/30 animate-bounce mb-1">
+        <div
+          id="floating-whatsapp-prompt-badge"
+          className="hidden sm:flex items-center gap-1.5 bg-white/95 backdrop-blur-md text-[#1A1A1A] text-xs font-bold px-3 py-1.5 rounded-full shadow-lg border border-[#8C7342]/30 animate-bounce mb-1"
+        >
           <span className="w-2 h-2 rounded-full bg-[#25D366] animate-pulse"></span>
           <span>{isFrench ? 'Contactez-nous sur WhatsApp' : 'تواصل معنا عبر واتساب'}</span>
         </div>
@@ -42,6 +49,7 @@ export const FloatingWhatsApp: React.FC = () => {
         )}
 
         <a
+          id="floating-whatsapp-cta-link"
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
@@ -51,8 +59,12 @@ export const FloatingWhatsApp: React.FC = () => {
           aria-label={isFrench ? 'Contactez-nous directement sur WhatsApp' : 'تواصل معنا عبر الواتساب المباشر'}
           title={isFrench ? 'Message direct sur WhatsApp' : 'مراسلة عبر الواتساب المباشر'}
         >
-          <MessageCircle className={`w-7 h-7 ${shouldPulse ? 'animate-pulse' : ''}`} />
-          <span className={`max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs ${isFrench ? 'group-hover:ml-2' : 'group-hover:mr-2'} transition-all duration-300 text-xs font-bold`}>
+          <MessageCircle className={`w-7 h-7 shrink-0 ${shouldPulse ? 'animate-pulse' : ''}`} />
+          <span
+            className={`max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs ${
+              isFrench ? 'group-hover:ml-2' : 'group-hover:mr-2'
+            } transition-all duration-300 text-xs font-bold`}
+          >
             {isFrench ? 'Discuter sur WhatsApp' : 'راسلنا عبر واتساب'}
           </span>
         </a>

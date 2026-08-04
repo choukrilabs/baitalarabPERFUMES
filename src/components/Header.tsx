@@ -113,29 +113,30 @@ export const Header: React.FC<HeaderProps> = ({
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
-          {/* Brand Logo & Title */}
+          {/* Brand Logo & Title - ALWAYS visible next to logo on all screen sizes */}
           <div
             id="header-brand-logo-button"
             onClick={() => scrollToSection('hero')}
-            className="flex items-center gap-3 cursor-pointer group"
+            className="flex items-center gap-2 sm:gap-3 cursor-pointer group shrink-0 min-w-0"
           >
-            <div className="w-12 h-12 rounded-full gold-gradient p-0.5 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300">
-              <div className="w-full h-full rounded-full overflow-hidden">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full gold-gradient p-0.5 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300 shrink-0">
+              <div className="w-full h-full rounded-full overflow-hidden bg-[#1A1A1A]">
                 <img src="/logo.png" alt={storeName} className="w-full h-full object-cover" />
               </div>
             </div>
-            <div>
-              <h1 className="font-display font-bold text-xl sm:text-2xl text-[#FAF9F6] group-hover:text-[#8C7342] transition-colors">
+            <div className="flex flex-col justify-center min-w-0">
+              <h1 className="font-display font-bold text-xs sm:text-base md:text-xl lg:text-2xl text-[#FAF9F6] group-hover:text-[#8C7342] transition-colors leading-tight whitespace-nowrap">
                 {storeName}
               </h1>
-              <p className="text-xs text-[#8C7342] font-medium flex items-center gap-1">
-                <MapPin className="w-3 h-3 inline" /> {neighborhoodName}
+              <p className="text-[9px] sm:text-xs text-[#8C7342] font-medium flex items-center gap-0.5 sm:gap-1 leading-none mt-0.5 truncate">
+                <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 inline shrink-0" />
+                <span className="truncate">{neighborhoodName}</span>
               </p>
             </div>
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav id="header-desktop-nav" className="hidden md:flex items-center gap-6 lg:gap-8 font-medium text-sm">
+          <nav id="header-desktop-nav" className="hidden lg:flex items-center gap-6 xl:gap-8 font-medium text-sm">
             <button
               id="nav-link-home"
               onClick={() => scrollToSection('hero')}
@@ -169,10 +170,10 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           </nav>
 
-          {/* Right Action Icons Toolbar */}
-          <div className="flex items-center gap-2 sm:gap-2.5">
-            {/* Search Icon Trigger / Floating Popover Dropdown */}
-            <div ref={searchContainerRef} className="relative">
+          {/* Action Icons Toolbar: Desktop full icons & Mobile compact hamburger */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+            {/* Desktop Only: Search Trigger */}
+            <div ref={searchContainerRef} className="relative hidden md:block">
               <button
                 id="header-search-toggle-btn"
                 type="button"
@@ -273,34 +274,38 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </div>
 
-            {/* Language Switcher Icon Dropdown */}
-            <LanguageSwitcher variant="header" />
+            {/* Desktop Only: Language Switcher */}
+            <div className="hidden md:block">
+              <LanguageSwitcher variant="header" />
+            </div>
 
-            {/* Wishlist Trigger */}
-            <button
-              id="header-wishlist-btn"
-              onClick={onOpenWishlist}
-              className="relative p-2.5 rounded-full bg-[#2A2A2A] hover:bg-[#3A3A3A] text-[#FAF9F6] border border-[#8C7342]/30 transition-all hover:scale-105 flex items-center justify-center shadow-sm"
-              title={t('nav.wishlist')}
-              aria-label={t('nav.wishlist')}
-            >
-              <Heart className="w-4.5 h-4.5 text-[#8C7342]" />
-              {wishlistCount > 0 && (
-                <span className="absolute -top-1 -left-1 bg-red-500 text-white text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center border-2 border-[#1A1A1A] animate-pulse">
-                  {wishlistCount}
-                </span>
-              )}
-            </button>
+            {/* Desktop Only: Wishlist Trigger */}
+            <div className="hidden md:block">
+              <button
+                id="header-wishlist-btn"
+                onClick={onOpenWishlist}
+                className="relative p-2.5 rounded-full bg-[#2A2A2A] hover:bg-[#3A3A3A] text-[#FAF9F6] border border-[#8C7342]/30 transition-all hover:scale-105 flex items-center justify-center shadow-sm"
+                title={t('nav.wishlist')}
+                aria-label={t('nav.wishlist')}
+              >
+                <Heart className="w-4.5 h-4.5 text-[#8C7342]" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1 -left-1 bg-red-500 text-white text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center border-2 border-[#1A1A1A] animate-pulse">
+                    {wishlistCount}
+                  </span>
+                )}
+              </button>
+            </div>
 
-            {/* Cart Drawer Trigger */}
+            {/* Cart Drawer Trigger - Visible on both Mobile & Desktop for frictionless shopping */}
             <button
               id="header-cart-btn"
               onClick={onOpenCart}
-              className="relative p-2.5 rounded-full bg-[#2A2A2A] hover:bg-[#3A3A3A] text-[#FAF9F6] border border-[#8C7342]/30 transition-all hover:scale-105 flex items-center justify-center shadow-sm"
+              className="relative p-2 sm:p-2.5 rounded-full bg-[#2A2A2A] hover:bg-[#3A3A3A] text-[#FAF9F6] border border-[#8C7342]/30 transition-all hover:scale-105 flex items-center justify-center shadow-sm"
               title={t('nav.cart')}
               aria-label={t('nav.cart')}
             >
-              <ShoppingBag className="w-4.5 h-4.5 text-[#8C7342]" />
+              <ShoppingBag className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-[#8C7342]" />
               {totalCartCount > 0 && (
                 <span className="absolute -top-1 -left-1 bg-[#8C7342] text-white text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center border-2 border-[#1A1A1A] animate-pulse">
                   {totalCartCount}
@@ -308,47 +313,49 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </button>
 
-            {/* User Account / Auth Trigger */}
-            {currentUser ? (
-              <button
-                id="header-profile-btn"
-                onClick={onOpenProfile}
-                className="p-1 rounded-full bg-[#2A2A2A] hover:bg-[#3A3A3A] text-[#FAF9F6] border border-[#8C7342]/30 transition-all hover:scale-105 flex items-center justify-center shadow-sm"
-                title={userProfile?.displayName || currentUser.displayName || t('profile.title')}
-                aria-label={t('profile.title')}
-              >
-                <div className="w-7 h-7 rounded-full bg-[#8C7342] text-white flex items-center justify-center font-bold text-xs overflow-hidden">
-                  {currentUser.photoURL ? (
-                    <img
-                      src={currentUser.photoURL}
-                      alt="User"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    (userProfile?.displayName || currentUser.displayName || 'U').charAt(0).toUpperCase()
-                  )}
-                </div>
-              </button>
-            ) : (
-              <button
-                id="header-auth-btn"
-                onClick={onOpenAuth}
-                className="p-2.5 rounded-full bg-[#2A2A2A] hover:bg-[#8C7342] text-white border border-[#8C7342]/40 transition-all hover:scale-105 flex items-center justify-center shadow-sm group"
-                title={t('nav.login_register')}
-                aria-label={t('nav.login_register')}
-              >
-                <User className="w-4.5 h-4.5 text-[#8C7342] group-hover:text-white" />
-              </button>
-            )}
+            {/* Desktop Only: User Account / Auth Trigger */}
+            <div className="hidden md:block">
+              {currentUser ? (
+                <button
+                  id="header-profile-btn"
+                  onClick={onOpenProfile}
+                  className="p-1 rounded-full bg-[#2A2A2A] hover:bg-[#3A3A3A] text-[#FAF9F6] border border-[#8C7342]/30 transition-all hover:scale-105 flex items-center justify-center shadow-sm"
+                  title={userProfile?.displayName || currentUser.displayName || t('profile.title')}
+                  aria-label={t('profile.title')}
+                >
+                  <div className="w-7 h-7 rounded-full bg-[#8C7342] text-white flex items-center justify-center font-bold text-xs overflow-hidden">
+                    {currentUser.photoURL ? (
+                      <img
+                        src={currentUser.photoURL}
+                        alt="User"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      (userProfile?.displayName || currentUser.displayName || 'U').charAt(0).toUpperCase()
+                    )}
+                  </div>
+                </button>
+              ) : (
+                <button
+                  id="header-auth-btn"
+                  onClick={onOpenAuth}
+                  className="p-2.5 rounded-full bg-[#2A2A2A] hover:bg-[#8C7342] text-white border border-[#8C7342]/40 transition-all hover:scale-105 flex items-center justify-center shadow-sm group"
+                  title={t('nav.login_register')}
+                  aria-label={t('nav.login_register')}
+                >
+                  <User className="w-4.5 h-4.5 text-[#8C7342] group-hover:text-white" />
+                </button>
+              )}
+            </div>
 
-            {/* Mobile Menu Toggle */}
+            {/* Mobile Hamburger Button - Shrunk secondary icons are housed here */}
             <button
               id="header-mobile-menu-toggle-btn"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg bg-[#2A2A2A] text-[#FAF9F6] border border-[#8C7342]/30"
+              className="md:hidden p-2 rounded-xl bg-[#2A2A2A] text-[#FAF9F6] border border-[#8C7342]/40 hover:bg-[#3A3A3A] active:scale-95 transition-all flex items-center justify-center"
               aria-label={mobileMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileMenuOpen ? <X className="w-5 h-5 text-[#8C7342]" /> : <Menu className="w-5 h-5 text-[#FAF9F6]" />}
             </button>
           </div>
         </div>
