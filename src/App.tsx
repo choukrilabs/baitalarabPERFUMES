@@ -21,11 +21,13 @@ import { categorySEO, updateMetaTags, defaultSEO } from './utils/seo';
 import { ToastProvider, useToast } from './context/ToastContext';
 import { AuthProvider } from './context/AuthContext';
 import { WishlistProvider } from './context/WishlistContext';
+import { LanguageProvider, useLanguage } from './context/LanguageContext';
 
 function StoreApp() {
   const { products, addProduct, editProduct, deleteProduct, resetToDefault } = useProducts();
   const { promoBanner, updatePromoBanner } = usePromoBanner();
   const { toast } = useToast();
+  const { dir, language, t } = useLanguage();
 
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -196,7 +198,12 @@ function StoreApp() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF9F6] text-[#1A1A1A] font-['Tajawal',sans-serif]">
+    <div
+      dir={dir}
+      className={`min-h-screen flex flex-col bg-[#FAF9F6] text-[#1A1A1A] ${
+        language === 'ar' ? "font-['Tajawal',sans-serif]" : "font-sans"
+      }`}
+    >
       {/* Navigation Bar */}
       <Header
         cartItems={cartItems}
@@ -343,12 +350,14 @@ function StoreApp() {
 
 export default function App() {
   return (
-    <ToastProvider>
-      <AuthProvider>
-        <WishlistProvider>
-          <StoreApp />
-        </WishlistProvider>
-      </AuthProvider>
-    </ToastProvider>
+    <LanguageProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <WishlistProvider>
+            <StoreApp />
+          </WishlistProvider>
+        </AuthProvider>
+      </ToastProvider>
+    </LanguageProvider>
   );
 }

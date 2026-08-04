@@ -3,6 +3,7 @@ import { Product, SHOP_CONFIG } from '../types';
 import { ShoppingBag, Eye, MessageCircle, Sparkles, Check, Star, Heart, Camera, ChevronLeft, ChevronRight, XCircle } from 'lucide-react';
 import { ProductImage } from './ProductImage';
 import { useWishlist } from '../context/WishlistContext';
+import { useLanguage } from '../context/LanguageContext';
 import { buildSingleProductWhatsappMessage, getWhatsappUrl } from '../utils/whatsapp';
 
 const HighlightText = ({ text, highlight }: { text: string; highlight?: string }) => {
@@ -52,6 +53,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   searchQuery,
 }) => {
   const { isFavorite, toggleFavorite } = useWishlist();
+  const { t, isFrench, getCategoryName, getPerfumeTerm } = useLanguage();
   const isFav = isFavorite(product.id);
 
   // All available angles for this product
@@ -79,17 +81,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   const whatsappMsgText = isOutOfStock
-    ? `مرحباً عطور بيت العرب، أود الاستفسار عن موعد توفر منتج:\n• ${product.name} ${product.volume || ''}\n• السعر: ${product.price} MAD\nهل يمكن إشعاري عند توفره؟`
-    : buildSingleProductWhatsappMessage(product, 1);
+    ? (isFrench
+        ? `Bonjour Parfums Bait Al Arab, je souhaite savoir quand le produit sera disponible :\n• ${product.name} ${product.volume || ''}\n• Prix : ${product.price} DH\nPouvez-vous me notifier dès son réapprovisionnement ?`
+        : `مرحباً عطور بيت العرب، أود الاستفسار عن موعد توفر منتج:\n• ${product.name} ${product.volume || ''}\n• السعر: ${product.price} MAD\nهل يمكن إشعاري عند توفره؟`)
+    : buildSingleProductWhatsappMessage(product, 1, undefined, isFrench ? 'fr' : 'ar');
   
   const directWhatsappUrl = getWhatsappUrl(whatsappMsgText);
 
   const getGenderLabel = (g?: string) => {
-    if (g === 'men') return 'رجالي';
-    if (g === 'women') return 'نسائي';
-    if (g === 'unisex') return 'للجنسين';
+    if (g === 'men') return isFrench ? 'Homme' : 'رجالي';
+    if (g === 'women') return isFrench ? 'Femme' : 'نسائي';
+    if (g === 'unisex') return isFrench ? 'Unisexe' : 'للجنسين';
     return null;
   };
+
+  const displayVolume = product.volume ? getPerfumeTerm(product.volume) : null;
 
   return (
     <div className={`bg-white rounded-2xl overflow-hidden border transition-all duration-300 flex flex-col group relative ${
@@ -116,21 +122,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <div className="flex flex-wrap items-center gap-1.5">
             {isOutOfStock ? (
               <span className="bg-rose-700 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
-                <XCircle className="w-3 h-3" /> نفد من المخزن
+                <XCircle className="w-3 h-3" /> {t('product.out_of_stock')}
               </span>
             ) : product.isFeatured ? (
               <span className="gold-gradient text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
-                <Sparkles className="w-3 h-3" /> مميز
+                <Sparkles className="w-3 h-3" /> {t('product.featured')}
               </span>
             ) : product.originalPrice && product.originalPrice > product.price ? (
               <span className="bg-[#8C7342] text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md">
-                تخفيض
+                {t('product.discount')}
               </span>
             ) : null}
 
-            {product.volume && (
+            {displayVolume && (
               <span className="bg-[#1A1A1A]/80 backdrop-blur-md text-[#FAF9F6] text-[11px] font-medium px-2 py-0.5 rounded-full shadow">
-                {product.volume}
+                {displayVolume}
               </span>
             )}
           </div>
@@ -147,8 +153,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 ? 'bg-red-50 text-red-500 hover:bg-red-100 scale-105'
                 : 'bg-white/85 text-gray-600 hover:bg-white hover:text-red-500 hover:scale-110'
             }`}
-            title={isFav ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة'}
-            aria-label="المفضلة"
+            title={isFav ? (isFrench ? 'Retirer des favoris' : 'إزالة من المفضلة') : (isFrench ? 'Ajouter aux favoris' : 'إضافة إلى المفضلة')}
+            aria-label={t('nav.wishlist')}
           >
             <Heart
               className={`w-4 h-4 transition-all ${
@@ -161,10 +167,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {/* Multi-angle Indicator & Navigation Arrows on Card */}
         {allImages.length > 1 && (
           <>
-            <div className="absolute top-12 right-3 z-10 pointer-events-none">
+            <div className={`absolute top-12 ${isFrench ? 'left-3' : 'right-3'} z-10 pointer-events-none`}>
               <span className="bg-[#1A1A1A]/85 backdrop-blur-sm text-[#FAF9F6] text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow">
                 <Camera className="w-3 h-3 text-[#C1841A]" />
-                <span>{allImages.length} زوايا للزجاجة</span>
+                <span>{allImages.length} {isFrench ? 'angles' : 'زوايا'}</span>
               </span>
             </div>
 
@@ -174,7 +180,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 type="button"
                 onClick={handlePrevImage}
                 className="pointer-events-auto w-7 h-7 rounded-full bg-white/90 hover:bg-white text-gray-800 flex items-center justify-center shadow-md transition-transform active:scale-95"
-                title="الزاوية السابقة"
+                title={isFrench ? "Angle précédent" : "الزاوية السابقة"}
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -182,7 +188,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 type="button"
                 onClick={handleNextImage}
                 className="pointer-events-auto w-7 h-7 rounded-full bg-white/90 hover:bg-white text-gray-800 flex items-center justify-center shadow-md transition-transform active:scale-95"
-                title="الزاوية التالية"
+                title={isFrench ? "Angle suivant" : "الزاوية التالية"}
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
@@ -213,22 +219,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           className="absolute bottom-3 right-3 left-3 bg-white/95 hover:bg-white text-[#1A1A1A] py-2 rounded-xl text-xs font-bold shadow-lg flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 z-10"
         >
           <Eye className="w-3.5 h-3.5 text-[#8C7342]" />
-          <span>عرض تفاصيل المنتج وزوايا العطر</span>
+          <span>{t('product.quick_view')}</span>
         </button>
       </div>
 
       {/* Card Body */}
       <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
         <div>
-          {/* Notes or Category tag + Gender Pill */}
+          {/* Category tag + Gender Pill */}
           <div className="flex flex-wrap items-center justify-between gap-1 text-[11px] text-[#8C7342] font-semibold mb-1">
             <span className="flex items-center gap-1">
-              {product.category === 'perfumes' && '✨ عطور وعود'}
-              {product.category === 'incense' && '💨 بخور'}
-              {product.category === 'clothes' && '👗 ملابس'}
-              {product.category === 'oils' && '🌿 زيوت طبيعية'}
-              {product.category === 'wholesale' && '🏢 بيع بالجملة'}
-              {product.category === 'other' && '✨ منتجات أخرى'}
+              ✨ {getCategoryName(product.category)}
             </span>
 
             {getGenderLabel(product.gender) && (
@@ -266,7 +267,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   key={idx}
                   className="bg-gray-100 text-gray-500 text-[10px] font-medium px-2 py-0.5 rounded-md"
                 >
-                  <HighlightText text={note} highlight={searchQuery} />
+                  <HighlightText text={getPerfumeTerm(note)} highlight={searchQuery} />
                 </span>
               ))}
             </div>
@@ -279,11 +280,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             <div className="flex items-baseline gap-2">
               <span className="font-display font-extrabold text-lg text-[#1A1A1A]">
                 {product.price}{' '}
-                <span className="text-xs font-normal text-[#8C7342]">درهم</span>
+                <span className="text-xs font-normal text-[#8C7342]">{t('currency')}</span>
               </span>
               {product.originalPrice && product.originalPrice > product.price && (
                 <span className="text-xs text-gray-400 line-through">
-                  {product.originalPrice} درهم
+                  {product.originalPrice} {t('currency')}
                 </span>
               )}
             </div>
@@ -291,11 +292,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             {/* Stock Mini Indicator */}
             {isOutOfStock ? (
               <span className="text-[11px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md">
-                غير متوفر
+                {t('product.out_of_stock')}
               </span>
             ) : (
               <span className="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
-                متوفر بالمخزن
+                {t('product.in_stock')}
               </span>
             )}
           </div>
@@ -311,10 +312,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                   ? 'bg-amber-600 hover:bg-amber-700 text-white'
                   : 'bg-[#25D366] hover:bg-[#20bd5a] text-white'
               }`}
-              title={isOutOfStock ? "استفسار عن التوفر عبر واتساب" : "طلب مباشر عبر واتساب"}
+              title={isOutOfStock ? t('product.inquire_whatsapp') : t('product.order_whatsapp')}
             >
               <MessageCircle className="w-3.5 h-3.5" />
-              <span>{isOutOfStock ? 'استفسر بالواتساب' : 'طلب بالواتساب'}</span>
+              <span className="truncate">{isOutOfStock ? t('product.inquire_whatsapp') : t('product.order_whatsapp')}</span>
             </a>
 
             <button
@@ -329,16 +330,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               }`}
             >
               {isOutOfStock ? (
-                <span>نفد من المخزن</span>
+                <span>{t('product.out_of_stock')}</span>
               ) : isInCart ? (
                 <>
                   <Check className="w-3.5 h-3.5" />
-                  <span>في السلة</span>
+                  <span>{t('product.in_cart')}</span>
                 </>
               ) : (
                 <>
                   <ShoppingBag className="w-3.5 h-3.5" />
-                  <span>إضافة للسلة</span>
+                  <span>{t('product.add_to_cart')}</span>
                 </>
               )}
             </button>

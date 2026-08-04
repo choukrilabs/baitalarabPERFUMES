@@ -4,6 +4,7 @@ import { ProductCard } from './ProductCard';
 import { CategoryFilter } from './CategoryFilter';
 import { SearchSuggestionsDropdown } from './SearchSuggestionsDropdown';
 import { calculateFuzzyScore } from '../utils/fuzzySearch';
+import { useLanguage } from '../context/LanguageContext';
 import {
   Search,
   SlidersHorizontal,
@@ -46,6 +47,8 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   searchQuery,
   onSearchChange,
 }) => {
+  const { t, isFrench, getCategoryName } = useLanguage();
+
   // Advanced Filter States
   const [selectedGender, setSelectedGender] = useState<'all' | 'men' | 'women' | 'unisex'>('all');
   const [pricePreset, setPricePreset] = useState<'all' | 'under150' | '150-300' | '300-600' | 'above600' | 'custom'>('all');
@@ -260,7 +263,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   };
 
   return (
-    <section id="catalog" className="py-10 bg-[#FAF9F6]">
+    <section id="catalog" className="py-10 bg-[#FAF9F6]" dir={isFrench ? 'ltr' : 'rtl'}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Category Header Selector */}
@@ -275,27 +278,33 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
 
         {/* Universal Reassurance Banner */}
         <div className="mt-4 bg-gradient-to-r from-emerald-950 via-[#132A1C] to-emerald-950 text-[#FAF9F6] p-3.5 rounded-2xl border border-[#25D366]/30 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-3 text-center sm:text-right">
+          <div className={`flex items-center gap-3 text-center ${isFrench ? 'sm:text-left' : 'sm:text-right'}`}>
             <div className="w-8 h-8 rounded-full bg-[#25D366] text-white flex items-center justify-center shrink-0 shadow-md">
               <MessageCircle className="w-4 h-4 fill-current" />
             </div>
             <div>
               <p className="text-xs sm:text-sm font-bold text-white leading-tight">
-                {WHATSAPP_TRUST_BANNER}
+                {t('trust.badge')}
               </p>
               <p className="text-[11px] text-emerald-300 mt-0.5">
-                تأكيد مباشر وتوصيل آمن لجميع مدن المغرب • الدفع عند الاستلام بعد المعاينة
+                {isFrench
+                  ? 'Confirmation immédiate et livraison sécurisée partout au Maroc • Paiement à la livraison'
+                  : 'تأكيد مباشر وتوصيل آمن لجميع مدن المغرب • الدفع عند الاستلام بعد المعاينة'}
               </p>
             </div>
           </div>
 
           <a
-            href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=${encodeURIComponent('مرحباً عطور بيت العرب، أود الاستفسار عن التوصيل لمدينتي.')}`}
+            href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=${encodeURIComponent(
+              isFrench
+                ? 'Bonjour Parfums Bait Al Arab, je souhaite me renseigner sur la livraison dans ma ville.'
+                : 'مرحباً عطور بيت العرب، أود الاستفسار عن التوصيل لمدينتي.'
+            )}`}
             target="_blank"
             rel="noopener noreferrer"
             className="shrink-0 bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs font-bold py-2 px-4 rounded-xl flex items-center gap-1.5 shadow transition-transform hover:scale-105"
           >
-            <span>استفسر عن مدينتك</span>
+            <span>{isFrench ? 'Livraison dans ma ville' : 'استفسر عن مدينتك'}</span>
             <Truck className="w-3.5 h-3.5" />
           </a>
         </div>
@@ -325,7 +334,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                     setCurrentPage(1);
                   }
                 }}
-                placeholder="ابحث عن اسم عطر، نوتات عطرية، دهن عود..."
+                placeholder={isFrench ? "Rechercher parfum, oud, encens, notes..." : "ابحث عن اسم عطر، نوتات عطرية، دهن عود..."}
                 className="w-full bg-[#FAF9F6] border border-gray-200 focus:border-[#8C7342] rounded-2xl pr-10 pl-4 py-2.5 text-xs sm:text-sm text-[#1A1A1A] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8C7342]/20 transition-all"
               />
               <Search className="w-4 h-4 text-[#8C7342] absolute right-3.5 top-3.5 pointer-events-none" />
@@ -378,7 +387,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                 }`}
               >
                 <Filter className="w-3.5 h-3.5 text-[#C1841A]" />
-                <span>فلاتر متقدمة</span>
+                <span>{isFrench ? 'Filtres' : 'فلاتر متقدمة'}</span>
                 {activeFiltersCount > 0 && (
                   <span className="w-5 h-5 rounded-full bg-[#C1841A] text-white text-[10px] flex items-center justify-center font-bold">
                     {activeFiltersCount}
@@ -397,11 +406,11 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                   }}
                   className="bg-transparent text-[#1A1A1A] text-xs font-semibold focus:outline-none cursor-pointer"
                 >
-                  <option value="featured">الأكثر تميزاً وطلباً</option>
-                  <option value="price-asc">السعر: الأقل أولاً</option>
-                  <option value="price-desc">السعر: الأعلى أولاً</option>
-                  <option value="rating">الأعلى تقييماً</option>
-                  <option value="newest">الأحدث وصولاً</option>
+                  <option value="featured">{t('filter.sort_featured')}</option>
+                  <option value="price-asc">{t('filter.sort_price_asc')}</option>
+                  <option value="price-desc">{t('filter.sort_price_desc')}</option>
+                  <option value="rating">{t('filter.sort_rating')}</option>
+                  <option value="newest">{t('filter.sort_newest')}</option>
                 </select>
               </div>
 
@@ -415,7 +424,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                       ? 'bg-white shadow-sm text-[#8C7342]'
                       : 'text-gray-400 hover:text-gray-600'
                   }`}
-                  title="شبكة البطاقات"
+                  title={isFrench ? "Grille" : "شبكة البطاقات"}
                 >
                   <LayoutGrid className="w-4 h-4" />
                 </button>
@@ -427,7 +436,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                       ? 'bg-white shadow-sm text-[#8C7342]'
                       : 'text-gray-400 hover:text-gray-600'
                   }`}
-                  title="عرض مكثف"
+                  title={isFrench ? "Compact" : "عرض مكثف"}
                 >
                   <List className="w-4 h-4" />
                 </button>
@@ -440,13 +449,13 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
             <div className="pt-4 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-fadeIn text-xs">
               {/* 1. Gender Filter */}
               <div className="space-y-1.5">
-                <label className="font-bold text-gray-700 block">الجنس المستهدف:</label>
+                <label className="font-bold text-gray-700 block">{t('filter.gender')}:</label>
                 <div className="flex flex-wrap gap-1">
                   {[
-                    { id: 'all', label: 'الكل' },
-                    { id: 'men', label: 'رجالي' },
-                    { id: 'women', label: 'نسائي' },
-                    { id: 'unisex', label: 'للجنسين' },
+                    { id: 'all', label: t('filter.gender_all') },
+                    { id: 'men', label: t('filter.gender_men') },
+                    { id: 'women', label: t('filter.gender_women') },
+                    { id: 'unisex', label: t('filter.gender_unisex') },
                   ].map((g) => (
                     <button
                       key={g.id}
@@ -469,13 +478,13 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
 
               {/* 2. Price Preset Filter */}
               <div className="space-y-1.5">
-                <label className="font-bold text-gray-700 block">نطاق السعر (درهم):</label>
+                <label className="font-bold text-gray-700 block">{t('filter.price_range')}:</label>
                 <div className="flex flex-wrap gap-1">
                   {[
-                    { id: 'all', label: 'الكل' },
+                    { id: 'all', label: t('filter.price_all') },
                     { id: 'under150', label: '< 150 DH' },
-                    { id: '150-300', label: '150-300' },
-                    { id: '300-600', label: '300-600' },
+                    { id: '150-300', label: '150-300 DH' },
+                    { id: '300-600', label: '300-600 DH' },
                     { id: 'above600', label: '> 600 DH' },
                   ].map((p) => (
                     <button
@@ -499,7 +508,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
 
               {/* 3. Product Type Filter */}
               <div className="space-y-1.5">
-                <label className="font-bold text-gray-700 block">نوع المنتج / العطر:</label>
+                <label className="font-bold text-gray-700 block">{t('filter.type')}:</label>
                 <select
                   value={selectedType}
                   onChange={(e) => {
@@ -508,15 +517,15 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                   }}
                   className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-1.5 text-xs text-gray-800 focus:outline-none focus:border-[#8C7342]"
                 >
-                  <option value="all">جميع الأنواع</option>
-                  <option value="ماء عطر فاخر (Eau de Parfum)">ماء عطر فاخر (Eau de Parfum)</option>
-                  <option value="دهن وزيت عطري مركز">دهن وزيت عطري مركز</option>
-                  <option value="بخور وعود فاخر">بخور وعود فاخر</option>
-                  <option value="أزياء وملابس تقليدية">أزياء وملابس تقليدية</option>
-                  <option value="زيوت طبيعية وعناية">زيوت طبيعية وعناية</option>
-                  {availableProductTypes.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
+                  <option value="all">{t('filter.all_types')}</option>
+                  <option value="ماء عطر فاخر (Eau de Parfum)">{isFrench ? "Eau de Parfum" : "ماء عطر فاخر (Eau de Parfum)"}</option>
+                  <option value="دهن وزيت عطري مركز">{isFrench ? "Dahn & Huile Concentrée" : "دهن وزيت عطري مركز"}</option>
+                  <option value="بخور وعود فاخر">{isFrench ? "Bakhoor & Oud Précieux" : "بخور وعود فاخر"}</option>
+                  <option value="أزياء وملابس تقليدية">{isFrench ? "Vêtements Traditionnels" : "أزياء وملابس تقليدية"}</option>
+                  <option value="زيوت طبيعية وعناية">{isFrench ? "Huiles Naturelles" : "زيوت طبيعية وعناية"}</option>
+                  {availableProductTypes.map((tItem) => (
+                    <option key={tItem} value={tItem}>
+                      {tItem}
                     </option>
                   ))}
                 </select>
@@ -524,12 +533,12 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
 
               {/* 4. Stock & Offers Filter */}
               <div className="space-y-1.5">
-                <label className="font-bold text-gray-700 block">حالة المخزن والعروض:</label>
+                <label className="font-bold text-gray-700 block">{t('filter.availability')}:</label>
                 <div className="flex flex-wrap gap-1">
                   {[
-                    { id: 'all', label: 'الكل' },
-                    { id: 'inStock', label: 'المتوفر فقط بالمخزن' },
-                    { id: 'onSale', label: 'تخفيضات فقط' },
+                    { id: 'all', label: t('filter.avail_all') },
+                    { id: 'inStock', label: t('filter.avail_instock') },
+                    { id: 'onSale', label: t('filter.avail_onsale') },
                   ].map((s) => (
                     <button
                       key={s.id}
@@ -555,11 +564,11 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
           {/* Active Filter Chips & Clear All */}
           {activeFiltersCount > 0 && (
             <div className="pt-3 border-t border-gray-100 flex flex-wrap items-center gap-2 text-xs">
-              <span className="text-gray-400 font-medium">الفلاتر المطبقة:</span>
+              <span className="text-gray-400 font-medium">{t('filter.active_filters')}:</span>
 
               {selectedCategory !== 'all' && (
                 <span className="bg-[#FAF9F6] border border-[#8C7342]/30 text-[#8C7342] px-2.5 py-1 rounded-lg flex items-center gap-1 font-semibold">
-                  قسم: {selectedCategory}
+                  {isFrench ? 'Catégorie : ' : 'قسم: '} {getCategoryName(selectedCategory)}
                   <button type="button" onClick={() => onSelectCategory('all')}>
                     <X className="w-3 h-3 hover:text-red-500" />
                   </button>
@@ -568,7 +577,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
 
               {selectedGender !== 'all' && (
                 <span className="bg-[#FAF9F6] border border-[#8C7342]/30 text-[#8C7342] px-2.5 py-1 rounded-lg flex items-center gap-1 font-semibold">
-                  الجنس: {selectedGender === 'men' ? 'رجالي' : selectedGender === 'women' ? 'نسائي' : 'للجنسين'}
+                  {isFrench ? 'Genre : ' : 'الجنس: '} {selectedGender === 'men' ? (isFrench ? 'Homme' : 'رجالي') : selectedGender === 'women' ? (isFrench ? 'Femme' : 'نسائي') : (isFrench ? 'Unisexe' : 'للجنسين')}
                   <button type="button" onClick={() => setSelectedGender('all')}>
                     <X className="w-3 h-3 hover:text-red-500" />
                   </button>
@@ -577,7 +586,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
 
               {pricePreset !== 'all' && (
                 <span className="bg-[#FAF9F6] border border-[#8C7342]/30 text-[#8C7342] px-2.5 py-1 rounded-lg flex items-center gap-1 font-semibold">
-                  السعر: {pricePreset}
+                  {isFrench ? 'Prix : ' : 'السعر: '} {pricePreset}
                   <button type="button" onClick={() => setPricePreset('all')}>
                     <X className="w-3 h-3 hover:text-red-500" />
                   </button>
@@ -586,7 +595,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
 
               {selectedType !== 'all' && (
                 <span className="bg-[#FAF9F6] border border-[#8C7342]/30 text-[#8C7342] px-2.5 py-1 rounded-lg flex items-center gap-1 font-semibold">
-                  النوع: {selectedType}
+                  {isFrench ? 'Type : ' : 'النوع: '} {selectedType}
                   <button type="button" onClick={() => setSelectedType('all')}>
                     <X className="w-3 h-3 hover:text-red-500" />
                   </button>
@@ -595,7 +604,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
 
               {stockFilter !== 'all' && (
                 <span className="bg-[#FAF9F6] border border-[#8C7342]/30 text-[#8C7342] px-2.5 py-1 rounded-lg flex items-center gap-1 font-semibold">
-                  الحالة: {stockFilter === 'inStock' ? 'المتوفر بالمخزن' : 'التخفيضات'}
+                  {isFrench ? 'Statut : ' : 'الحالة: '} {stockFilter === 'inStock' ? t('filter.avail_instock') : t('filter.avail_onsale')}
                   <button type="button" onClick={() => setStockFilter('all')}>
                     <X className="w-3 h-3 hover:text-red-500" />
                   </button>
@@ -604,7 +613,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
 
               {searchQuery && (
                 <span className="bg-[#FAF9F6] border border-[#8C7342]/30 text-[#8C7342] px-2.5 py-1 rounded-lg flex items-center gap-1 font-semibold">
-                  بحث: &quot;{searchQuery}&quot;
+                  {isFrench ? 'Recherche : ' : 'بحث: '} &quot;{searchQuery}&quot;
                   <button type="button" onClick={() => onSearchChange('')}>
                     <X className="w-3 h-3 hover:text-red-500" />
                   </button>
@@ -617,7 +626,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                 className="text-rose-600 hover:text-rose-700 font-bold flex items-center gap-1 mr-auto hover:underline"
               >
                 <RotateCcw className="w-3 h-3" />
-                <span>إعادة ضبط الكل</span>
+                <span>{t('filter.reset')}</span>
               </button>
             </div>
           )}
@@ -626,16 +635,28 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
         {/* Results Count Header */}
         <div className="flex items-center justify-between mb-6 text-xs text-gray-500">
           <div>
-            <span>تم العثور على </span>
-            <strong className="text-[#1A1A1A] font-bold text-sm">{filteredProducts.length}</strong>
-            <span> منتج في الكتالوج</span>
-            {filteredProducts.length > itemsPerPage && (
-              <span> (عرض الصفحة {currentPage} من أصل {totalPages})</span>
+            {isFrench ? (
+              <>
+                <strong className="text-[#1A1A1A] font-bold text-sm">{filteredProducts.length}</strong>
+                <span> produit(s) trouvé(s)</span>
+                {filteredProducts.length > itemsPerPage && (
+                  <span> (Page {currentPage} sur {totalPages})</span>
+                )}
+              </>
+            ) : (
+              <>
+                <span>تم العثور على </span>
+                <strong className="text-[#1A1A1A] font-bold text-sm">{filteredProducts.length}</strong>
+                <span> منتج في الكتالوج</span>
+                {filteredProducts.length > itemsPerPage && (
+                  <span> (عرض الصفحة {currentPage} من أصل {totalPages})</span>
+                )}
+              </>
             )}
           </div>
 
           <div className="flex items-center gap-2">
-            <span>عناصر الصفحة:</span>
+            <span>{isFrench ? 'Par page :' : 'عناصر الصفحة:'}</span>
             <select
               value={itemsPerPage}
               onChange={(e) => {
@@ -682,8 +703,8 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                   disabled={currentPage === 1}
                   className="px-4 py-2 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shadow-sm"
                 >
-                  <ChevronRight className="w-4 h-4" />
-                  <span>السابق</span>
+                  {isFrench ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                  <span>{isFrench ? 'Précédent' : 'السابق'}</span>
                 </button>
 
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
@@ -707,8 +728,8 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                   disabled={currentPage === totalPages}
                   className="px-4 py-2 rounded-xl bg-white border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shadow-sm"
                 >
-                  <span>التالي</span>
-                  <ChevronLeft className="w-4 h-4" />
+                  <span>{isFrench ? 'Suivant' : 'التالي'}</span>
+                  {isFrench ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
                 </button>
               </div>
             )}
@@ -719,16 +740,16 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
               <PackageX className="w-8 h-8" />
             </div>
             <h3 className="font-display font-bold text-lg text-[#1A1A1A]">
-              لم يتم العثور على أي منتج مطابق
+              {t('filter.no_results')}
             </h3>
             <p className="text-sm text-gray-500">
-              جرّب تغيير خيارات التصفية، أو البحث بكلمات أخرى، أو مسح الفلاتر.
+              {t('filter.no_results_desc')}
             </p>
             <button
               onClick={handleResetAllFilters}
               className="gold-gradient text-white px-6 py-2.5 rounded-xl text-xs font-bold hover:scale-105 transition-transform shadow-md"
             >
-              إعادة ضبط جميع الفلاتر وعرض الكتالوج
+              {t('filter.reset')}
             </button>
           </div>
         )}

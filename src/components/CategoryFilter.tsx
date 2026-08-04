@@ -2,6 +2,7 @@ import React from 'react';
 import { CATEGORIES } from '../data/initialCatalog';
 import { Product } from '../types';
 import { Sparkles, Flame, Shirt, Droplet, Flower2 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface CategoryFilterProps {
   selectedCategory: string;
@@ -14,6 +15,8 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
   onSelectCategory,
   products,
 }) => {
+  const { t, getCategoryName, isFrench } = useLanguage();
+
   const getIcon = (iconName: string) => {
     switch (iconName) {
       case 'Flame':
@@ -39,7 +42,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-display font-bold text-xl sm:text-2xl text-[#1A1A1A] flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-[#8C7342]" />
-          <span>تصفّح حسب القسم</span>
+          <span>{t('category.browse_title')}</span>
         </h2>
       </div>
 
@@ -47,6 +50,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
         {CATEGORIES.map((cat) => {
           const isSelected = selectedCategory === cat.id;
           const count = getCategoryCount(cat.id);
+          const categoryTitle = getCategoryName(cat.id);
 
           return (
             <button
@@ -68,7 +72,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
                 {getIcon(cat.iconName)}
               </div>
 
-              <span className="font-bold text-sm sm:text-base mb-1">{cat.nameAr}</span>
+              <span className="font-bold text-sm sm:text-base mb-1">{categoryTitle}</span>
               <span
                 className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${
                   isSelected
@@ -76,7 +80,7 @@ export const CategoryFilter: React.FC<CategoryFilterProps> = ({
                     : 'bg-gray-100 text-gray-500'
                 }`}
               >
-                {count} منتج
+                {count} {isFrench ? (count > 1 ? 'articles' : 'article') : 'منتج'}
               </span>
             </button>
           );

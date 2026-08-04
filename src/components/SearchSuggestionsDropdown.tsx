@@ -5,6 +5,7 @@ import {
   POPULAR_SEARCH_SUGGESTIONS,
   normalizeSearchText,
 } from '../utils/fuzzySearch';
+import { useLanguage } from '../context/LanguageContext';
 import {
   Sparkles,
   Search,
@@ -14,6 +15,7 @@ import {
   Package,
   Layers,
   ChevronLeft,
+  ChevronRight,
   CheckCircle2,
   XCircle,
 } from 'lucide-react';
@@ -100,6 +102,8 @@ export const SearchSuggestionsDropdown: React.FC<SearchSuggestionsDropdownProps>
   onSelectCategory,
   onApplyQuery,
 }) => {
+  const { t, isFrench, getCategoryName } = useLanguage();
+
   const suggestions = useMemo(() => {
     return getSearchSuggestions(products, query, 5, 3, 4);
   }, [products, query]);
@@ -112,10 +116,31 @@ export const SearchSuggestionsDropdown: React.FC<SearchSuggestionsDropdownProps>
     suggestions.matchedCategories.length > 0 ||
     suggestions.matchedNotes.length > 0;
 
+  const popularSearches = isFrench
+    ? [
+        { label: 'Oud Royal', query: 'عود' },
+        { label: 'Musc Blanc', query: 'مسك' },
+        { label: 'Bakhoor & Encens', query: 'بخور', category: 'incense' },
+        { label: 'Parfum Homme', query: 'رجالي' },
+        { label: 'Huile Dahn Al Oud', query: 'دهن عود' },
+      ]
+    : POPULAR_SEARCH_SUGGESTIONS;
+
+  const quickNavCategories = [
+    { id: 'perfumes', name: getCategoryName('perfumes'), icon: '✨' },
+    { id: 'oils', name: getCategoryName('oils'), icon: '👑' },
+    { id: 'incense', name: getCategoryName('incense'), icon: '🔥' },
+    { id: 'clothes', name: getCategoryName('clothes'), icon: '👘' },
+    { id: 'wholesale', name: getCategoryName('wholesale'), icon: '📦' },
+    { id: 'all', name: getCategoryName('all'), icon: '🌸' },
+  ];
+
   return (
     <div
       id="search-suggestions-dropdown"
-      className="absolute top-full right-0 left-0 mt-2 z-50 bg-white rounded-2xl shadow-2xl border border-gray-200/90 overflow-hidden text-right animate-fadeIn"
+      className={`absolute top-full right-0 left-0 mt-2 z-50 bg-white rounded-2xl shadow-2xl border border-gray-200/90 overflow-hidden ${
+        isFrench ? 'text-left' : 'text-right'
+      } animate-fadeIn`}
       style={{ maxHeight: 'min(80vh, 520px)' }}
     >
       <div className="overflow-y-auto max-h-[min(78vh,500px)] p-2 sm:p-3 divide-y divide-gray-100">
@@ -125,13 +150,15 @@ export const SearchSuggestionsDropdown: React.FC<SearchSuggestionsDropdownProps>
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-gray-500 flex items-center gap-1.5">
                 <Flame className="w-3.5 h-3.5 text-amber-500" />
-                <span>عمليات البحث الأكثر طلباً</span>
+                <span>{isFrench ? 'Recherches populaires' : 'عمليات البحث الأكثر طلباً'}</span>
               </span>
-              <span className="text-[10px] text-gray-400">انقر للبحث الفوري</span>
+              <span className="text-[10px] text-gray-400">
+                {isFrench ? 'Cliquez pour rechercher' : 'انقر للبحث الفوري'}
+              </span>
             </div>
 
             <div className="flex flex-wrap gap-1.5">
-              {POPULAR_SEARCH_SUGGESTIONS.map((item, idx) => (
+              {popularSearches.map((item, idx) => (
                 <button
                   key={idx}
                   type="button"
@@ -152,17 +179,10 @@ export const SearchSuggestionsDropdown: React.FC<SearchSuggestionsDropdownProps>
 
             <div className="pt-2 border-t border-gray-100">
               <span className="text-xs font-bold text-gray-500 block mb-2">
-                تصفح الأقسام الرئيسية:
+                {isFrench ? 'Parcourir les catégories principales :' : 'تصفح الأقسام الرئيسية:'}
               </span>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-                {[
-                  { id: 'perfumes', name: 'العطور الشرقية', icon: '✨' },
-                  { id: 'oils', name: 'أدهان العود والمسك', icon: '👑' },
-                  { id: 'incense', name: 'البخور والمعمول', icon: '🔥' },
-                  { id: 'clothes', name: 'الأزياء التقليدية', icon: '👘' },
-                  { id: 'wholesale', name: 'البيع بالجملة', icon: '📦' },
-                  { id: 'all', name: 'جميع التشكيلات', icon: '🌸' },
-                ].map((cat) => (
+                {quickNavCategories.map((cat) => (
                   <button
                     key={cat.id}
                     type="button"
@@ -171,7 +191,9 @@ export const SearchSuggestionsDropdown: React.FC<SearchSuggestionsDropdownProps>
                       onApplyQuery('');
                       onClose();
                     }}
-                    className="flex items-center gap-2 p-2 rounded-xl bg-gray-50 hover:bg-[#8C7342]/10 text-xs text-gray-800 hover:text-[#8C7342] transition-all text-right font-medium"
+                    className={`flex items-center gap-2 p-2 rounded-xl bg-gray-50 hover:bg-[#8C7342]/10 text-xs text-gray-800 hover:text-[#8C7342] transition-all ${
+                      isFrench ? 'text-left' : 'text-right'
+                    } font-medium`}
                   >
                     <span>{cat.icon}</span>
                     <span className="truncate">{cat.name}</span>
@@ -193,7 +215,7 @@ export const SearchSuggestionsDropdown: React.FC<SearchSuggestionsDropdownProps>
                   <div>
                     <span className="text-[11px] font-bold text-gray-500 flex items-center gap-1 mb-1.5">
                       <Tag className="w-3 h-3 text-[#8C7342]" />
-                      <span>أقسام وفئات مطابقة:</span>
+                      <span>{isFrench ? 'Catégories correspondantes :' : 'أقسام وفئات مطابقة:'}</span>
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       {suggestions.matchedCategories.map((cat) => (
@@ -206,9 +228,9 @@ export const SearchSuggestionsDropdown: React.FC<SearchSuggestionsDropdownProps>
                           }}
                           className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 text-xs font-semibold transition-all hover:scale-102"
                         >
-                          <HighlightFuzzyText text={cat.name} query={query} />
+                          <HighlightFuzzyText text={getCategoryName(cat.id)} query={query} />
                           <span className="text-[10px] bg-amber-200/70 text-amber-950 px-1.5 py-0.2 rounded-full">
-                            {cat.count} منتج
+                            {cat.count} {isFrench ? 'produits' : 'منتج'}
                           </span>
                         </button>
                       ))}
@@ -221,7 +243,7 @@ export const SearchSuggestionsDropdown: React.FC<SearchSuggestionsDropdownProps>
                   <div>
                     <span className="text-[11px] font-bold text-gray-500 flex items-center gap-1 mb-1.5">
                       <Sparkles className="w-3 h-3 text-emerald-600" />
-                      <span>نوتات ومكونات عطرية:</span>
+                      <span>{isFrench ? 'Notes et ingrédients olfactifs :' : 'نوتات ومكونات عطرية:'}</span>
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       {suggestions.matchedNotes.map((item, idx) => (
@@ -253,12 +275,14 @@ export const SearchSuggestionsDropdown: React.FC<SearchSuggestionsDropdownProps>
                 <div className="flex items-center justify-between px-1 mb-1">
                   <span className="text-xs font-bold text-[#1A1A1A] flex items-center gap-1.5">
                     <Package className="w-3.5 h-3.5 text-[#8C7342]" />
-                    <span>المنتجات المقترحة</span>
+                    <span>{isFrench ? 'Produits suggérés' : 'المنتجات المقترحة'}</span>
                     <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full font-mono">
                       {suggestions.totalMatches}
                     </span>
                   </span>
-                  <span className="text-[10px] text-gray-400">انقر للمعاينة الفورية</span>
+                  <span className="text-[10px] text-gray-400">
+                    {isFrench ? 'Aperçu rapide' : 'انقر للمعاينة الفورية'}
+                  </span>
                 </div>
 
                 <div className="space-y-1">
@@ -270,7 +294,9 @@ export const SearchSuggestionsDropdown: React.FC<SearchSuggestionsDropdownProps>
                         onSelectProduct(product);
                         onClose();
                       }}
-                      className="w-full group flex items-center justify-between p-2 rounded-xl hover:bg-amber-50/60 border border-transparent hover:border-amber-200/70 transition-all text-right"
+                      className={`w-full group flex items-center justify-between p-2 rounded-xl hover:bg-amber-50/60 border border-transparent hover:border-amber-200/70 transition-all ${
+                        isFrench ? 'text-left' : 'text-right'
+                      }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         {/* Thumbnail */}
@@ -296,29 +322,30 @@ export const SearchSuggestionsDropdown: React.FC<SearchSuggestionsDropdownProps>
                           {/* Matching note hint if matched by notes */}
                           {matchedFields.includes('notes') && product.notes && (
                             <p className="text-[10px] text-emerald-700 truncate mt-0.5">
-                              نوتات: <HighlightFuzzyText text={product.notes.join(' • ')} query={query} />
+                              {isFrench ? 'Notes: ' : 'نوتات: '}{' '}
+                              <HighlightFuzzyText text={product.notes.join(' • ')} query={query} />
                             </p>
                           )}
 
                           {/* Category or Type */}
                           <p className="text-[10px] text-gray-500 truncate mt-0.5">
-                            {product.productType || product.category}
+                            {product.productType || getCategoryName(product.category)}
                           </p>
                         </div>
                       </div>
 
                       {/* Price & Action Badge */}
-                      <div className="flex flex-col items-end shrink-0 pl-1">
+                      <div className={`flex flex-col ${isFrench ? 'items-end pr-1' : 'items-end pl-1'} shrink-0`}>
                         <span className="text-xs font-bold text-[#8C7342]">
-                          {product.price} <span className="text-[9px]">MAD</span>
+                          {product.price} <span className="text-[9px]">{t('product.currency')}</span>
                         </span>
                         {product.inStock === false ? (
                           <span className="text-[9px] text-rose-600 flex items-center gap-0.5">
-                            <XCircle className="w-2.5 h-2.5" /> غير متوفر
+                            <XCircle className="w-2.5 h-2.5" /> {t('product.out_of_stock')}
                           </span>
                         ) : (
                           <span className="text-[9px] text-emerald-600 flex items-center gap-0.5">
-                            <CheckCircle2 className="w-2.5 h-2.5" /> متوفر
+                            <CheckCircle2 className="w-2.5 h-2.5" /> {t('product.in_stock')}
                           </span>
                         )}
                       </div>
@@ -340,10 +367,12 @@ export const SearchSuggestionsDropdown: React.FC<SearchSuggestionsDropdownProps>
                 <div className="flex items-center gap-1.5">
                   <Search className="w-3.5 h-3.5" />
                   <span>
-                    عرض جميع النتائج ({suggestions.totalMatches} منتج) لكلمة &quot;{query}&quot;
+                    {isFrench
+                      ? `Voir tous les résultats (${suggestions.totalMatches} produits) pour "${query}"`
+                      : `عرض جميع النتائج (${suggestions.totalMatches} منتج) لكلمة "${query}"`}
                   </span>
                 </div>
-                <ChevronLeft className="w-4 h-4" />
+                {isFrench ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
               </button>
             </div>
           </>
@@ -357,15 +386,22 @@ export const SearchSuggestionsDropdown: React.FC<SearchSuggestionsDropdownProps>
             </div>
             <div>
               <p className="text-xs font-bold text-gray-700">
-                لم نعثر على تطابق مباشر لكلمة &quot;{query}&quot;
+                {isFrench
+                  ? `Aucun résultat direct pour "${query}"`
+                  : `لم نعثر على تطابق مباشر لكلمة "${query}"`}
               </p>
               <p className="text-[11px] text-gray-500 mt-0.5">
-                جرّب البحث بكلمة عامة أخرى مثل: عود، مسك، بخور، عطر رجالي، أو تصفح الأقسام أدناه.
+                {isFrench
+                  ? 'Essayez avec un mot-clé général : Oud, Musc, Bakhoor, Parfum Homme, ou explorez les catégories.'
+                  : 'جرّب البحث بكلمة عامة أخرى مثل: عود، مسك، بخور، عطر رجالي، أو تصفح الأقسام أدناه.'}
               </p>
             </div>
 
             <div className="flex flex-wrap justify-center gap-1.5 pt-1">
-              {['عود كمبودي', 'مسك', 'بخور', 'عطر شرقي'].map((term) => (
+              {(isFrench
+                ? ['Oud Cambodi', 'Musc', 'Bakhoor', 'Parfum Oriental']
+                : ['عود كمبودي', 'مسك', 'بخور', 'عطر شرقي']
+              ).map((term) => (
                 <button
                   key={term}
                   type="button"

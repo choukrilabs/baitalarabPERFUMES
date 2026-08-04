@@ -16,15 +16,26 @@ function getAI(): GoogleGenAI | null {
 export async function generateProductDescription(
   name: string,
   category: string,
-  notes?: string
+  notes?: string,
+  isFrench?: boolean
 ): Promise<string> {
   const ai = getAI();
   if (!ai) {
-    return `منتج فاخر من عطور بيت العرب في حي الحبوس بالدار البيضاء. جودة عالية ومكونات أصيلة مختارة بعناية.`;
+    return isFrench
+      ? `Création prestigieuse signée Parfumerie Bait Al Arab, située au Quartier Habous à Casablanca. Ingrédients nobles et authentiques soigneusement sélectionnés.`
+      : `منتج فاخر من عطور بيت العرب في حي الحبوس بالدار البيضاء. جودة عالية ومكونات أصيلة مختارة بعناية.`;
   }
 
   try {
-    const prompt = `أنت كاتب تسويقي محترف لمتجر "عطور بيت العرب" الواقع في حي الحبوس بالدار البيضاء.
+    const prompt = isFrench
+      ? `Tu es un rédacteur marketing de luxe pour la prestigieuse boutique "Parfumerie Bait Al Arab" située au Quartier Habous à Casablanca.
+Rédige une description courte, captivante et élégante (entre 25 et 45 mots) en français raffiné pour le produit suivant :
+- Nom du produit : ${name}
+- Catégorie : ${category}
+${notes ? `- Ingrédients / Notes olfactives : ${notes}` : ''}
+
+La description doit évoquer l'authenticité orientale, le raffinement et l'excellence marocaine sans longueur excessive.`
+      : `أنت كاتب تسويقي محترف لمتجر "عطور بيت العرب" الواقع في حي الحبوس بالدار البيضاء.
 اكتب وصفاً جذاباً وقصيراً (بين 25 إلى 45 كلمة) باللغة العربية الفصحى الأنيقة للمنتج التالي:
 - اسم المنتج: ${name}
 - التصنيف: ${category}
@@ -43,5 +54,7 @@ ${notes ? `- ميزات/مكونات إضافية: ${notes}` : ''}
     console.error('Error generating AI description:', err);
   }
 
-  return `منتج فاخر من عطور بيت العرب في حي الحبوس بالدار البيضاء. جودة عالية ومكونات أصيلة مختارة بعناية.`;
+  return isFrench
+    ? `Création prestigieuse signée Parfumerie Bait Al Arab, située au Quartier Habous à Casablanca. Ingrédients nobles et authentiques soigneusement sélectionnés.`
+    : `منتج فاخر من عطور بيت العرب في حي الحبوس بالدار البيضاء. جودة عالية ومكونات أصيلة مختارة بعناية.`;
 }

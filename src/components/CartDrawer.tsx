@@ -19,7 +19,9 @@ import {
 import { ProductImage } from './ProductImage';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { buildCartWhatsappMessage, getWhatsappUrl, WHATSAPP_TRUST_BANNER } from '../utils/whatsapp';
+import { useLanguage } from '../context/LanguageContext';
+import { buildCartWhatsappMessage, getWhatsappUrl, WHATSAPP_TRUST_BANNER_AR, WHATSAPP_TRUST_BANNER_FR } from '../utils/whatsapp';
+import { MOROCCAN_CITIES_FR } from '../utils/translations';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -44,6 +46,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 }) => {
   const { currentUser, userProfile, saveOrder } = useAuth();
   const { toast } = useToast();
+  const { t, isFrench } = useLanguage();
 
   const [selectedAddressId, setSelectedAddressId] = useState<string>('');
   const [showAddressPicker, setShowAddressPicker] = useState(false);
@@ -72,8 +75,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
     } else if (customName.trim() || customPhone.trim() || customStreet.trim()) {
       orderAddress = {
         id: 'guest-' + Date.now(),
-        title: 'عنوان التوصيل',
-        recipientName: customName.trim() || currentUser?.displayName || 'العميل',
+        title: t('cart.guest_title'),
+        recipientName: customName.trim() || currentUser?.displayName || t('cart.guest_customer'),
         phone: customPhone.trim() || userProfile?.phone || '',
         city: customCity,
         district: '',
@@ -91,7 +94,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
         })),
         totalPrice,
         status: 'pending',
-        customerName: orderAddress?.recipientName || customName || currentUser?.displayName || 'العميل',
+        customerName: orderAddress?.recipientName || customName || currentUser?.displayName || t('cart.guest_customer'),
         phone: orderAddress?.phone || customPhone || userProfile?.phone || '',
       };
 
@@ -107,26 +110,30 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
     // Build WhatsApp message formatted specifically for high Moroccan conversion
     const customerInfo = {
       name: orderAddress?.recipientName || customName || currentUser?.displayName,
-      city: orderAddress?.city || customCity,
+      city: isFrench ? (MOROCCAN_CITIES_FR[orderAddress?.city || customCity] || orderAddress?.city || customCity) : (orderAddress?.city || customCity),
       phone: orderAddress?.phone || customPhone || userProfile?.phone,
       streetAddress: orderAddress?.streetAddress || customStreet,
     };
 
-    const msg = buildCartWhatsappMessage(cartItems, totalPrice, customerInfo);
+    const msg = buildCartWhatsappMessage(cartItems, totalPrice, customerInfo, isFrench ? 'fr' : 'ar');
 
-    toast.success('جاري توجيهك إلى واتساب لتأكيد الطلب...');
+    toast.success(t('cart.directing_whatsapp'));
 
     // Open WhatsApp
     const whatsappUrl = getWhatsappUrl(msg);
     window.open(whatsappUrl, '_blank');
   };
 
+  const trustBannerText = isFrench ? WHATSAPP_TRUST_BANNER_FR : WHATSAPP_TRUST_BANNER_AR;
+
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-black/60 backdrop-blur-sm animate-fadeIn">
-      <div className="absolute inset-y-0 left-0 max-w-full flex pl-0 sm:pl-10">
+      <div className={`absolute inset-y-0 ${isFrench ? 'right-0 pr-0 sm:pr-10' : 'left-0 pl-0 sm:pl-10'} max-w-full flex`}>
         <div
-          className="w-screen max-w-md bg-white shadow-2xl flex flex-col justify-between border-r border-gray-200"
-          dir="rtl"
+          className={`w-screen max-w-md bg-white shadow-2xl flex flex-col justify-between ${
+            isFrench ? 'border-l' : 'border-r'
+          } border-gray-200`}
+          dir={isFrench ? 'ltr' : 'rtl'}
         >
           {/* Header */}
           <div className="p-4 sm:p-5 bg-[#1A1A1A] text-[#FAF9F6] flex items-center justify-between">
@@ -138,16 +145,16 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               </div>
               <div>
                 <h2 className="font-display font-bold text-base text-white">
-                  سلة الطلبات ({cartItems.reduce((acc, i) => acc + i.quantity, 0)})
+                  {t('cart.title')} ({cartItems.reduce((acc, i) => acc + i.quantity, 0)})
                 </h2>
-                <p className="text-[11px] text-[#8C7342]">تأكيد سريع وتوصيل لجميع المدن</p>
+                <p className="text-[11px] text-[#8C7342]">{t('cart.order_fast_delivery')}</p>
               </div>
             </div>
 
             <button
               onClick={onClose}
               className="p-2 rounded-full hover:bg-[#2A2A2A] text-gray-300 hover:text-white transition-colors"
-              aria-label="إغلاق"
+              aria-label={isFrench ? 'Fermer' : 'إغلاق'}
             >
               <X className="w-5 h-5" />
             </button>
@@ -160,10 +167,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             </div>
             <div className="flex-1">
               <p className="font-bold text-[#FAF9F6] leading-tight">
-                {WHATSAPP_TRUST_BANNER}
+                {trustBannerText}
               </p>
               <p className="text-[10px] text-emerald-300/80 mt-0.5">
-                الدفع عند الاستلام مع فحص الطلب عند التسليم
+                {t('cart.trust_sub')}
               </p>
             </div>
           </div>
@@ -211,10 +218,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                           {item.product.name}
                         </h4>
                         <p className="text-xs text-[#8C7342] font-extrabold mt-0.5">
-                          {item.product.price * item.quantity} درهم
+                          {item.product.price * item.quantity} {t('product.currency')}
                           {item.quantity > 1 && (
-                            <span className="text-[10px] text-gray-400 font-normal mr-1">
-                              ({item.product.price} درهم / حبة)
+                            <span className={`text-[10px] text-gray-400 font-normal ${isFrench ? 'ml-1' : 'mr-1'}`}>
+                              ({item.product.price} {t('cart.per_unit')})
                             </span>
                           )}
                         </p>
@@ -226,7 +233,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                               onUpdateQuantity(item.product.id, -1);
                             }}
                             className="w-6 h-6 rounded-lg bg-gray-100 hover:bg-[#8C7342] text-[#1A1A1A] hover:text-white flex items-center justify-center text-xs font-bold transition-colors"
-                            aria-label="تقليل الكمية"
+                            aria-label={isFrench ? 'Diminuer la quantité' : 'تقليل الكمية'}
                           >
                             <Minus className="w-3 h-3" />
                           </button>
@@ -238,7 +245,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                               onUpdateQuantity(item.product.id, 1);
                             }}
                             className="w-6 h-6 rounded-lg bg-gray-100 hover:bg-[#8C7342] text-[#1A1A1A] hover:text-white flex items-center justify-center text-xs font-bold transition-colors"
-                            aria-label="زيادة الكمية"
+                            aria-label={isFrench ? 'Augmenter la quantité' : 'زيادة الكمية'}
                           >
                             <Plus className="w-3 h-3" />
                           </button>
@@ -249,10 +256,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                       <button
                         onClick={() => {
                           onRemoveItem(item.product.id);
-                          toast.info(`تم حذف ${item.product.name} من السلة`);
+                          toast.info(t('cart.item_removed', { name: item.product.name }));
                         }}
                         className="p-2 text-gray-300 hover:text-red-500 transition-colors"
-                        title="حذف من السلة"
+                        title={isFrench ? 'Supprimer' : 'حذف من السلة'}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -265,7 +272,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-[#1A1A1A] flex items-center gap-1.5">
                       <MapPin className="w-3.5 h-3.5 text-[#8C7342]" />
-                      عنوان التوصيل
+                      {t('cart.enter_address')}
                     </span>
 
                     {currentUser && addresses.length > 0 && (
@@ -273,7 +280,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         onClick={() => setShowAddressPicker(!showAddressPicker)}
                         className="text-[11px] text-[#8C7342] font-bold hover:underline"
                       >
-                        {showAddressPicker ? 'إخفاء العناوين' : 'تغيير العنوان'}
+                        {showAddressPicker ? t('cart.hide_addresses') : t('cart.change_address')}
                       </button>
                     )}
                   </div>
@@ -288,7 +295,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                               onClick={() => {
                                 setSelectedAddressId(addr.id);
                                 setShowAddressPicker(false);
-                                toast.info(`تم اختيار عنوان: ${addr.title}`);
+                                toast.info(t('cart.selected_address', { title: addr.title }));
                               }}
                               className={`p-2.5 rounded-xl border text-xs cursor-pointer transition-all ${
                                 (selectedAddressId === addr.id ||
@@ -298,7 +305,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                               }`}
                             >
                               <div className="flex items-center justify-between">
-                                <span>{addr.title} - {addr.city}</span>
+                                <span>{addr.title} - {isFrench ? (MOROCCAN_CITIES_FR[addr.city] || addr.city) : addr.city}</span>
                                 {(selectedAddressId === addr.id ||
                                   (!selectedAddressId && addr.isDefault)) && (
                                   <Check className="w-3.5 h-3.5 text-[#8C7342]" />
@@ -316,7 +323,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                             {activeAddress?.recipientName} ({activeAddress?.title})
                           </p>
                           <p className="text-gray-500 mt-0.5">
-                            {activeAddress?.streetAddress}، {activeAddress?.city}
+                            {activeAddress?.streetAddress}، {isFrench ? (MOROCCAN_CITIES_FR[activeAddress?.city || ''] || activeAddress?.city) : activeAddress?.city}
                           </p>
                           {activeAddress?.phone && (
                             <p className="text-gray-400 text-[11px] mt-0.5">
@@ -328,13 +335,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                     ) : (
                       <div className="bg-[#FAF9F6] p-3 rounded-xl text-xs space-y-2 border border-gray-100">
                         <p className="text-gray-500">
-                          لم تحفظ أي عنوان بعد في حسابك. يمكنك إضافة عنوان سريع:
+                          {t('cart.no_addresses')}
                         </p>
                         <input
                           type="text"
                           value={customStreet}
                           onChange={(e) => setCustomStreet(e.target.value)}
-                          placeholder="الشارع ورقم المنزل..."
+                          placeholder={isFrench ? 'Rue, numéro et quartier...' : 'الشارع ورقم المنزل...'}
                           className="w-full bg-white border border-gray-200 rounded-lg p-2 text-xs"
                         />
                       </div>
@@ -347,14 +354,14 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                           type="text"
                           value={customName}
                           onChange={(e) => setCustomName(e.target.value)}
-                          placeholder="اسمك الكريم"
+                          placeholder={t('cart.name')}
                           className="bg-[#FAF9F6] border border-gray-200 rounded-lg p-2 text-xs"
                         />
                         <input
                           type="tel"
                           value={customPhone}
                           onChange={(e) => setCustomPhone(e.target.value)}
-                          placeholder="رقم الهاتف"
+                          placeholder={t('cart.phone')}
                           className="bg-[#FAF9F6] border border-gray-200 rounded-lg p-2 text-xs"
                         />
                       </div>
@@ -366,7 +373,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                         >
                           {MOROCCAN_CITIES.slice(0, 10).map((c) => (
                             <option key={c} value={c}>
-                              {c}
+                              {isFrench ? (MOROCCAN_CITIES_FR[c] || c) : c}
                             </option>
                           ))}
                         </select>
@@ -374,7 +381,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                           type="text"
                           value={customStreet}
                           onChange={(e) => setCustomStreet(e.target.value)}
-                          placeholder="الحي / الشارع"
+                          placeholder={t('cart.street')}
                           className="bg-[#FAF9F6] border border-gray-200 rounded-lg p-2 text-xs"
                         />
                       </div>
@@ -386,7 +393,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                             onClick={onOpenAuth}
                             className="text-[11px] text-[#8C7342] hover:underline font-bold"
                           >
-                            هل لديك حساب؟ سجّل الدخول لاستخدام عناوينك المحفوظة
+                            {t('cart.have_account')}
                           </button>
                         </div>
                       )}
@@ -400,10 +407,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   <ShoppingBag className="w-8 h-8" />
                 </div>
                 <h3 className="font-display font-bold text-base text-[#1A1A1A]">
-                  سلة الطلبات فارغة
+                  {t('cart.empty_title')}
                 </h3>
                 <p className="text-xs text-gray-400 max-w-xs mx-auto leading-relaxed">
-                  تصفح مجموعتنا من العطور، العود والبخور وأضف ما يعجبك لإتمام الطلب.
+                  {t('cart.empty_desc')}
                 </p>
               </div>
             )}
@@ -413,16 +420,16 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
           {cartItems.length > 0 && (
             <div className="p-4 sm:p-5 bg-white border-t border-gray-200 space-y-3 shadow-inner">
               <div className="flex items-center justify-between text-sm font-bold text-[#1A1A1A]">
-                <span>المجموع الكلي:</span>
+                <span>{t('cart.total')}</span>
                 <span className="text-xl font-display font-extrabold text-[#8C7342]">
-                  {totalPrice} درهم
+                  {totalPrice} {t('product.currency')}
                 </span>
               </div>
 
               <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 text-xs text-emerald-900 flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-[#25D366] shrink-0" />
                 <span className="font-bold text-[11px] leading-tight">
-                  {WHATSAPP_TRUST_BANNER}
+                  {trustBannerText}
                 </span>
               </div>
 
@@ -432,17 +439,17 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white py-3.5 rounded-xl font-bold text-sm shadow-lg flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
                 >
                   <MessageCircle className="w-5 h-5" />
-                  <span>تأكيد وإرسال الطلب بالواتساب ({cartItems.length})</span>
+                  <span>{t('cart.send_whatsapp_btn', { count: cartItems.length })}</span>
                 </button>
 
                 <button
                   onClick={() => {
                     onClearCart();
-                    toast.info('تم تفريغ سلة الطلبات');
+                    toast.info(t('cart.cart_cleared'));
                   }}
                   className="w-full text-xs text-gray-400 hover:text-red-500 py-1 transition-colors text-center"
                 >
-                  تفريغ السلة
+                  {t('cart.clear')}
                 </button>
               </div>
             </div>

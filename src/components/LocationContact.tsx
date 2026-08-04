@@ -1,29 +1,37 @@
 import React from 'react';
 import { SHOP_CONFIG } from '../types';
-import { MapPin, Phone, MessageCircle, Clock, ExternalLink, Facebook, Instagram, ShieldCheck } from 'lucide-react';
-import { WHATSAPP_TRUST_BANNER } from '../utils/whatsapp';
+import { MapPin, Phone, MessageCircle, Clock, ExternalLink, Facebook, Instagram, ShieldCheck, Mail } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
+import { WHATSAPP_TRUST_BANNER_AR, WHATSAPP_TRUST_BANNER_FR } from '../utils/whatsapp';
 
 export const LocationContact: React.FC = () => {
+  const { t, isFrench } = useLanguage();
+  const trustBannerText = isFrench ? WHATSAPP_TRUST_BANNER_FR : WHATSAPP_TRUST_BANNER_AR;
+
+  const whatsappInquiryText = isFrench
+    ? 'Bonjour Parfums Bait Al Arab, je souhaite obtenir des informations sur votre boutique aux Habous.'
+    : 'مرحباً عطور بيت العرب، أود الاستفسار عن متجركم في الحبوس.';
+
   return (
     <section id="contact" className="py-16 bg-[#FAF9F6]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
           <span className="text-xs font-bold text-[#8C7342] uppercase tracking-wider bg-gray-100 px-3.5 py-1 rounded-full">
-            زورونا أو تواصلوا معنا
+            {t('contact.badge')}
           </span>
           <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[#1A1A1A]">
-            موقع المتجر ووسائل التواصل
+            {t('contact.title')}
           </h2>
           <p className="text-sm text-gray-500">
-            يسعدنا استقبالكم في متجرنا بالحبوس بالدار البيضاء، أو الإجابة على استفساراتكم عبر الواتساب ومواقع التواصل الاجتماعي.
+            {t('contact.desc')}
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
           
           {/* Contact Details Column */}
-          <div className="lg:col-span-5 bg-white rounded-3xl p-6 sm:p-8 border border-gray-200 shadow-sm flex flex-col justify-between space-y-6">
+          <div className={`lg:col-span-5 bg-white rounded-3xl p-6 sm:p-8 border border-gray-200 shadow-sm flex flex-col justify-between space-y-6 ${isFrench ? 'text-left' : 'text-right'}`}>
             <div className="space-y-6">
               
               {/* Address */}
@@ -33,13 +41,13 @@ export const LocationContact: React.FC = () => {
                 </div>
                 <div>
                   <h4 className="font-display font-bold text-base text-[#1A1A1A]">
-                    عنوان المتجر
+                    {t('contact.address_title')}
                   </h4>
                   <p className="text-sm text-gray-500 mt-0.5">
-                    {SHOP_CONFIG.address}
+                    {isFrench ? 'Rue Moulay Ismaïl, Quartier des Habous' : SHOP_CONFIG.address}
                   </p>
                   <p className="text-xs text-[#8C7342] font-semibold">
-                    {SHOP_CONFIG.city}
+                    {isFrench ? 'Casablanca, Maroc' : SHOP_CONFIG.city}
                   </p>
                 </div>
               </div>
@@ -51,7 +59,7 @@ export const LocationContact: React.FC = () => {
                 </div>
                 <div className="space-y-1">
                   <h4 className="font-display font-bold text-base text-[#1A1A1A]">
-                    الهاتف والواتساب المباشر
+                    {t('contact.phone_title')}
                   </h4>
                   <a
                     href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}`}
@@ -62,13 +70,13 @@ export const LocationContact: React.FC = () => {
                     {SHOP_CONFIG.phoneFormatted}
                   </a>
                   <p className="text-xs text-gray-500">
-                    متاح للطلبات والاستفسارات يومياً
+                    {t('contact.phone_sub')}
                   </p>
 
                   <div className="mt-2 bg-emerald-50 border border-emerald-200/80 rounded-xl p-2.5 flex items-center gap-2 text-xs text-emerald-950">
                     <ShieldCheck className="w-4 h-4 text-[#25D366] shrink-0" />
                     <span className="font-bold text-[11px] leading-tight">
-                      {WHATSAPP_TRUST_BANNER}
+                      {trustBannerText}
                     </span>
                   </div>
                 </div>
@@ -77,13 +85,11 @@ export const LocationContact: React.FC = () => {
               {/* Email */}
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-gray-100 text-[#8C7342] flex items-center justify-center shrink-0">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                  </svg>
+                  <Mail className="w-6 h-6" />
                 </div>
                 <div>
                   <h4 className="font-display font-bold text-base text-[#1A1A1A]">
-                    البريد الإلكتروني
+                    {t('contact.email_title')}
                   </h4>
                   <a
                     href={`mailto:${SHOP_CONFIG.email}`}
@@ -101,10 +107,10 @@ export const LocationContact: React.FC = () => {
                 </div>
                 <div>
                   <h4 className="font-display font-bold text-base text-[#1A1A1A]">
-                    أوقات العمل
+                    {t('contact.hours_title')}
                   </h4>
                   <p className="text-sm text-gray-500 mt-0.5">
-                    يومياً: من 9:00 صباحاً حتى 8:30 مساءً
+                    {t('contact.hours_val')}
                   </p>
                 </div>
               </div>
@@ -114,7 +120,7 @@ export const LocationContact: React.FC = () => {
             {/* Social Media Links */}
             <div className="pt-6 border-t border-gray-200 space-y-3">
               <h4 className="font-bold text-xs text-[#8C7342] uppercase tracking-wider">
-                حساباتنا الرسمية على مواقع التواصل:
+                {t('contact.socials')}
               </h4>
 
               <div className="grid grid-cols-2 gap-3">
@@ -126,7 +132,7 @@ export const LocationContact: React.FC = () => {
                   className="flex items-center justify-center gap-2 p-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 text-white font-bold text-xs shadow hover:scale-105 transition-transform"
                 >
                   <Instagram className="w-4 h-4" />
-                  <span>إنستغرام</span>
+                  <span>{t('contact.instagram')}</span>
                 </a>
 
                 {/* Facebook */}
@@ -137,18 +143,18 @@ export const LocationContact: React.FC = () => {
                   className="flex items-center justify-center gap-2 p-3 rounded-xl bg-[#1877F2] text-white font-bold text-xs shadow hover:scale-105 transition-transform"
                 >
                   <Facebook className="w-4 h-4" />
-                  <span>فيسبوك</span>
+                  <span>{t('contact.facebook')}</span>
                 </a>
               </div>
 
               <a
-                href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=${encodeURIComponent('مرحباً عطور بيت العرب، أود الاستفسار عن متجركم في الحبوس.')}`}
+                href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=${encodeURIComponent(whatsappInquiryText)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white p-3 rounded-xl font-bold text-xs shadow flex items-center justify-center gap-2 transition-all"
               >
                 <MessageCircle className="w-4 h-4" />
-                <span>مراسلة عبر الواتساب المباشر</span>
+                <span>{t('contact.msg_whatsapp')}</span>
               </a>
             </div>
           </div>
@@ -160,13 +166,17 @@ export const LocationContact: React.FC = () => {
               className="w-full flex-1 border-0 min-h-[360px]"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              title="موقع عطور بيت العرب - حي الحبوس بالدار البيضاء"
+              title={isFrench ? "Localisation Parfums Bait Al Arab - Quartier des Habous" : "موقع عطور بيت العرب - حي الحبوس بالدار البيضاء"}
             />
 
-            <div className="p-4 bg-[#1A1A1A] text-white flex flex-col sm:flex-row items-center justify-between gap-3">
-              <div className="text-right">
-                <p className="font-bold text-sm text-white">متجر عطور بيت العرب</p>
-                <p className="text-xs text-[#8C7342]">حي الحبوس • الدار البيضاء</p>
+            <div className={`p-4 bg-[#1A1A1A] text-white flex flex-col sm:flex-row items-center justify-between gap-3 ${isFrench ? 'text-left' : 'text-right'}`}>
+              <div>
+                <p className="font-bold text-sm text-white">
+                  {isFrench ? 'Parfums Bait Al Arab' : 'متجر عطور بيت العرب'}
+                </p>
+                <p className="text-xs text-[#8C7342]">
+                  {isFrench ? 'Quartier Habous • Casablanca' : 'حي الحبوس • الدار البيضاء'}
+                </p>
               </div>
 
               <a
@@ -176,7 +186,7 @@ export const LocationContact: React.FC = () => {
                 className="gold-gradient text-white px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow hover:scale-105 transition-transform shrink-0"
               >
                 <ExternalLink className="w-3.5 h-3.5" />
-                <span>فتح في خرائط جوجل (Google Maps)</span>
+                <span>{t('contact.open_maps')}</span>
               </a>
             </div>
           </div>

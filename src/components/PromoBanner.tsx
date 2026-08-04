@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, ArrowLeft, X, Flame } from 'lucide-react';
+import { Sparkles, ArrowLeft, ArrowRight, X, Flame } from 'lucide-react';
 import { PromoBannerConfig, CategoryType } from '../types';
+import { useLanguage } from '../context/LanguageContext';
+import { translateBannerText } from '../utils/translations';
 
 interface PromoBannerProps {
   config: PromoBannerConfig;
@@ -14,6 +16,7 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({
   onExplore,
 }) => {
   const [isDismissed, setIsDismissed] = useState(false);
+  const { t, isFrench } = useLanguage();
 
   // Reset dismissal if headline or enabled state changes (new promotion)
   useEffect(() => {
@@ -68,11 +71,18 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({
 
   const currentTheme = themeStyles[config.theme || 'gold_dark'] || themeStyles.gold_dark;
 
+  const headline = translateBannerText(config.headline, isFrench) || config.headline;
+  const subtext = translateBannerText(config.subtext, isFrench) || config.subtext;
+  const badgeText = translateBannerText(config.badgeText, isFrench) || config.badgeText;
+  const ctaText = translateBannerText(config.ctaText, isFrench) || config.ctaText;
+  const countdownText = translateBannerText(config.countdownText, isFrench) || config.countdownText;
+
   return (
     <aside
-      aria-label="إعلان ترويجي وعروض خاصة"
+      id="store-promo-banner"
+      aria-label={isFrench ? 'Offre promotionnelle exclusive' : 'إعلان ترويجي وعروض خاصة'}
       className="relative z-30 w-full px-2 sm:px-4 pt-2.5 pb-1 max-w-7xl mx-auto animate-fadeIn"
-      dir="rtl"
+      dir={isFrench ? 'ltr' : 'rtl'}
     >
       <div
         className={`relative overflow-hidden rounded-2xl sm:rounded-3xl border p-3 sm:p-4 transition-all duration-300 ${currentTheme.container}`}
@@ -95,30 +105,31 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({
 
             <div className="space-y-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                {config.badgeText && (
+                {badgeText && (
                   <span
+                    id="promo-banner-badge"
                     className={`inline-flex items-center gap-1 text-[11px] sm:text-xs font-black px-2.5 py-0.5 rounded-full ${currentTheme.badge}`}
                   >
                     <Sparkles className="w-3 h-3" />
-                    <span>{config.badgeText}</span>
+                    <span>{badgeText}</span>
                   </span>
                 )}
 
-                {config.countdownText && (
-                  <span className="text-[10px] sm:text-[11px] text-gray-300 font-medium flex items-center gap-1">
+                {countdownText && (
+                  <span id="promo-banner-countdown" className="text-[10px] sm:text-[11px] text-gray-300 font-medium flex items-center gap-1">
                     <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
-                    <span>{config.countdownText}</span>
+                    <span>{countdownText}</span>
                   </span>
                 )}
               </div>
 
-              <h2 className="font-display font-bold text-sm sm:text-base lg:text-lg text-white leading-tight">
-                {config.headline}
+              <h2 id="promo-banner-headline" className="font-display font-bold text-sm sm:text-base lg:text-lg text-white leading-tight">
+                {headline}
               </h2>
 
-              {config.subtext && (
-                <p className="text-xs sm:text-sm text-gray-300/90 line-clamp-2 leading-relaxed">
-                  {config.subtext}
+              {subtext && (
+                <p id="promo-banner-subtext" className="text-xs sm:text-sm text-gray-300/90 line-clamp-2 leading-relaxed">
+                  {subtext}
                 </p>
               )}
             </div>
@@ -127,25 +138,27 @@ export const PromoBanner: React.FC<PromoBannerProps> = ({
           {/* Action Controls: CTA Button & Close */}
           <div className="flex items-center gap-2 sm:gap-3 self-end sm:self-center shrink-0 flex-wrap sm:flex-nowrap w-full sm:w-auto justify-between sm:justify-end">
             {/* Primary Action Button */}
-            {config.ctaText && (
+            {ctaText && (
               <button
+                id="promo-banner-cta-btn"
                 type="button"
                 onClick={handleCtaClick}
                 className={`font-bold text-xs sm:text-sm px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl shadow-lg transition-transform hover:scale-105 active:scale-95 flex items-center gap-1.5 ${currentTheme.ctaBtn}`}
               >
-                <span>{config.ctaText}</span>
-                <ArrowLeft className="w-4 h-4" />
+                <span>{ctaText}</span>
+                {isFrench ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
               </button>
             )}
 
             {/* Dismiss / Close Button */}
             {config.closable !== false && (
               <button
+                id="promo-banner-close-btn"
                 type="button"
                 onClick={() => setIsDismissed(true)}
                 className="p-1.5 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
-                aria-label="إغلاق الإعلان الترويجي"
-                title="إغلاق"
+                aria-label={isFrench ? "Fermer l'offre promotionnelle" : "إغلاق الإعلان الترويجي"}
+                title={isFrench ? "Fermer" : "إغلاق"}
               >
                 <X className="w-4 h-4" />
               </button>

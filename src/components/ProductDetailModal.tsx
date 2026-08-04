@@ -20,7 +20,13 @@ import { ProductImage } from './ProductImage';
 import { QuickQuestionButton } from './QuickQuestionButton';
 import { useWishlist } from '../context/WishlistContext';
 import { useToast } from '../context/ToastContext';
-import { buildSingleProductWhatsappMessage, getWhatsappUrl, WHATSAPP_TRUST_BANNER } from '../utils/whatsapp';
+import { useLanguage } from '../context/LanguageContext';
+import {
+  buildSingleProductWhatsappMessage,
+  getWhatsappUrl,
+  WHATSAPP_TRUST_BANNER_AR,
+  WHATSAPP_TRUST_BANNER_FR,
+} from '../utils/whatsapp';
 
 interface ProductDetailModalProps {
   allProducts?: Product[];
@@ -41,6 +47,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 }) => {
   const { isFavorite, toggleFavorite } = useWishlist();
   const { toast } = useToast();
+  const { t, isFrench, language, getCategoryName } = useLanguage();
   const [newReview, setNewReview] = useState({ authorName: '', rating: 5, comment: '' });
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviewSuccess, setReviewSuccess] = useState(false);
@@ -73,7 +80,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
         authorName: newReview.authorName,
         rating: newReview.rating,
         comment: newReview.comment,
-        date: new Date().toLocaleDateString('ar-MA'),
+        date: new Date().toLocaleDateString(isFrench ? 'fr-FR' : 'ar-MA'),
       };
 
       const docRef = doc(db, 'products', product.id);
@@ -83,11 +90,11 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
       setNewReview({ authorName: '', rating: 5, comment: '' });
       setReviewSuccess(true);
-      toast.success('شكراً لك! تم إرسال تقييمك بنجاح');
+      toast.success(isFrench ? 'Merci ! Votre avis a été envoyé avec succès' : 'شكراً لك! تم إرسال تقييمك بنجاح');
       setTimeout(() => setReviewSuccess(false), 3000);
     } catch (error) {
       console.error('Error submitting review:', error);
-      toast.error('حدث خطأ أثناء إرسال التقييم');
+      toast.error(isFrench ? 'Une erreur est survenue lors de l’envoi de votre avis' : 'حدث خطأ أثناء إرسال التقييم');
     } finally {
       setIsSubmittingReview(false);
     }
@@ -100,10 +107,13 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
       : 0;
 
   const whatsappMsgText = isOutOfStock
-    ? `مرحباً عطور بيت العرب، استفسار عن موعد توفر وحجز المنتج:\n• ${product.name} ${product.volume || ''}\n• السعر: ${product.price} MAD\nهل يمكن إشعاري عند توفره؟`
-    : buildSingleProductWhatsappMessage(product, 1);
+    ? isFrench
+      ? `Bonjour Parfums Bait Al Arab, je souhaite savoir quand ce produit sera à nouveau disponible :\n• ${product.name} ${product.volume || ''}\n• Prix : ${product.price} DH\nPouvez-vous me notifier dès son réapprovisionnement ? Merci.`
+      : `مرحباً عطور بيت العرب، استفسار عن موعد توفر وحجز المنتج:\n• ${product.name} ${product.volume || ''}\n• السعر: ${product.price} MAD\nهل يمكن إشعاري عند توفره؟`
+    : buildSingleProductWhatsappMessage(product, 1, undefined, language);
 
   const directWhatsappUrl = getWhatsappUrl(whatsappMsgText);
+  const trustBanner = isFrench ? WHATSAPP_TRUST_BANNER_FR : WHATSAPP_TRUST_BANNER_AR;
 
   const relatedProducts = allProducts
     .filter((p) => p.category === product.category && p.id !== product.id && p.active)
@@ -113,10 +123,11 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fadeIn">
       <div
         className="relative bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl border border-gray-200 flex flex-col md:flex-row max-h-[90vh] overflow-y-auto"
+        dir={isFrench ? 'ltr' : 'rtl'}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Control Buttons (Close & Favorite) */}
-        <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
+        <div className={`absolute top-4 ${isFrench ? 'right-4' : 'left-4'} z-10 flex items-center gap-2`}>
           <button
             type="button"
             onClick={() => toggleFavorite(product)}
@@ -125,8 +136,8 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 ? 'bg-red-50 text-red-500 hover:bg-red-100 scale-105'
                 : 'bg-[#1A1A1A]/80 text-white hover:bg-white hover:text-red-500'
             }`}
-            title={isFav ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة'}
-            aria-label="المفضلة"
+            title={isFav ? (isFrench ? 'Retirer des favoris' : 'إزالة من المفضلة') : (isFrench ? 'Ajouter aux favoris' : 'إضافة إلى المفضلة')}
+            aria-label="Wishlist"
           >
             <Heart className={`w-4 h-4 ${isFav ? 'fill-red-500 text-red-500' : ''}`} />
           </button>
@@ -134,7 +145,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
           <button
             onClick={onClose}
             className="w-9 h-9 rounded-full bg-[#1A1A1A]/80 text-white flex items-center justify-center hover:bg-[#8C7342] transition-colors shadow-md"
-            aria-label="إغلاق"
+            aria-label={isFrench ? 'Fermer' : 'إغلاق'}
           >
             <X className="w-5 h-5" />
           </button>
@@ -152,14 +163,14 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             />
 
             {/* Badges */}
-            <div className="absolute top-3 right-3 flex flex-col gap-1 z-10">
+            <div className={`absolute top-3 ${isFrench ? 'left-3' : 'right-3'} flex flex-col gap-1 z-10`}>
               {isOutOfStock ? (
                 <span className="bg-rose-700 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow flex items-center gap-1">
-                  <XCircle className="w-3 h-3" /> نفد من المخزن
+                  <XCircle className="w-3 h-3" /> {t('product.out_of_stock')}
                 </span>
               ) : product.isFeatured ? (
                 <span className="gold-gradient text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" /> منتج مميز
+                  <Sparkles className="w-3 h-3" /> {t('product.featured')}
                 </span>
               ) : null}
             </div>
@@ -174,14 +185,14 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                   }
                   className="pointer-events-auto w-7 h-7 rounded-full bg-white/90 text-gray-800 flex items-center justify-center shadow"
                 >
-                  <ChevronRight className="w-4 h-4" />
+                  {isFrench ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                 </button>
                 <button
                   type="button"
                   onClick={() => setSelectedAngleIndex((prev) => (prev + 1) % allImages.length)}
                   className="pointer-events-auto w-7 h-7 rounded-full bg-white/90 text-gray-800 flex items-center justify-center shadow"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  {isFrench ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
                 </button>
               </div>
             )}
@@ -209,26 +220,21 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
         </div>
 
         {/* Product Information Side */}
-        <div className="md:w-1/2 p-6 sm:p-8 flex flex-col justify-between space-y-6">
+        <div className={`md:w-1/2 p-6 sm:p-8 flex flex-col justify-between space-y-6 ${isFrench ? 'text-left' : 'text-right'}`}>
           <div className="space-y-4">
             <div>
               <div className="flex flex-wrap items-center gap-1.5 mb-2">
                 <span className="text-xs text-[#8C7342] font-bold bg-gray-100 px-2.5 py-1 rounded-md inline-block">
-                  {product.category === 'perfumes' && 'عطور وعود شرقي'}
-                  {product.category === 'incense' && 'بخور'}
-                  {product.category === 'clothes' && 'ملابس'}
-                  {product.category === 'oils' && 'زيوت طبيعية'}
-                  {product.category === 'wholesale' && 'بيع بالجملة'}
-                  {product.category === 'other' && 'منتجات أخرى'}
+                  {getCategoryName(product.category)}
                 </span>
 
                 {isOutOfStock ? (
                   <span className="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md">
-                    غير متوفر بالمخزن
+                    {t('product.out_of_stock')}
                   </span>
                 ) : (
                   <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
-                    متوفر بالمخزن
+                    {t('product.in_stock')}
                   </span>
                 )}
               </div>
@@ -237,7 +243,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
               {product.volume && (
                 <p className="text-xs text-gray-500 font-medium mt-1">
-                  الحجم/الكمية: {product.volume}
+                  {isFrench ? 'Volume / Quantité :' : 'الحجم/الكمية:'} {product.volume}
                 </p>
               )}
             </div>
@@ -245,11 +251,11 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             {/* Price Badge */}
             <div className="flex items-baseline gap-3 pb-3 border-b border-gray-200">
               <span className="font-display font-extrabold text-2xl text-[#8C7342]">
-                {product.price} <span className="text-sm font-normal text-[#1A1A1A]">درهم مغربي</span>
+                {product.price} <span className="text-sm font-normal text-[#1A1A1A]">{t('product.currency')}</span>
               </span>
               {product.originalPrice && product.originalPrice > product.price && (
                 <span className="text-sm text-gray-400 line-through">
-                  {product.originalPrice} درهم
+                  {product.originalPrice} {t('product.currency')}
                 </span>
               )}
             </div>
@@ -257,7 +263,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             {/* Description */}
             <div className="space-y-2">
               <h4 className="text-xs font-bold text-[#8C7342] uppercase tracking-wider">
-                الوصف والمميزات:
+                {isFrench ? 'Description & Caractéristiques :' : 'الوصف والمميزات:'}
               </h4>
               <p className="text-sm text-gray-500 leading-relaxed">{product.description}</p>
             </div>
@@ -266,7 +272,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             {product.notes && product.notes.length > 0 && (
               <div className="space-y-2">
                 <h4 className="text-xs font-bold text-[#8C7342] uppercase tracking-wider">
-                  المكونات / النوتات العطرية:
+                  {isFrench ? 'Notes & Ingrédients :' : 'المكونات / النوتات العطرية:'}
                 </h4>
                 <div className="flex flex-wrap gap-1.5">
                   {product.notes.map((note, idx) => (
@@ -285,11 +291,11 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             <div className="pt-2 flex items-center gap-4 text-xs text-gray-600 border-t border-gray-200">
               <div className="flex items-center gap-1">
                 <ShieldCheck className="w-4 h-4 text-[#8C7342]" />
-                <span>ضمان الجودة</span>
+                <span>{isFrench ? 'Qualité Garantie' : 'ضمان الجودة'}</span>
               </div>
               <div className="flex items-center gap-1">
                 <MapPin className="w-4 h-4 text-[#8C7342]" />
-                <span>متجرنا بالحبوس</span>
+                <span>{isFrench ? 'Habous • Casablanca' : 'متجرنا بالحبوس'}</span>
               </div>
             </div>
 
@@ -297,7 +303,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             <div className="pt-4 space-y-3 border-t border-gray-200">
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-bold text-[#8C7342] uppercase tracking-wider">
-                  آراء العملاء:
+                  {isFrench ? 'Avis Clients :' : 'آراء العملاء:'}
                 </h4>
                 {reviews.length > 0 && (
                   <div className="flex items-center gap-1 text-sm font-bold text-[#1A1A1A]">
@@ -336,23 +342,27 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                   ))
                 ) : (
                   <p className="text-xs text-gray-500 italic">
-                    لا توجد تقييمات بعد. كن أول من يقيّم هذا المنتج!
+                    {isFrench ? 'Aucun avis pour l’instant. Soyez le premier à donner votre avis !' : 'لا توجد تقييمات بعد. كن أول من يقيّم هذا المنتج!'}
                   </p>
                 )}
               </div>
 
               {/* Add Review Form */}
               <div className="mt-6 pt-4 border-t border-gray-200">
-                <h4 className="text-sm font-bold text-[#1A1A1A] mb-3">أضف تقييمك</h4>
+                <h4 className="text-sm font-bold text-[#1A1A1A] mb-3">
+                  {isFrench ? 'Ajouter un avis' : 'أضف تقييمك'}
+                </h4>
                 {reviewSuccess ? (
                   <div className="bg-green-50 text-green-700 p-3 rounded-xl text-sm font-medium flex items-center justify-center gap-2">
                     <Check className="w-4 h-4" />
-                    تم إضافة تقييمك بنجاح!
+                    {isFrench ? 'Avis publié avec succès !' : 'تم إضافة تقييمك بنجاح!'}
                   </div>
                 ) : (
                   <form onSubmit={handleSubmitReview} className="space-y-3">
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">الاسم</label>
+                      <label className="block text-xs text-gray-600 mb-1">
+                        {isFrench ? 'Votre Nom *' : 'الاسم'}
+                      </label>
                       <input
                         type="text"
                         required
@@ -361,11 +371,13 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                           setNewReview({ ...newReview, authorName: e.target.value })
                         }
                         className="w-full border border-gray-200 rounded-lg p-2 text-sm focus:ring-1 focus:ring-[#8C7342] focus:border-[#8C7342]"
-                        placeholder="الاسم الكريم..."
+                        placeholder={isFrench ? 'Ex : Mehdi B.' : 'الاسم الكريم...'}
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">التقييم</label>
+                      <label className="block text-xs text-gray-600 mb-1">
+                        {isFrench ? 'Note' : 'التقييم'}
+                      </label>
                       <div className="flex gap-1">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <button
@@ -386,7 +398,9 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                       </div>
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">تعليق</label>
+                      <label className="block text-xs text-gray-600 mb-1">
+                        {isFrench ? 'Commentaire *' : 'تعليق'}
+                      </label>
                       <textarea
                         required
                         value={newReview.comment}
@@ -394,7 +408,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                           setNewReview({ ...newReview, comment: e.target.value })
                         }
                         className="w-full border border-gray-200 rounded-lg p-2 text-sm h-20 resize-none focus:ring-1 focus:ring-[#8C7342] focus:border-[#8C7342]"
-                        placeholder="ما رأيك في المنتج؟"
+                        placeholder={isFrench ? 'Que pensez-vous de ce parfum ?' : 'ما رأيك في المنتج؟'}
                       />
                     </div>
                     <button
@@ -402,7 +416,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                       disabled={isSubmittingReview}
                       className="w-full bg-[#1A1A1A] text-white rounded-lg py-2 text-sm font-bold hover:bg-[#8C7342] transition-colors disabled:opacity-50"
                     >
-                      {isSubmittingReview ? 'جاري الإرسال...' : 'إرسال التقييم'}
+                      {isSubmittingReview ? (isFrench ? 'Envoi en cours...' : 'جاري الإرسال...') : (isFrench ? 'Publier l’avis' : 'إرسال التقييم')}
                     </button>
                   </form>
                 )}
@@ -414,7 +428,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
           {relatedProducts.length > 0 && onProductSelect && (
             <div className="pt-4 border-t border-gray-200">
               <h4 className="text-xs font-bold text-[#8C7342] uppercase tracking-wider mb-3">
-                منتجات مشابهة
+                {isFrench ? 'Produits similaires' : 'منتجات مشابهة'}
               </h4>
               <div className="grid grid-cols-2 gap-3">
                 {relatedProducts.map((rp) => (
@@ -435,7 +449,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                         {rp.name}
                       </h5>
                       <span className="text-[10px] text-[#8C7342] font-semibold">
-                        {rp.price} درهم
+                        {rp.price} {t('product.currency')}
                       </span>
                     </div>
                   </div>
@@ -448,7 +462,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
           <div className="bg-emerald-50 border border-emerald-200/80 rounded-xl p-2.5 flex items-center gap-2 text-xs text-emerald-950">
             <ShieldCheck className="w-4 h-4 text-[#25D366] shrink-0" />
             <span className="font-bold text-[11px] leading-tight">
-              {WHATSAPP_TRUST_BANNER}
+              {trustBanner}
             </span>
           </div>
 
@@ -465,7 +479,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               }`}
             >
               <MessageCircle className="w-5 h-5" />
-              <span>{isOutOfStock ? 'حجز واستفسار بالواتساب' : 'طلب مباشر عبر واتساب'}</span>
+              <span>{isOutOfStock ? (isFrench ? 'Précommander sur WhatsApp' : 'حجز واستفسار بالواتساب') : (isFrench ? 'Commander sur WhatsApp' : 'طلب مباشر عبر واتساب')}</span>
             </a>
 
             <button
@@ -482,17 +496,17 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               {isOutOfStock ? (
                 <>
                   <XCircle className="w-4 h-4" />
-                  <span>نفد من المخزن حالياً</span>
+                  <span>{t('product.out_of_stock')}</span>
                 </>
               ) : isInCart ? (
                 <>
                   <Check className="w-4 h-4" />
-                  <span>تمت الإضافة لسلة الطلبات</span>
+                  <span>{t('product.in_cart')}</span>
                 </>
               ) : (
                 <>
                   <ShoppingBag className="w-4 h-4 text-[#8C7342]" />
-                  <span>إضافة لسلة الطلبات</span>
+                  <span>{t('product.add_to_cart')}</span>
                 </>
               )}
             </button>
