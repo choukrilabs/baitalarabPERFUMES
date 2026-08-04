@@ -1,6 +1,7 @@
 import React from 'react';
 import { SHOP_CONFIG } from '../types';
-import { MapPin, Phone, MessageCircle, Clock, ExternalLink, Facebook, Instagram } from 'lucide-react';
+import { MapPin, Phone, MessageCircle, Clock, ExternalLink, Facebook, Instagram, ShieldCheck } from 'lucide-react';
+import { WHATSAPP_TRUST_BANNER } from '../utils/whatsapp';
 
 export const LocationContact: React.FC = () => {
   return (
@@ -48,7 +49,7 @@ export const LocationContact: React.FC = () => {
                 <div className="w-12 h-12 rounded-2xl bg-[#E8F8EE] text-[#25D366] flex items-center justify-center shrink-0">
                   <Phone className="w-6 h-6" />
                 </div>
-                <div>
+                <div className="space-y-1">
                   <h4 className="font-display font-bold text-base text-[#1A1A1A]">
                     الهاتف والواتساب المباشر
                   </h4>
@@ -56,13 +57,20 @@ export const LocationContact: React.FC = () => {
                     href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-base font-bold text-[#25D366] hover:underline dir-ltr inline-block mt-0.5"
+                    className="text-base font-bold text-[#25D366] hover:underline dir-ltr inline-block"
                   >
                     {SHOP_CONFIG.phoneFormatted}
                   </a>
                   <p className="text-xs text-gray-500">
                     متاح للطلبات والاستفسارات يومياً
                   </p>
+
+                  <div className="mt-2 bg-emerald-50 border border-emerald-200/80 rounded-xl p-2.5 flex items-center gap-2 text-xs text-emerald-950">
+                    <ShieldCheck className="w-4 h-4 text-[#25D366] shrink-0" />
+                    <span className="font-bold text-[11px] leading-tight">
+                      {WHATSAPP_TRUST_BANNER}
+                    </span>
+                  </div>
                 </div>
               </div>
 

@@ -1,9 +1,9 @@
 import React from 'react';
 import { ProductImage } from './ProductImage';
-import { Sparkles, MessageCircle, MapPin, Award, ShieldCheck, Heart } from 'lucide-react';
+import { Sparkles, MessageCircle, MapPin, Award, ShieldCheck, Heart, Truck } from 'lucide-react';
 import { SHOP_CONFIG } from '../types';
-
 import { Product } from "../types";
+import { WHATSAPP_TRUST_BANNER } from '../utils/whatsapp';
 interface HeroProps {
   products: Product[];
   onExploreClick: () => void;
@@ -55,6 +55,14 @@ export const Hero: React.FC<HeroProps> = ({ onExploreClick, products }) => {
                 <Heart className="w-4 h-4 text-[#8C7342] shrink-0" />
                 <span>بيع بالجملة والتفصيل</span>
               </div>
+            </div>
+
+            {/* Moroccan Direct Reassurance Pill */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-gradient-to-r from-emerald-950/80 to-[#1A1A1A] border border-[#25D366]/40 text-emerald-200 text-xs sm:text-sm font-bold shadow-md">
+              <span className="w-5 h-5 rounded-full bg-[#25D366] text-white flex items-center justify-center shrink-0">
+                <MessageCircle className="w-3.5 h-3.5 fill-current" />
+              </span>
+              <span>{WHATSAPP_TRUST_BANNER}</span>
             </div>
 
             {/* CTA Action Buttons */}

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Product, CartItem } from '../types';
+import { Product, CartItem, SHOP_CONFIG } from '../types';
 import { ProductCard } from './ProductCard';
 import { CategoryFilter } from './CategoryFilter';
 import {
@@ -17,7 +17,11 @@ import {
   Flame,
   ArrowUpDown,
   RotateCcw,
+  MessageCircle,
+  ShieldCheck,
+  Truck,
 } from 'lucide-react';
+import { WHATSAPP_TRUST_BANNER } from '../utils/whatsapp';
 
 interface ProductGridProps {
   products: Product[];
@@ -211,6 +215,33 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
           }}
           products={products}
         />
+
+        {/* Universal Reassurance Banner */}
+        <div className="mt-4 bg-gradient-to-r from-emerald-950 via-[#132A1C] to-emerald-950 text-[#FAF9F6] p-3.5 rounded-2xl border border-[#25D366]/30 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-3 text-center sm:text-right">
+            <div className="w-8 h-8 rounded-full bg-[#25D366] text-white flex items-center justify-center shrink-0 shadow-md">
+              <MessageCircle className="w-4 h-4 fill-current" />
+            </div>
+            <div>
+              <p className="text-xs sm:text-sm font-bold text-white leading-tight">
+                {WHATSAPP_TRUST_BANNER}
+              </p>
+              <p className="text-[11px] text-emerald-300 mt-0.5">
+                تأكيد مباشر وتوصيل آمن لجميع مدن المغرب • الدفع عند الاستلام بعد المعاينة
+              </p>
+            </div>
+          </div>
+
+          <a
+            href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=${encodeURIComponent('مرحباً عطور بيت العرب، أود الاستفسار عن التوصيل لمدينتي.')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs font-bold py-2 px-4 rounded-xl flex items-center gap-1.5 shadow transition-transform hover:scale-105"
+          >
+            <span>استفسر عن مدينتك</span>
+            <Truck className="w-3.5 h-3.5" />
+          </a>
+        </div>
 
         <div id="catalog-products-top" className="scroll-mt-20" />
 

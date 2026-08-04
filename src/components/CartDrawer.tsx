@@ -12,11 +12,14 @@ import {
   ChevronDown,
   User,
   Phone,
-  Sparkles
+  Sparkles,
+  ShieldCheck,
+  Truck
 } from 'lucide-react';
 import { ProductImage } from './ProductImage';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { buildCartWhatsappMessage, getWhatsappUrl, WHATSAPP_TRUST_BANNER } from '../utils/whatsapp';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -101,32 +104,20 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
       console.warn('Could not record order to database:', err);
     }
 
-    // Build WhatsApp message
-    let msg = `مرحباً عطور بيت العرب 🌿\nأود طلب المنتجات التالية:\n\n`;
-    cartItems.forEach((item, idx) => {
-      msg += `${idx + 1}. *${item.product.name}*\n   • الكمية: ${item.quantity}\n   • السعر: ${
-        item.product.price * item.quantity
-      } درهم\n`;
-    });
+    // Build WhatsApp message formatted specifically for high Moroccan conversion
+    const customerInfo = {
+      name: orderAddress?.recipientName || customName || currentUser?.displayName,
+      city: orderAddress?.city || customCity,
+      phone: orderAddress?.phone || customPhone || userProfile?.phone,
+      streetAddress: orderAddress?.streetAddress || customStreet,
+    };
 
-    msg += `\n*الإجمالي: ${totalPrice} درهم مغربي*\n`;
-
-    if (orderAddress) {
-      msg += `\n📍 *بيانات التوصيل:*\n`;
-      msg += `• المستلم: ${orderAddress.recipientName}\n`;
-      if (orderAddress.phone) msg += `• الهاتف: ${orderAddress.phone}\n`;
-      msg += `• المدينة: ${orderAddress.city}\n`;
-      if (orderAddress.streetAddress) msg += `• العنوان: ${orderAddress.streetAddress}\n`;
-    }
-
-    msg += `\nالرجاء تأكيد الطلب. شكراً لكم!`;
+    const msg = buildCartWhatsappMessage(cartItems, totalPrice, customerInfo);
 
     toast.success('جاري توجيهك إلى واتساب لتأكيد الطلب...');
 
     // Open WhatsApp
-    const whatsappUrl = `https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=${encodeURIComponent(
-      msg
-    )}`;
+    const whatsappUrl = getWhatsappUrl(msg);
     window.open(whatsappUrl, '_blank');
   };
 
@@ -160,6 +151,21 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             >
               <X className="w-5 h-5" />
             </button>
+          </div>
+
+          {/* Reassurance Banner */}
+          <div className="bg-gradient-to-r from-emerald-950 via-[#132A1C] to-emerald-950 text-emerald-100 px-4 py-2.5 border-b border-emerald-800/40 flex items-center gap-2.5 text-xs shadow-inner">
+            <div className="w-6 h-6 rounded-full bg-[#25D366]/20 border border-[#25D366]/40 flex items-center justify-center shrink-0">
+              <MessageCircle className="w-3.5 h-3.5 text-[#25D366]" />
+            </div>
+            <div className="flex-1">
+              <p className="font-bold text-[#FAF9F6] leading-tight">
+                {WHATSAPP_TRUST_BANNER}
+              </p>
+              <p className="text-[10px] text-emerald-300/80 mt-0.5">
+                الدفع عند الاستلام مع فحص الطلب عند التسليم
+              </p>
+            </div>
           </div>
 
           {/* Cart Items List */}
@@ -410,6 +416,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 <span>المجموع الكلي:</span>
                 <span className="text-xl font-display font-extrabold text-[#8C7342]">
                   {totalPrice} درهم
+                </span>
+              </div>
+
+              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 text-xs text-emerald-900 flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-[#25D366] shrink-0" />
+                <span className="font-bold text-[11px] leading-tight">
+                  {WHATSAPP_TRUST_BANNER}
                 </span>
               </div>
 

@@ -30,6 +30,7 @@ import {
 import { ProductImage } from './ProductImage';
 import { useWishlist } from '../context/WishlistContext';
 import { useToast } from '../context/ToastContext';
+import { buildSingleProductWhatsappMessage, getWhatsappUrl, WHATSAPP_TRUST_BANNER } from '../utils/whatsapp';
 
 interface ProductPageProps {
   product: Product;
@@ -145,23 +146,10 @@ export const ProductPage: React.FC<ProductPageProps> = ({
 
   // Handle WhatsApp direct checkout message
   const totalPriceMAD = product.price * quantity;
-  const whatsappMsg = encodeURIComponent(
-    isOutOfStock
-      ? `مرحباً عطور بيت العرب، أود الاستفسار عن موعد توفر وحجز المنتج:\n` +
-        `• *اسم المنتج:* ${product.name}\n` +
-        `• *السعر:* ${product.price} درهم\n` +
-        (product.volume ? `• *الحجم:* ${product.volume}\n` : '') +
-        `• *رابط المنتج:* ${window.location.origin}/?product=${product.id}\n\n` +
-        `هل يمكن إشعاري أو حجزه فور توفره بالمخزن؟`
-      : `مرحباً عطور بيت العرب، أود طلب المنتج التالي:\n` +
-        `• *اسم المنتج:* ${product.name}\n` +
-        `• *الكمية:* ${quantity}\n` +
-        `• *السعر الإجمالي:* ${totalPriceMAD} درهم مغربي\n` +
-        (product.volume ? `• *الحجم/الوزن:* ${product.volume}\n` : '') +
-        `• *رابط المنتج:* ${window.location.origin}/?product=${product.id}\n\n` +
-        `يرجى تأكيد التوفر وترتيب التوصيل إلى عنواني.`
-  );
-  const directWhatsappUrl = `https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=${whatsappMsg}`;
+  const whatsappMsgText = isOutOfStock
+    ? `مرحباً عطور بيت العرب، أود الاستفسار عن موعد توفر وحجز المنتج:\n• ${product.name} ${product.volume || ''}\n• السعر: ${product.price} MAD\nهل يمكن إشعاري عند توفره؟`
+    : buildSingleProductWhatsappMessage(product, quantity);
+  const directWhatsappUrl = getWhatsappUrl(whatsappMsgText);
 
   // Handle Copy Link
   const handleCopyLink = () => {
@@ -602,8 +590,23 @@ export const ProductPage: React.FC<ProductPageProps> = ({
                 </div>
               )}
 
+              {/* Reassurance Banner for zero-hesitation purchase */}
+              <div className="bg-gradient-to-r from-emerald-50 via-[#F3FAF5] to-emerald-50 border border-emerald-200/90 rounded-2xl p-3.5 flex items-center gap-3 shadow-sm">
+                <div className="w-9 h-9 rounded-xl bg-[#25D366] text-white flex items-center justify-center shrink-0 shadow-md">
+                  <MessageCircle className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-extrabold text-[#1A1A1A] leading-snug">
+                    {WHATSAPP_TRUST_BANNER}
+                  </p>
+                  <p className="text-[11px] text-emerald-800 font-medium mt-0.5">
+                    خدمة سريعة ومجانية • الدفع نقداً عند استلام طلبيتك وفحصها
+                  </p>
+                </div>
+              </div>
+
               {/* Action Buttons: Add to Cart & WhatsApp Order */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                 <button
                   type="button"
                   onClick={handleAddToCartWithQuantity}

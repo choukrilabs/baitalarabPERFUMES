@@ -3,6 +3,7 @@ import { Product, SHOP_CONFIG } from '../types';
 import { ShoppingBag, Eye, MessageCircle, Sparkles, Check, Star, Heart, Camera, ChevronLeft, ChevronRight, XCircle } from 'lucide-react';
 import { ProductImage } from './ProductImage';
 import { useWishlist } from '../context/WishlistContext';
+import { buildSingleProductWhatsappMessage, getWhatsappUrl } from '../utils/whatsapp';
 
 const HighlightText = ({ text, highlight }: { text: string; highlight?: string }) => {
   if (!highlight || !highlight.trim()) return <>{text}</>;
@@ -69,19 +70,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     setActiveImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
   };
 
-  const whatsappMsg = encodeURIComponent(
-    isOutOfStock
-      ? `مرحباً عطور بيت العرب، أود الاستفسار عن موعد توفر منتج:
-• *${product.name}*
-• السعر: ${product.price} درهم
-${product.volume ? `• الحجم/الوزن: ${product.volume}\n` : ''}هل يمكن حجزه أو معرفة موعد توفره؟`
-      : `مرحباً عطور بيت العرب، أود طلب المنتج:
-• *${product.name}*
-• السعر: ${product.price} درهم
-${product.volume ? `• الحجم/الوزن: ${product.volume}\n` : ''}الرجاء تأكيد الطلب والتوصيل.`
-  );
+  const whatsappMsgText = isOutOfStock
+    ? `مرحباً عطور بيت العرب، أود الاستفسار عن موعد توفر منتج:\n• ${product.name} ${product.volume || ''}\n• السعر: ${product.price} MAD\nهل يمكن إشعاري عند توفره؟`
+    : buildSingleProductWhatsappMessage(product, 1);
   
-  const directWhatsappUrl = `https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=${whatsappMsg}`;
+  const directWhatsappUrl = getWhatsappUrl(whatsappMsgText);
 
   const getGenderLabel = (g?: string) => {
     if (g === 'men') return 'رجالي';

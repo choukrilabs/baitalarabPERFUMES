@@ -19,6 +19,7 @@ import {
 import { ProductImage } from './ProductImage';
 import { useWishlist } from '../context/WishlistContext';
 import { useToast } from '../context/ToastContext';
+import { buildSingleProductWhatsappMessage, getWhatsappUrl, WHATSAPP_TRUST_BANNER } from '../utils/whatsapp';
 
 interface ProductDetailModalProps {
   allProducts?: Product[];
@@ -97,17 +98,11 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
       ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
       : 0;
 
-  const whatsappMsg = encodeURIComponent(
-    isOutOfStock
-      ? `مرحباً عطور بيت العرب، استفسار عن موعد توفر المنتج:\n• *${product.name}*\n• السعر: ${product.price} درهم\n${
-          product.volume ? `• الحجم: ${product.volume}\n` : ''
-        }هل يمكن حجزه عند توفره؟`
-      : `مرحباً عطور بيت العرب، استفسار عن المنتج:\n• *${product.name}*\n• السعر: ${product.price} درهم\n${
-          product.volume ? `• الحجم: ${product.volume}\n` : ''
-        }يرجى إفادتي بالتفاصيل وطريقة التوصيل.`
-  );
+  const whatsappMsgText = isOutOfStock
+    ? `مرحباً عطور بيت العرب، استفسار عن موعد توفر وحجز المنتج:\n• ${product.name} ${product.volume || ''}\n• السعر: ${product.price} MAD\nهل يمكن إشعاري عند توفره؟`
+    : buildSingleProductWhatsappMessage(product, 1);
 
-  const directWhatsappUrl = `https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=${whatsappMsg}`;
+  const directWhatsappUrl = getWhatsappUrl(whatsappMsgText);
 
   const relatedProducts = allProducts
     .filter((p) => p.category === product.category && p.id !== product.id && p.active)
@@ -448,8 +443,16 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             </div>
           )}
 
+          {/* Reassurance Banner */}
+          <div className="bg-emerald-50 border border-emerald-200/80 rounded-xl p-2.5 flex items-center gap-2 text-xs text-emerald-950">
+            <ShieldCheck className="w-4 h-4 text-[#25D366] shrink-0" />
+            <span className="font-bold text-[11px] leading-tight">
+              {WHATSAPP_TRUST_BANNER}
+            </span>
+          </div>
+
           {/* Buttons */}
-          <div className="space-y-2 pt-2">
+          <div className="space-y-2 pt-1">
             <a
               href={directWhatsappUrl}
               target="_blank"
