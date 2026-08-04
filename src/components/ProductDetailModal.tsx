@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Product, SHOP_CONFIG, Review } from '../types';
-import { X, MessageCircle, ShoppingBag, ShieldCheck, MapPin, Sparkles, Check, Star } from 'lucide-react';
-
+import { X, MessageCircle, ShoppingBag, ShieldCheck, MapPin, Sparkles, Check, Star, Heart } from 'lucide-react';
 import { ProductImage } from './ProductImage';
-
+import { useWishlist } from '../context/WishlistContext';
+import { useToast } from '../context/ToastContext';
 
 interface ProductDetailModalProps {
   allProducts?: Product[];
@@ -24,11 +24,15 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   allProducts = [],
   onProductSelect,
 }) => {
+  const { isFavorite, toggleFavorite } = useWishlist();
+  const { toast } = useToast();
   const [newReview, setNewReview] = useState({ authorName: '', rating: 5, comment: '' });
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviewSuccess, setReviewSuccess] = useState(false);
 
   if (!product) return null;
+
+  const isFav = isFavorite(product.id);
 
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,10 +55,11 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
       
       setNewReview({ authorName: '', rating: 5, comment: '' });
       setReviewSuccess(true);
+      toast.success('شكراً لك! تم إرسال تقييمك بنجاح');
       setTimeout(() => setReviewSuccess(false), 3000);
     } catch (error) {
       console.error("Error submitting review:", error);
-      alert('حدث خطأ أثناء إرسال التقييم');
+      toast.error('حدث خطأ أثناء إرسال التقييم');
     } finally {
       setIsSubmittingReview(false);
     }
@@ -82,14 +87,30 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
         className="relative bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl border border-gray-200 flex flex-col md:flex-row max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 left-4 z-10 w-9 h-9 rounded-full bg-[#1A1A1A]/80 text-white flex items-center justify-center hover:bg-[#8C7342] transition-colors shadow-md"
-          aria-label="إغلاق"
-        >
-          <X className="w-5 h-5" />
-        </button>
+        {/* Top Control Buttons (Close & Favorite) */}
+        <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => toggleFavorite(product)}
+            className={`w-9 h-9 rounded-full flex items-center justify-center backdrop-blur-md transition-all shadow-md ${
+              isFav
+                ? 'bg-red-50 text-red-500 hover:bg-red-100 scale-105'
+                : 'bg-[#1A1A1A]/80 text-white hover:bg-white hover:text-red-500'
+            }`}
+            title={isFav ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة'}
+            aria-label="المفضلة"
+          >
+            <Heart className={`w-4 h-4 ${isFav ? 'fill-red-500 text-red-500' : ''}`} />
+          </button>
+
+          <button
+            onClick={onClose}
+            className="w-9 h-9 rounded-full bg-[#1A1A1A]/80 text-white flex items-center justify-center hover:bg-[#8C7342] transition-colors shadow-md"
+            aria-label="إغلاق"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
         {/* Product Image Side */}
         <div className="md:w-1/2 bg-gray-100 relative aspect-square md:aspect-auto">

@@ -36,6 +36,85 @@ export interface CartItem {
   quantity: number;
 }
 
+export interface Address {
+  id: string;
+  title: string; // e.g. "المنزل", "العمل"
+  recipientName: string;
+  phone: string;
+  city: string;
+  district: string;
+  streetAddress: string;
+  postalCode?: string;
+  deliveryNotes?: string;
+  isDefault: boolean;
+}
+
+export interface Order {
+  id: string;
+  userId: string;
+  customerName: string;
+  phone: string;
+  items: CartItem[];
+  totalPrice: number;
+  address?: Address;
+  status: 'pending' | 'processing' | 'shipped' | 'delivered';
+  notes?: string;
+  createdAt: string;
+}
+
+export interface UserProfile {
+  uid: string;
+  email: string;
+  displayName: string;
+  phone?: string;
+  photoURL?: string;
+  addresses: Address[];
+  favorites: string[]; // product IDs
+  cart?: CartItem[];
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface ToastItem {
+  id: string;
+  type: 'success' | 'info' | 'warning' | 'error';
+  title?: string;
+  message: string;
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
+  duration?: number;
+}
+
+export const MOROCCAN_CITIES = [
+  'الدار البيضاء',
+  'الرباط',
+  'مراكش',
+  'فاس',
+  'طنجة',
+  'أكادير',
+  'مكناس',
+  'وجدة',
+  'القنيطرة',
+  'تطوان',
+  'تمارة',
+  'سلا',
+  'الجديدة',
+  'المحمدية',
+  'بني ملال',
+  'خريبكة',
+  'آسفي',
+  'الناظور',
+  'سطات',
+  'الصويرة',
+  'العيون',
+  'الداخلة',
+  'ورزازات',
+  'تارودانت',
+  'أخرى'
+];
+
 export interface ShopInfo {
   name: string;
   subtitle: string;

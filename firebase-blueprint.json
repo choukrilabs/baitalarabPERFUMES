@@ -1,20 +1,72 @@
 {
-  "collections": [
-    {
-      "name": "products",
-      "description": "Products catalog including perfumes, abayas, and honey",
-      "fields": [
-        { "name": "name", "type": "string" },
-        { "name": "category", "type": "string" },
-        { "name": "price", "type": "number" },
-        { "name": "originalPrice", "type": "number", "optional": true },
-        { "name": "volume", "type": "string", "optional": true },
-        { "name": "description", "type": "string" },
-        { "name": "image", "type": "string" },
-        { "name": "active", "type": "boolean" },
-        { "name": "isFeatured", "type": "boolean" },
-        { "name": "notes", "type": "array", "items": { "type": "string" } }
-      ]
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Product catalog item",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "price": { "type": "number" },
+        "originalPrice": { "type": "number" },
+        "volume": { "type": "string" },
+        "description": { "type": "string" },
+        "image": { "type": "string" },
+        "active": { "type": "boolean" },
+        "isFeatured": { "type": "boolean" },
+        "notes": { "type": "array" },
+        "reviews": { "type": "array" }
+      },
+      "required": ["name", "category", "price", "description", "image", "active"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User account profile with saved addresses and preferences",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "phone": { "type": "string" },
+        "addresses": { "type": "array" },
+        "favorites": { "type": "array" },
+        "cart": { "type": "array" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer order history",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "phone": { "type": "string" },
+        "items": { "type": "array" },
+        "totalPrice": { "type": "number" },
+        "address": { "type": "object" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["userId", "items", "totalPrice", "createdAt"]
     }
-  ]
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Public catalog products"
+    },
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile with saved addresses and favorites"
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Customer order records"
+    }
+  }
 }

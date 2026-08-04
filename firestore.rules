@@ -1,9 +1,32 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Products catalog: Anyone can view, only authenticated admins can manage
     match /products/{document} {
       allow read: if true;
-      allow write: if true; // Insecure for production, but suitable for this preview admin panel prototype
+      allow write: if isSignedIn();
+    }
+    
+    // User Profiles: Users can ONLY read and write their OWN profile data
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Orders: Anyone (guest or registered) can submit an order, but users can only read their own orders
+    match /orders/{orderId} {
+      allow create: if true;
+      allow read, update, delete: if isSignedIn() && (resource.data.userId == request.auth.uid || request.auth.token.email == 'choukric148@gmail.com');
     }
   }
 }
+

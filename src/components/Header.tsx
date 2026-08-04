@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, Lock, Menu, X, MapPin, Phone, Search, Star } from 'lucide-react';
+import { ShoppingBag, Lock, Menu, X, MapPin, Phone, Search, Star, Heart, User } from 'lucide-react';
 import { SHOP_CONFIG, CartItem } from '../types';
+import { useWishlist } from '../context/WishlistContext';
+import { useAuth } from '../context/AuthContext';
 
 interface HeaderProps {
   cartItems: CartItem[];
   onOpenCart: () => void;
+  onOpenWishlist: () => void;
+  onOpenAuth: () => void;
+  onOpenProfile: () => void;
   onOpenAdmin: () => void;
   onSelectCategory?: (category: string) => void;
+  onNavigateHome?: () => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
 }
@@ -14,13 +20,19 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   cartItems,
   onOpenCart,
+  onOpenWishlist,
+  onOpenAuth,
+  onOpenProfile,
   onOpenAdmin,
   onSelectCategory,
+  onNavigateHome,
   searchQuery,
   onSearchChange,
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { wishlistCount } = useWishlist();
+  const { currentUser, userProfile } = useAuth();
 
   const totalCartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -34,10 +46,15 @@ export const Header: React.FC<HeaderProps> = ({
 
   const scrollToSection = (id: string) => {
     setMobileMenuOpen(false);
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+    if (onNavigateHome) {
+      onNavigateHome();
     }
+    setTimeout(() => {
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 50);
   };
 
   return (
@@ -143,6 +160,21 @@ export const Header: React.FC<HeaderProps> = ({
               <span>{SHOP_CONFIG.phoneFormatted}</span>
             </a>
 
+            {/* Wishlist Trigger */}
+            <button
+              onClick={onOpenWishlist}
+              className="relative p-2.5 rounded-full bg-[#2A2A2A] hover:bg-[#3A3A3A] text-[#FAF9F6] border border-[#8C7342]/30 transition-all hover:scale-105"
+              title="قائمة المفضلة"
+              aria-label="فتح قائمة المفضلة"
+            >
+              <Heart className="w-5 h-5 text-[#8C7342]" />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -left-1 bg-red-500 text-white text-[11px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#1A1A1A] animate-pulse">
+                  {wishlistCount}
+                </span>
+              )}
+            </button>
+
             {/* Cart Drawer Trigger */}
             <button
               onClick={onOpenCart}
@@ -158,8 +190,39 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </button>
 
-            {/* Admin Login Button - HIDDEN for security, moved to double click on logo */}
-            
+            {/* User Account / Auth Trigger */}
+            {currentUser ? (
+              <button
+                onClick={onOpenProfile}
+                className="flex items-center gap-2 p-1 sm:px-3 sm:py-1.5 rounded-full bg-[#2A2A2A] hover:bg-[#3A3A3A] text-[#FAF9F6] border border-[#8C7342]/30 transition-all hover:scale-105"
+                title="حسابي وعناويني"
+              >
+                <div className="w-7 h-7 rounded-full bg-[#8C7342] text-white flex items-center justify-center font-bold text-xs overflow-hidden">
+                  {currentUser.photoURL ? (
+                    <img
+                      src={currentUser.photoURL}
+                      alt="User"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    (userProfile?.displayName || currentUser.displayName || 'ع').charAt(0).toUpperCase()
+                  )}
+                </div>
+                <span className="hidden sm:inline text-xs font-bold max-w-[100px] truncate text-[#FAF9F6]">
+                  {userProfile?.displayName || currentUser.displayName || 'حسابي'}
+                </span>
+              </button>
+            ) : (
+              <button
+                onClick={onOpenAuth}
+                className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#2A2A2A] hover:bg-[#8C7342] text-white border border-[#8C7342]/40 transition-all hover:scale-105 text-xs font-bold"
+                title="تسجيل الدخول"
+              >
+                <User className="w-3.5 h-3.5 text-[#8C7342] group-hover:text-white" />
+                <span>دخول / تسجيل</span>
+              </button>
+            )}
+
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -190,6 +253,57 @@ export const Header: React.FC<HeaderProps> = ({
               />
               <Search className="w-4 h-4 text-[#8C7342] absolute right-3.5 top-3 pointer-events-none" />
             </div>
+
+            {/* User Account Quick Mobile Row */}
+            {currentUser ? (
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenProfile();
+                }}
+                className="flex items-center justify-between w-full p-3 rounded-xl bg-[#2A2A2A] text-[#FAF9F6] border border-[#8C7342]/30"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-[#8C7342] text-white flex items-center justify-center font-bold text-xs">
+                    {(userProfile?.displayName || currentUser.displayName || 'ع').charAt(0).toUpperCase()}
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs font-bold block">{userProfile?.displayName || currentUser.displayName || 'حسابي'}</span>
+                    <span className="text-[10px] text-[#8C7342]">العناوين وسجل الطلبات</span>
+                  </div>
+                </div>
+                <span className="text-xs text-gray-400">إدارة الحساب &larr;</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenAuth();
+                }}
+                className="flex items-center justify-center gap-2 w-full py-2.5 px-3 rounded-xl bg-[#8C7342] text-white text-xs font-bold shadow"
+              >
+                <User className="w-4 h-4" />
+                <span>تسجيل الدخول / إنشاء حساب جديد</span>
+              </button>
+            )}
+
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenWishlist();
+              }}
+              className="flex items-center justify-between w-full py-2 px-3 rounded-lg hover:bg-[#2A2A2A] text-sm text-red-400"
+            >
+              <div className="flex items-center gap-2">
+                <Heart className="w-4 h-4" />
+                <span>المفضلة</span>
+              </div>
+              {wishlistCount > 0 && (
+                <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                  {wishlistCount}
+                </span>
+              )}
+            </button>
 
             <button
               onClick={() => scrollToSection('hero')}

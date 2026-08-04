@@ -1,7 +1,8 @@
 import React from 'react';
 import { Product, SHOP_CONFIG } from '../types';
-import { ShoppingBag, Eye, MessageCircle, Sparkles, Check, Star } from 'lucide-react';
+import { ShoppingBag, Eye, MessageCircle, Sparkles, Check, Star, Heart } from 'lucide-react';
 import { ProductImage } from './ProductImage';
+import { useWishlist } from '../context/WishlistContext';
 
 const HighlightText = ({ text, highlight }: { text: string; highlight?: string }) => {
   if (!highlight || !highlight.trim()) return <>{text}</>;
@@ -41,6 +42,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   isInCart,
   searchQuery,
 }) => {
+  const { isFavorite, toggleFavorite } = useWishlist();
+  const isFav = isFavorite(product.id);
+
   const whatsappMsg = encodeURIComponent(
     `مرحباً عطور بيت العرب، أود طلب المنتج:
 • *${product.name}*
@@ -54,7 +58,10 @@ ${product.volume ? `• الحجم/الوزن: ${product.volume}
   return (
     <div className="bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group relative">
       {/* Top Image Container */}
-      <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
+      <div 
+        onClick={() => onQuickView(product)}
+        className="relative aspect-[4/3] bg-gray-100 overflow-hidden cursor-pointer"
+      >
         <ProductImage
           src={product.image}
           alt={product.name}
@@ -64,34 +71,59 @@ ${product.volume ? `• الحجم/الوزن: ${product.volume}
         {/* Overlay Dark Blur Gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-        {/* Top Badges */}
-        <div className="absolute top-3 right-3 left-3 flex items-center justify-between pointer-events-none">
-          {product.isFeatured ? (
-            <span className="gold-gradient text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
-              <Sparkles className="w-3 h-3" /> مميز
-            </span>
-          ) : product.originalPrice && product.originalPrice > product.price ? (
-            <span className="bg-[#8C7342] text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md">
-              تخفيض
-            </span>
-          ) : (
-            <span />
-          )}
+        {/* Top Badges & Wishlist Button */}
+        <div className="absolute top-3 right-3 left-3 flex items-center justify-between pointer-events-none z-10">
+          <div className="flex items-center gap-1.5">
+            {product.isFeatured ? (
+              <span className="gold-gradient text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
+                <Sparkles className="w-3 h-3" /> مميز
+              </span>
+            ) : product.originalPrice && product.originalPrice > product.price ? (
+              <span className="bg-[#8C7342] text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md">
+                تخفيض
+              </span>
+            ) : null}
 
-          {product.volume && (
-            <span className="bg-[#1A1A1A]/80 backdrop-blur-md text-[#FAF9F6] text-[11px] font-medium px-2.5 py-1 rounded-full shadow">
-              {product.volume}
-            </span>
-          )}
+            {product.volume && (
+              <span className="bg-[#1A1A1A]/80 backdrop-blur-md text-[#FAF9F6] text-[11px] font-medium px-2 py-0.5 rounded-full shadow">
+                {product.volume}
+              </span>
+            )}
+          </div>
+
+          {/* Wishlist Heart Button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleFavorite(product);
+            }}
+            className={`pointer-events-auto w-8 h-8 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-200 shadow-md ${
+              isFav
+                ? 'bg-red-50 text-red-500 hover:bg-red-100 scale-105'
+                : 'bg-white/85 text-gray-600 hover:bg-white hover:text-red-500 hover:scale-110'
+            }`}
+            title={isFav ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة'}
+            aria-label="المفضلة"
+          >
+            <Heart
+              className={`w-4 h-4 transition-all ${
+                isFav ? 'fill-red-500 text-red-500 scale-110' : ''
+              }`}
+            />
+          </button>
         </div>
 
-        {/* Quick View Hover Button */}
+        {/* View Product Page Hover Button */}
         <button
-          onClick={() => onQuickView(product)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onQuickView(product);
+          }}
           className="absolute bottom-3 right-3 left-3 bg-white/95 hover:bg-white text-[#1A1A1A] py-2 rounded-xl text-xs font-bold shadow-lg flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0"
         >
           <Eye className="w-3.5 h-3.5 text-[#8C7342]" />
-          <span>معاينة التفاصيل</span>
+          <span>عرض صفحة المنتج</span>
         </button>
       </div>
 
@@ -107,7 +139,10 @@ ${product.volume ? `• الحجم/الوزن: ${product.volume}
             {product.category === 'other' && '✨ منتجات أخرى'}
           </div>
 
-          <h3 className="font-display font-bold text-base text-[#1A1A1A] line-clamp-1 group-hover:text-[#8C7342] transition-colors">
+          <h3 
+            onClick={() => onQuickView(product)}
+            className="font-display font-bold text-base text-[#1A1A1A] line-clamp-1 group-hover:text-[#8C7342] transition-colors cursor-pointer"
+          >
             <HighlightText text={product.name} highlight={searchQuery} />
           </h3>
           {product.reviews && product.reviews.length > 0 && (

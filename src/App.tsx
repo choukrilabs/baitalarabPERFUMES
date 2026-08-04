@@ -1,71 +1,121 @@
-import { useState, useEffect } from 'react';
-import { Product, CartItem } from './types';
+import { useState, useEffect, useCallback } from 'react';
+import { Product, CartItem, CategoryType } from './types';
 import { useProducts } from './hooks/useProducts';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { ProductGrid } from './components/ProductGrid';
+import { ProductPage } from './components/ProductPage';
 import { ProductDetailModal } from './components/ProductDetailModal';
 import { CartDrawer } from './components/CartDrawer';
+import { WishlistDrawer } from './components/WishlistDrawer';
+import { AuthModal } from './components/AuthModal';
+import { UserProfileModal } from './components/UserProfileModal';
 import { AdminPanel } from './components/AdminPanel';
 import { AboutSection } from './components/AboutSection';
 import { LocationContact } from './components/LocationContact';
 import { Footer } from './components/Footer';
 import { FloatingWhatsApp } from './components/FloatingWhatsApp';
 import { categorySEO, updateMetaTags, defaultSEO } from './utils/seo';
+import { ToastProvider, useToast } from './context/ToastContext';
+import { AuthProvider } from './context/AuthContext';
+import { WishlistProvider } from './context/WishlistContext';
 
-export default function App() {
+function StoreApp() {
   const { products, addProduct, editProduct, deleteProduct, resetToDefault } = useProducts();
+  const { toast } = useToast();
+
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+  const [activeProduct, setActiveProduct] = useState<Product | null>(null);
+  
+  // Modals and Drawers
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isWishlistOpen, setIsWishlistOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-  // Check URL query string for ?product=id and open it when products are loaded
+  // Helper to extract product ID from current URL
+  const getProductIdFromURL = useCallback(() => {
+    const params = new URLSearchParams(window.location.search);
+    const queryId = params.get('product');
+    if (queryId) return queryId;
+
+    // Check pathname like /product/xyz
+    const pathMatch = window.location.pathname.match(/\/product\/([^/?#]+)/);
+    if (pathMatch && pathMatch[1]) return pathMatch[1];
+
+    // Check hash like #product=xyz
+    const hashMatch = window.location.hash.match(/#product=([^/?#&]+)/);
+    if (hashMatch && hashMatch[1]) return hashMatch[1];
+
+    return null;
+  }, []);
+
+  // Sync URL on initial load and when products are loaded/updated
   useEffect(() => {
     if (products.length === 0) return;
     
-    const params = new URLSearchParams(window.location.search);
-    const productId = params.get('product');
-    if (productId && !quickViewProduct) {
-      const p = products.find(prod => prod.id === productId);
+    const productId = getProductIdFromURL();
+    if (productId) {
+      const p = products.find((prod) => prod.id === productId);
       if (p) {
-        setQuickViewProduct(p);
+        setActiveProduct(p);
       }
+    } else {
+      setActiveProduct(null);
     }
-  }, [products]);
+  }, [products, getProductIdFromURL]);
 
-  // Dynamically update SEO metadata based on current category "page" or viewed product
+  // Listen to browser Back and Forward history buttons (popstate)
   useEffect(() => {
-    if (quickViewProduct) {
+    const handlePopState = () => {
+      const productId = getProductIdFromURL();
+      if (productId && products.length > 0) {
+        const p = products.find((prod) => prod.id === productId);
+        setActiveProduct(p || null);
+      } else {
+        setActiveProduct(null);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [products, getProductIdFromURL]);
+
+  // Dynamically update SEO metadata and page title based on current view
+  useEffect(() => {
+    if (activeProduct) {
       updateMetaTags(
-        quickViewProduct.name,
-        quickViewProduct.description || quickViewProduct.name,
-        quickViewProduct
+        `${activeProduct.name} - عطور بيت العرب الدار البيضاء`,
+        activeProduct.description || activeProduct.name,
+        activeProduct
       );
     } else {
       const seoInfo = categorySEO[selectedCategory] || defaultSEO;
       updateMetaTags(seoInfo.title, seoInfo.description);
     }
-  }, [selectedCategory, quickViewProduct]);
-
-  // Save changes to storage whenever products update
-
+  }, [selectedCategory, activeProduct]);
 
   const handleResetProducts = () => {
     resetToDefault();
   };
 
   // Cart operations
-  const handleAddToCart = (product: Product) => {
+  const handleAddToCart = (product: Product, quantity: number = 1) => {
     setCartItems((prev) => {
       const existingIndex = prev.findIndex((item) => item.product.id === product.id);
       if (existingIndex > -1) {
-        // Remove if already in cart or toggle
-        return prev.filter((item) => item.product.id !== product.id);
+        const updated = [...prev];
+        updated[existingIndex] = {
+          ...updated[existingIndex],
+          quantity: updated[existingIndex].quantity + quantity,
+        };
+        return updated;
+      } else {
+        return [...prev, { product, quantity }];
       }
-      return [...prev, { product, quantity: 1 }];
     });
   };
 
@@ -91,18 +141,55 @@ export default function App() {
     setCartItems([]);
   };
 
-  const scrollToCatalog = () => {
-    const el = document.getElementById('catalog');
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  const handleReorder = (items: { product: Product; quantity: number }[]) => {
+    setCartItems((prev) => {
+      const newItems = [...prev];
+      items.forEach((reorderItem) => {
+        const idx = newItems.findIndex((i) => i.product.id === reorderItem.product.id);
+        if (idx > -1) {
+          newItems[idx].quantity += reorderItem.quantity;
+        } else {
+          newItems.push({ product: reorderItem.product, quantity: reorderItem.quantity });
+        }
+      });
+      return newItems;
+    });
+    setIsCartOpen(true);
   };
 
-  const handleQuickView = (product: Product | null) => {
-    setQuickViewProduct(product);
-    if (product) {
-      window.history.pushState({}, '', `/?product=${product.id}`);
-    } else {
+  const scrollToCatalog = () => {
+    if (activeProduct) {
+      setActiveProduct(null);
       window.history.pushState({}, '', '/');
     }
+    setTimeout(() => {
+      const el = document.getElementById('catalog');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }, 50);
+  };
+
+  // Navigate to dedicated product page
+  const handleNavigateToProduct = (product: Product) => {
+    setActiveProduct(product);
+    window.history.pushState({ productId: product.id }, '', `/?product=${product.id}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Return to home page catalog
+  const handleBackToHome = () => {
+    setActiveProduct(null);
+    window.history.pushState({}, '', '/');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSelectCategoryFromProduct = (category: CategoryType | 'all') => {
+    setSelectedCategory(category);
+    setActiveProduct(null);
+    window.history.pushState({}, '', '/');
+    setTimeout(() => {
+      const el = document.getElementById('catalog');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }, 50);
   };
 
   return (
@@ -111,53 +198,87 @@ export default function App() {
       <Header
         cartItems={cartItems}
         onOpenCart={() => setIsCartOpen(true)}
+        onOpenWishlist={() => setIsWishlistOpen(true)}
+        onOpenAuth={() => setIsAuthOpen(true)}
+        onOpenProfile={() => setIsProfileOpen(true)}
         onOpenAdmin={() => setIsAdminOpen(true)}
-        onSelectCategory={(cat) => setSelectedCategory(cat)}
+        onSelectCategory={(cat) => {
+          setSelectedCategory(cat);
+          if (activeProduct) {
+            handleBackToHome();
+          }
+        }}
+        onNavigateHome={handleBackToHome}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
       />
 
-      {/* Main Content Sections */}
+      {/* Main Content Sections: Product Page OR Home Catalog */}
       <main className="flex-1">
-        {/* Hero Section */}
-        <Hero onExploreClick={scrollToCatalog} products={products} />
+        {activeProduct ? (
+          /* Dedicated Product Page for Each Product */
+          <ProductPage
+            product={activeProduct}
+            allProducts={products}
+            onNavigateToProduct={handleNavigateToProduct}
+            onBackToHome={handleBackToHome}
+            onAddToCart={handleAddToCart}
+            onSelectCategory={handleSelectCategoryFromProduct}
+            cartItems={cartItems}
+          />
+        ) : (
+          /* Store Homepage Sections */
+          <>
+            {/* Hero Section */}
+            <Hero onExploreClick={scrollToCatalog} products={products} />
 
-        {/* Product Catalog Grid */}
-        <ProductGrid
-          products={products}
-          selectedCategory={selectedCategory}
-          onSelectCategory={setSelectedCategory}
-          onQuickView={handleQuickView}
-          onAddToCart={handleAddToCart}
-          cartItems={cartItems}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-        />
+            {/* Product Catalog Grid */}
+            <ProductGrid
+              products={products}
+              selectedCategory={selectedCategory}
+              onSelectCategory={setSelectedCategory}
+              onQuickView={handleNavigateToProduct}
+              onAddToCart={(p) => handleAddToCart(p, 1)}
+              cartItems={cartItems}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+            />
 
-        {/* About Section */}
-        <AboutSection products={products} />
+            {/* About Section */}
+            <AboutSection products={products} />
 
-        {/* Map & Location / Contact Section */}
-        <LocationContact />
+            {/* Map & Location / Contact Section */}
+            <LocationContact />
+          </>
+        )}
       </main>
 
       {/* Footer */}
       <Footer
         onOpenAdmin={() => setIsAdminOpen(true)}
-        onSelectCategory={(cat) => setSelectedCategory(cat)}
+        onSelectCategory={(cat) => {
+          setSelectedCategory(cat);
+          if (activeProduct) {
+            handleBackToHome();
+          }
+        }}
+        onNavigateHome={handleBackToHome}
       />
 
       {/* Floating Action Button */}
       <FloatingWhatsApp />
 
-      {/* Quick View Modal */}
-      <ProductDetailModal
-        product={quickViewProduct}
-        allProducts={products}
-        onProductSelect={handleQuickView}
-        onClose={() => handleQuickView(null)}
-        onAddToCart={handleAddToCart}
-        isInCart={quickViewProduct ? cartItems.some((i) => i.product.id === quickViewProduct.id) : false}
+      {/* Wishlist Drawer */}
+      <WishlistDrawer
+        isOpen={isWishlistOpen}
+        onClose={() => setIsWishlistOpen(false)}
+        products={products}
+        onAddToCart={(p) => handleAddToCart(p, 1)}
+        onQuickView={(p) => {
+          setIsWishlistOpen(false);
+          handleNavigateToProduct(p);
+        }}
+        cartItems={cartItems}
       />
 
       {/* Cart Drawer */}
@@ -168,6 +289,25 @@ export default function App() {
         onUpdateQuantity={handleUpdateQuantity}
         onRemoveItem={handleRemoveFromCart}
         onClearCart={handleClearCart}
+        onNavigateToProduct={handleNavigateToProduct}
+        onOpenAuth={() => {
+          setIsCartOpen(false);
+          setIsAuthOpen(true);
+        }}
+      />
+
+      {/* Authentication Modal */}
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        onSuccess={() => setIsProfileOpen(true)}
+      />
+
+      {/* User Profile & Saved Addresses Modal */}
+      <UserProfileModal
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+        onReorder={handleReorder}
       />
 
       {/* Admin Panel Modal */}
@@ -181,5 +321,17 @@ export default function App() {
         onResetProducts={handleResetProducts}
       />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <ToastProvider>
+      <AuthProvider>
+        <WishlistProvider>
+          <StoreApp />
+        </WishlistProvider>
+      </AuthProvider>
+    </ToastProvider>
   );
 }

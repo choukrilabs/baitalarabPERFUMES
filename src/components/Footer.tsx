@@ -5,12 +5,18 @@ import { Lock, Phone, MapPin, Instagram, Facebook, Star } from 'lucide-react';
 interface FooterProps {
   onOpenAdmin: () => void;
   onSelectCategory: (category: string) => void;
+  onNavigateHome?: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onSelectCategory }) => {
+export const Footer: React.FC<FooterProps> = ({ onOpenAdmin, onSelectCategory, onNavigateHome }) => {
   const scrollToSection = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+    if (onNavigateHome) {
+      onNavigateHome();
+    }
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }, 50);
   };
 
   return (
