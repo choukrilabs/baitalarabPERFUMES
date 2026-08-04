@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Product, SHOP_CONFIG } from '../types';
-import { ShoppingBag, Eye, MessageCircle, Sparkles, Check, Star, Heart } from 'lucide-react';
+import { ShoppingBag, Eye, MessageCircle, Sparkles, Check, Star, Heart, Camera, ChevronLeft, ChevronRight, XCircle } from 'lucide-react';
 import { ProductImage } from './ProductImage';
 import { useWishlist } from '../context/WishlistContext';
 
@@ -45,27 +45,66 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const { isFavorite, toggleFavorite } = useWishlist();
   const isFav = isFavorite(product.id);
 
+  // All available angles for this product
+  const allImages = React.useMemo(() => {
+    if (product.images && product.images.length > 0) {
+      // Ensure primary image is at the beginning if not already in images array
+      const unique = [product.image, ...product.images.filter(img => img !== product.image)];
+      return unique.filter(Boolean);
+    }
+    return product.image ? [product.image] : [];
+  }, [product.image, product.images]);
+
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const currentDisplayImage = allImages[activeImageIndex] || product.image;
+  const isOutOfStock = product.inStock === false;
+
+  const handleNextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveImageIndex((prev) => (prev + 1) % allImages.length);
+  };
+
+  const handlePrevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
+  };
+
   const whatsappMsg = encodeURIComponent(
-    `مرحباً عطور بيت العرب، أود طلب المنتج:
+    isOutOfStock
+      ? `مرحباً عطور بيت العرب، أود الاستفسار عن موعد توفر منتج:
 • *${product.name}*
 • السعر: ${product.price} درهم
-${product.volume ? `• الحجم/الوزن: ${product.volume}
-` : ''}الرجاء تأكيد الطلب والتوصيل.`
+${product.volume ? `• الحجم/الوزن: ${product.volume}\n` : ''}هل يمكن حجزه أو معرفة موعد توفره؟`
+      : `مرحباً عطور بيت العرب، أود طلب المنتج:
+• *${product.name}*
+• السعر: ${product.price} درهم
+${product.volume ? `• الحجم/الوزن: ${product.volume}\n` : ''}الرجاء تأكيد الطلب والتوصيل.`
   );
   
   const directWhatsappUrl = `https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=${whatsappMsg}`;
 
+  const getGenderLabel = (g?: string) => {
+    if (g === 'men') return 'رجالي';
+    if (g === 'women') return 'نسائي';
+    if (g === 'unisex') return 'للجنسين';
+    return null;
+  };
+
   return (
-    <div className="bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group relative">
+    <div className={`bg-white rounded-2xl overflow-hidden border transition-all duration-300 flex flex-col group relative ${
+      isOutOfStock ? 'border-gray-200 opacity-90' : 'border-gray-200 shadow-sm hover:shadow-xl hover:-translate-y-1'
+    }`}>
       {/* Top Image Container */}
       <div 
         onClick={() => onQuickView(product)}
         className="relative aspect-[4/3] bg-gray-100 overflow-hidden cursor-pointer"
       >
         <ProductImage
-          src={product.image}
+          src={currentDisplayImage}
           alt={product.name}
-          className="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-700"
+          className={`w-full h-full object-cover object-center transition-all duration-500 ${
+            isOutOfStock ? 'grayscale-[35%] opacity-85' : 'group-hover:scale-108 duration-700'
+          }`}
         />
 
         {/* Overlay Dark Blur Gradient */}
@@ -73,8 +112,12 @@ ${product.volume ? `• الحجم/الوزن: ${product.volume}
 
         {/* Top Badges & Wishlist Button */}
         <div className="absolute top-3 right-3 left-3 flex items-center justify-between pointer-events-none z-10">
-          <div className="flex items-center gap-1.5">
-            {product.isFeatured ? (
+          <div className="flex flex-wrap items-center gap-1.5">
+            {isOutOfStock ? (
+              <span className="bg-rose-700 text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
+                <XCircle className="w-3 h-3" /> نفد من المخزن
+              </span>
+            ) : product.isFeatured ? (
               <span className="gold-gradient text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
                 <Sparkles className="w-3 h-3" /> مميز
               </span>
@@ -114,29 +157,84 @@ ${product.volume ? `• الحجم/الوزن: ${product.volume}
           </button>
         </div>
 
+        {/* Multi-angle Indicator & Navigation Arrows on Card */}
+        {allImages.length > 1 && (
+          <>
+            <div className="absolute top-12 right-3 z-10 pointer-events-none">
+              <span className="bg-[#1A1A1A]/85 backdrop-blur-sm text-[#FAF9F6] text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow">
+                <Camera className="w-3 h-3 text-[#C1841A]" />
+                <span>{allImages.length} زوايا للزجاجة</span>
+              </span>
+            </div>
+
+            {/* Quick Angle switcher arrows */}
+            <div className="absolute inset-y-0 left-2 right-2 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+              <button
+                type="button"
+                onClick={handlePrevImage}
+                className="pointer-events-auto w-7 h-7 rounded-full bg-white/90 hover:bg-white text-gray-800 flex items-center justify-center shadow-md transition-transform active:scale-95"
+                title="الزاوية السابقة"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={handleNextImage}
+                className="pointer-events-auto w-7 h-7 rounded-full bg-white/90 hover:bg-white text-gray-800 flex items-center justify-center shadow-md transition-transform active:scale-95"
+                title="الزاوية التالية"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Angle dots */}
+            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5 z-10 pointer-events-none">
+              {allImages.map((_, idx) => (
+                <span
+                  key={idx}
+                  className={`w-1.5 h-1.5 rounded-full transition-all ${
+                    idx === activeImageIndex
+                      ? 'bg-[#C1841A] w-3.5'
+                      : 'bg-white/70'
+                  }`}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
         {/* View Product Page Hover Button */}
         <button
           onClick={(e) => {
             e.stopPropagation();
             onQuickView(product);
           }}
-          className="absolute bottom-3 right-3 left-3 bg-white/95 hover:bg-white text-[#1A1A1A] py-2 rounded-xl text-xs font-bold shadow-lg flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0"
+          className="absolute bottom-3 right-3 left-3 bg-white/95 hover:bg-white text-[#1A1A1A] py-2 rounded-xl text-xs font-bold shadow-lg flex items-center justify-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 z-10"
         >
           <Eye className="w-3.5 h-3.5 text-[#8C7342]" />
-          <span>عرض صفحة المنتج</span>
+          <span>عرض تفاصيل المنتج وزوايا العطر</span>
         </button>
       </div>
 
       {/* Card Body */}
       <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
         <div>
-          {/* Notes or Category tag */}
-          <div className="flex items-center gap-1 text-[11px] text-[#8C7342] font-semibold mb-1">
-            {product.category === 'perfumes' && '✨ عطور وعود'}
-            {product.category === 'incense' && '💨 بخور'}
-            {product.category === 'clothes' && '👗 ملابس'}
-            {product.category === 'oils' && '🌿 زيوت طبيعية'}
-            {product.category === 'other' && '✨ منتجات أخرى'}
+          {/* Notes or Category tag + Gender Pill */}
+          <div className="flex flex-wrap items-center justify-between gap-1 text-[11px] text-[#8C7342] font-semibold mb-1">
+            <span className="flex items-center gap-1">
+              {product.category === 'perfumes' && '✨ عطور وعود'}
+              {product.category === 'incense' && '💨 بخور'}
+              {product.category === 'clothes' && '👗 ملابس'}
+              {product.category === 'oils' && '🌿 زيوت طبيعية'}
+              {product.category === 'wholesale' && '🏢 بيع بالجملة'}
+              {product.category === 'other' && '✨ منتجات أخرى'}
+            </span>
+
+            {getGenderLabel(product.gender) && (
+              <span className="bg-amber-50 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-200">
+                {getGenderLabel(product.gender)}
+              </span>
+            )}
           </div>
 
           <h3 
@@ -188,6 +286,17 @@ ${product.volume ? `• الحجم/الوزن: ${product.volume}
                 </span>
               )}
             </div>
+
+            {/* Stock Mini Indicator */}
+            {isOutOfStock ? (
+              <span className="text-[11px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md">
+                غير متوفر
+              </span>
+            ) : (
+              <span className="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
+                متوفر بالمخزن
+              </span>
+            )}
           </div>
 
           {/* Buttons: WhatsApp Direct & Add to Order List */}
@@ -196,22 +305,31 @@ ${product.volume ? `• الحجم/الوزن: ${product.volume}
               href={directWhatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-[#25D366] hover:bg-[#20bd5a] text-white py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 shadow-sm"
-              title="طلب مباشر عبر واتساب"
+              className={`py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 shadow-sm ${
+                isOutOfStock
+                  ? 'bg-amber-600 hover:bg-amber-700 text-white'
+                  : 'bg-[#25D366] hover:bg-[#20bd5a] text-white'
+              }`}
+              title={isOutOfStock ? "استفسار عن التوفر عبر واتساب" : "طلب مباشر عبر واتساب"}
             >
               <MessageCircle className="w-3.5 h-3.5" />
-              <span>طلب بالواتساب</span>
+              <span>{isOutOfStock ? 'استفسر بالواتساب' : 'طلب بالواتساب'}</span>
             </a>
 
             <button
-              onClick={() => onAddToCart(product)}
+              onClick={() => !isOutOfStock && onAddToCart(product)}
+              disabled={isOutOfStock}
               className={`py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 ${
-                isInCart
+                isOutOfStock
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+                  : isInCart
                   ? 'bg-[#1E5C48] text-white shadow-inner'
                   : 'bg-gray-100 hover:bg-[#8C7342] text-[#1A1A1A] hover:text-white'
               }`}
             >
-              {isInCart ? (
+              {isOutOfStock ? (
+                <span>نفد من المخزن</span>
+              ) : isInCart ? (
                 <>
                   <Check className="w-3.5 h-3.5" />
                   <span>في السلة</span>

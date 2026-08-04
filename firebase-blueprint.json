@@ -13,7 +13,11 @@
         "volume": { "type": "string" },
         "description": { "type": "string" },
         "image": { "type": "string" },
+        "images": { "type": "array" },
         "active": { "type": "boolean" },
+        "inStock": { "type": "boolean" },
+        "gender": { "type": "string" },
+        "productType": { "type": "string" },
         "isFeatured": { "type": "boolean" },
         "notes": { "type": "array" },
         "reviews": { "type": "array" }

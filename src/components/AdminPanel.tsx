@@ -10,11 +10,15 @@ import {
   Eye,
   EyeOff,
   Sparkles,
-  Save,
   RotateCcw,
-  CheckCircle2,
-  KeyRound,
   Wand2,
+  ImagePlus,
+  Layers,
+  CheckCircle2,
+  XCircle,
+  Camera,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 
 import { compressImage } from '../utils/imageUtils';
@@ -42,7 +46,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [pinError, setPinError] = useState('');
-  const [deleteConfirm, setDeleteConfirm] = useState<{id: string, name: string} | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null);
   const [resetConfirm, setResetConfirm] = useState(false);
   const [actionMessage, setActionMessage] = useState('');
 
@@ -54,10 +58,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [newVolume, setNewVolume] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [newImage, setNewImage] = useState('');
+  const [newAdditionalImages, setNewAdditionalImages] = useState<string[]>([]);
+  const [newAdditionalUrlInput, setNewAdditionalUrlInput] = useState('');
+  const [newGender, setNewGender] = useState<'unisex' | 'men' | 'women'>('unisex');
+  const [newProductType, setNewProductType] = useState('ماء عطر فاخر (Eau de Parfum)');
+  const [newInStock, setNewInStock] = useState<boolean>(true);
   const [newNotes, setNewNotes] = useState('');
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
 
-  // Remove PIN change logic
+  // Expanded editor for product angles
+  const [expandedAnglesProductId, setExpandedAnglesProductId] = useState<string | null>(null);
+  const [editAdditionalUrlInput, setEditAdditionalUrlInput] = useState<{ [id: string]: string }>({});
 
   if (!isOpen) return null;
 
@@ -68,12 +79,35 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       setPinError('لم يتم إعداد كلمة المرور للمسؤول. يرجى إضافتها في الإعدادات.');
       return;
     }
-    
+
     if (pinInput === correctPassword) {
       setIsAuthenticated(true);
       setPinError('');
     } else {
       setPinError('كلمة المرور غير صحيحة.');
+    }
+  };
+
+  const handleAddAdditionalImage = () => {
+    if (!newAdditionalUrlInput.trim()) return;
+    setNewAdditionalImages([...newAdditionalImages, newAdditionalUrlInput.trim()]);
+    setNewAdditionalUrlInput('');
+  };
+
+  const handleRemoveAdditionalImage = (indexToRemove: number) => {
+    setNewAdditionalImages(newAdditionalImages.filter((_, idx) => idx !== indexToRemove));
+  };
+
+  const handleAdditionalImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        const compressedBase64 = await compressImage(file, 800, 800, 0.75);
+        setNewAdditionalImages((prev) => [...prev, compressedBase64]);
+      } catch (err) {
+        console.error('Failed to compress image', err);
+        setActionMessage('فشل في معالجة الصورة، يرجى المحاولة بصورة أخرى.');
+      }
     }
   };
 
@@ -84,7 +118,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       return;
     }
     if (!newImage) {
-      setActionMessage('الرجاء إضافة صورة للمنتج');
+      setActionMessage('الرجاء إضافة صورة رئيسية للمنتج');
       return;
     }
 
@@ -95,6 +129,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       .map((n) => n.trim())
       .filter(Boolean);
 
+    // Combine primary and additional images
+    const allImages = Array.from(new Set([newImage.trim(), ...newAdditionalImages])).filter(Boolean);
+
     const newProd: Product = {
       id: 'prod_' + Date.now(),
       name: newName.trim(),
@@ -104,6 +141,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         newDescription.trim() ||
         'منتج عالي الجودة من عطور بيت العرب، حي الحبوس، الدار البيضاء.',
       image: newImage.trim(),
+      images: allImages,
+      inStock: newInStock,
+      gender: newGender,
+      productType: newProductType.trim() || undefined,
       active: true,
     };
 
@@ -120,7 +161,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     setNewVolume('');
     setNewDescription('');
     setNewImage('');
+    setNewAdditionalImages([]);
+    setNewAdditionalUrlInput('');
+    setNewGender('unisex');
+    setNewProductType('ماء عطر فاخر (Eau de Parfum)');
+    setNewInStock(true);
     setNewNotes('');
+    setActionMessage('تمت إضافة المنتج بنجاح مع الصور المتعددة!');
+    setTimeout(() => setActionMessage(''), 3000);
   };
 
   const handleToggleActive = (id: string) => {
@@ -130,17 +178,77 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     }
   };
 
+  const handleToggleStock = (id: string) => {
+    const productToUpdate = products.find((p) => p.id === id);
+    if (productToUpdate) {
+      const currentStatus = productToUpdate.inStock !== false; // default true
+      onEditProduct({ ...productToUpdate, inStock: !currentStatus });
+    }
+  };
+
   const handleUpdateField = (id: string, field: keyof Product, value: any) => {
-    const productToUpdate = products.find(p => p.id === id);
+    const productToUpdate = products.find((p) => p.id === id);
     if (productToUpdate) {
       onEditProduct({ ...productToUpdate, [field]: value });
+    }
+  };
+
+  // Multiple angle images management for existing product
+  const handleAddAngleToProduct = (productId: string) => {
+    const inputUrl = editAdditionalUrlInput[productId];
+    if (!inputUrl || !inputUrl.trim()) return;
+
+    const productToUpdate = products.find((p) => p.id === productId);
+    if (productToUpdate) {
+      const existing = productToUpdate.images || (productToUpdate.image ? [productToUpdate.image] : []);
+      const updated = Array.from(new Set([...existing, inputUrl.trim()]));
+      onEditProduct({ ...productToUpdate, images: updated });
+      setEditAdditionalUrlInput({ ...editAdditionalUrlInput, [productId]: '' });
+    }
+  };
+
+  const handleUploadAngleToProduct = async (productId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        const compressedBase64 = await compressImage(file, 800, 800, 0.75);
+        const productToUpdate = products.find((p) => p.id === productId);
+        if (productToUpdate) {
+          const existing = productToUpdate.images || (productToUpdate.image ? [productToUpdate.image] : []);
+          const updated = Array.from(new Set([...existing, compressedBase64]));
+          onEditProduct({ ...productToUpdate, images: updated });
+        }
+      } catch (err) {
+        console.error('Failed to compress angle image', err);
+        setActionMessage('فشل في معالجة الصورة، يرجى المحاولة بصورة أخرى.');
+      }
+    }
+  };
+
+  const handleRemoveAngleFromProduct = (productId: string, imageToRemove: string) => {
+    const productToUpdate = products.find((p) => p.id === productId);
+    if (productToUpdate) {
+      const existing = productToUpdate.images || [productToUpdate.image];
+      const updated = existing.filter((img) => img !== imageToRemove);
+      // Ensure at least one image remains
+      const newPrimary = imageToRemove === productToUpdate.image ? updated[0] || productToUpdate.image : productToUpdate.image;
+      onEditProduct({ ...productToUpdate, image: newPrimary, images: updated });
+    }
+  };
+
+  const handleSetAngleAsPrimary = (productId: string, newPrimaryImage: string) => {
+    const productToUpdate = products.find((p) => p.id === productId);
+    if (productToUpdate) {
+      const existing = productToUpdate.images || [productToUpdate.image];
+      const reordered = [newPrimaryImage, ...existing.filter((img) => img !== newPrimaryImage)];
+      onEditProduct({ ...productToUpdate, image: newPrimaryImage, images: reordered });
     }
   };
 
   const handleDeleteProduct = (id: string, name: string) => {
     setDeleteConfirm({ id, name });
   };
-  
+
   const confirmDelete = () => {
     if (deleteConfirm) {
       onDeleteProduct(deleteConfirm.id);
@@ -165,11 +273,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         ? 'زيوت طبيعية'
         : 'أخرى';
 
-    const generated = await generateProductDescription(
-      newName,
-      catName,
-      newNotes
-    );
+    const generated = await generateProductDescription(newName, catName, newNotes);
     setNewDescription(generated);
     setIsGeneratingAI(false);
   };
@@ -178,7 +282,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     const file = e.target.files?.[0];
     if (file) {
       try {
-        const compressedBase64 = await compressImage(file, 600, 600, 0.7);
+        const compressedBase64 = await compressImage(file, 800, 800, 0.75);
         setNewImage(compressedBase64);
       } catch (err) {
         console.error('Failed to compress image', err);
@@ -191,8 +295,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     const file = e.target.files?.[0];
     if (file) {
       try {
-        const compressedBase64 = await compressImage(file, 600, 600, 0.7);
-        handleUpdateField(id, 'image', compressedBase64);
+        const compressedBase64 = await compressImage(file, 800, 800, 0.75);
+        const productToUpdate = products.find((p) => p.id === id);
+        if (productToUpdate) {
+          const existingImages = productToUpdate.images || [productToUpdate.image];
+          const updatedImages = [compressedBase64, ...existingImages.filter((img) => img !== productToUpdate.image)];
+          onEditProduct({ ...productToUpdate, image: compressedBase64, images: updatedImages });
+        } else {
+          handleUpdateField(id, 'image', compressedBase64);
+        }
       } catch (err) {
         console.error('Failed to compress image', err);
         setActionMessage('فشل في معالجة الصورة، يرجى المحاولة مرة أخرى بصورة أخرى.');
@@ -200,12 +311,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
     }
   };
 
-
-
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-md flex items-start justify-center p-4 sm:p-6 animate-fadeIn">
-      <div className="bg-white rounded-3xl w-full max-w-4xl overflow-hidden shadow-2xl border border-[#E5D7BF] my-6">
-        
+      <div className="bg-white rounded-3xl w-full max-w-5xl overflow-hidden shadow-2xl border border-[#E5D7BF] my-6">
         {/* Modal Top Banner */}
         <div className="bg-[#1A1A1A] text-[#FAF9F6] p-5 flex items-center justify-between border-b border-[#8C7342]/30">
           <div className="flex items-center gap-3">
@@ -216,11 +324,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </div>
             <div>
               <h2 className="font-display font-bold text-xl text-white">
-                لوحة تحكم المتجر (إدارة المنتجات والأسعار)
+                لوحة تحكم المتجر (المنتجات، المخزون، والزوايا المتعددة)
               </h2>
-              <p className="text-xs text-[#8C7342]">
-                عطور بيت العرب • حي الحبوس، الدار البيضاء
-              </p>
+              <p className="text-xs text-[#8C7342]">عطور بيت العرب • حي الحبوس، الدار البيضاء</p>
             </div>
           </div>
 
@@ -240,9 +346,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             </div>
 
             <div className="space-y-2">
-              <h3 className="font-display font-bold text-xl text-[#1A1A1A]">
-                أدخل كلمة المرور
-              </h3>
+              <h3 className="font-display font-bold text-xl text-[#1A1A1A]">أدخل كلمة المرور</h3>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-4">
@@ -273,12 +377,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           </div>
         ) : (
           /* Authenticated Dashboard Panel */
-          <div className="p-6 sm:p-8 space-y-8 bg-[#FAF9F6] max-h-[80vh] overflow-y-auto">
-            
+          <div className="p-6 sm:p-8 space-y-8 bg-[#FAF9F6] max-h-[82vh] overflow-y-auto">
             {/* Action Bar Header */}
             <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-[#E5D7BF]">
-              <div className="text-xs font-bold text-[#8F5D0F]">
-                إجمالي المنتجات: {products.length} (ظاهر: {products.filter((p) => p.active).length})
+              <div className="flex items-center gap-4 text-xs font-bold text-[#8F5D0F]">
+                <span>إجمالي المنتجات: {products.length}</span>
+                <span className="text-emerald-700">
+                  متوفر بالمخزن: {products.filter((p) => p.inStock !== false).length}
+                </span>
+                <span className="text-rose-600">
+                  نافد من المخزن: {products.filter((p) => p.inStock === false).length}
+                </span>
               </div>
 
               <div className="flex items-center gap-2">
@@ -296,39 +405,36 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             <div className="bg-white p-6 rounded-3xl border border-[#E5D7BF] shadow-sm space-y-4">
               <h3 className="font-display font-bold text-lg text-[#24160F] flex items-center gap-2">
                 <Plus className="w-5 h-5 text-[#C1841A]" />
-                <span>إضافة منتج جديد للمتجر</span>
+                <span>إضافة منتج جديد مع زوايا وصور متعددة</span>
               </h3>
 
-              <form onSubmit={handleAddProduct} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <form onSubmit={handleAddProduct} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Product Name */}
-                <div>
-                  <label className="block text-xs font-bold text-[#8F5D0F] mb-1">
-                    اسم المنتج *
-                  </label>
+                <div className="lg:col-span-2">
+                  <label className="block text-xs font-bold text-[#8F5D0F] mb-1">اسم المنتج *</label>
                   <input
                     type="text"
                     required
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
-                    placeholder="مثال: دهن عود سيوفي أصيل"
+                    placeholder="مثال: عطر عود ملوكي فاخر - زجاجة كريستال"
                     className="w-full bg-[#FAF5EC] border border-[#E5D7BF] focus:border-[#C1841A] rounded-xl px-3 py-2.5 text-xs text-[#24160F]"
                   />
                 </div>
 
                 {/* Category */}
                 <div>
-                  <label className="block text-xs font-bold text-[#8F5D0F] mb-1">
-                    القسم *
-                  </label>
+                  <label className="block text-xs font-bold text-[#8F5D0F] mb-1">القسم *</label>
                   <select
                     value={newCategory}
                     onChange={(e) => setNewCategory(e.target.value as CategoryType)}
                     className="w-full bg-[#FAF5EC] border border-[#E5D7BF] focus:border-[#C1841A] rounded-xl px-3 py-2.5 text-xs text-[#24160F]"
                   >
                     <option value="perfumes">العطور والروائح</option>
-                    <option value="incense">البخور</option>
-                    <option value="clothes">الملابس</option>
+                    <option value="incense">البخور والعود</option>
+                    <option value="clothes">الملابس والأزياء</option>
                     <option value="oils">الزيوت الطبيعية</option>
+                    <option value="wholesale">البيع بالجملة</option>
                     <option value="other">منتجات أخرى</option>
                   </select>
                 </div>
@@ -336,7 +442,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 {/* Price */}
                 <div>
                   <label className="block text-xs font-bold text-[#8F5D0F] mb-1">
-                    السعر (بالدرهم المغربي) *
+                    السعر الحالي (درهم) *
                   </label>
                   <input
                     type="number"
@@ -353,7 +459,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 {/* Original Price */}
                 <div>
                   <label className="block text-xs font-bold text-[#8F5D0F] mb-1">
-                    السعر السابق قبل التخفيض (اختياري)
+                    السعر قبل التخفيض (اختياري)
                   </label>
                   <input
                     type="number"
@@ -361,7 +467,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     step="1"
                     value={newOriginalPrice}
                     onChange={(e) => setNewOriginalPrice(e.target.value)}
-                    placeholder="مثال: 420"
+                    placeholder="مثال: 450"
                     className="w-full bg-[#FAF5EC] border border-[#E5D7BF] focus:border-[#C1841A] rounded-xl px-3 py-2.5 text-xs text-[#24160F]"
                   />
                 </div>
@@ -369,44 +475,159 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 {/* Volume / Size */}
                 <div>
                   <label className="block text-xs font-bold text-[#8F5D0F] mb-1">
-                    الحجم أو الوزن (اختياري)
+                    الحجم أو السعة
                   </label>
                   <input
                     type="text"
                     value={newVolume}
                     onChange={(e) => setNewVolume(e.target.value)}
-                    placeholder="مثال: 100 مل، 1 كجم، أو مقاس L"
+                    placeholder="مثال: 100 مل / تولتين / مقاس XL"
                     className="w-full bg-[#FAF5EC] border border-[#E5D7BF] focus:border-[#C1841A] rounded-xl px-3 py-2.5 text-xs text-[#24160F]"
                   />
                 </div>
 
-                {/* Image Upload/URL */}
+                {/* Gender */}
                 <div>
                   <label className="block text-xs font-bold text-[#8F5D0F] mb-1">
-                    صورة المنتج (رابط أو رفع)
+                    الفئة والجنس المستهدف
+                  </label>
+                  <select
+                    value={newGender}
+                    onChange={(e) => setNewGender(e.target.value as any)}
+                    className="w-full bg-[#FAF5EC] border border-[#E5D7BF] focus:border-[#C1841A] rounded-xl px-3 py-2.5 text-xs text-[#24160F]"
+                  >
+                    <option value="unisex">للجنسين (Unisex)</option>
+                    <option value="men">رجالي (Men)</option>
+                    <option value="women">نسائي (Women)</option>
+                  </select>
+                </div>
+
+                {/* Product Type */}
+                <div>
+                  <label className="block text-xs font-bold text-[#8F5D0F] mb-1">
+                    نوع وشكل المنتج
+                  </label>
+                  <input
+                    type="text"
+                    value={newProductType}
+                    onChange={(e) => setNewProductType(e.target.value)}
+                    placeholder="مثال: ماء عطر فاخر (Eau de Parfum)"
+                    className="w-full bg-[#FAF5EC] border border-[#E5D7BF] focus:border-[#C1841A] rounded-xl px-3 py-2.5 text-xs text-[#24160F]"
+                  />
+                </div>
+
+                {/* In Stock / Out of Stock Toggle */}
+                <div>
+                  <label className="block text-xs font-bold text-[#8F5D0F] mb-1">
+                    حالة توفر المخزون
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setNewInStock(!newInStock)}
+                    className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border transition-all ${
+                      newInStock
+                        ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                        : 'bg-rose-50 text-rose-800 border-rose-300'
+                    }`}
+                  >
+                    {newInStock ? (
+                      <>
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                        <span>متوفر بالمخزن (In Stock)</span>
+                      </>
+                    ) : (
+                      <>
+                        <XCircle className="w-4 h-4 text-rose-600" />
+                        <span>نفد من المخزن (Out of Stock)</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Primary Image Upload/URL */}
+                <div className="md:col-span-2 lg:col-span-3">
+                  <label className="block text-xs font-bold text-[#8F5D0F] mb-1">
+                    الصورة الرئيسية للواجهة (الزجاجة الأمامية) *
                   </label>
                   <div className="flex gap-2">
                     <input
                       type="url"
                       value={newImage}
                       onChange={(e) => setNewImage(e.target.value)}
-                      placeholder="https://..."
+                      placeholder="رابط الصورة الرئيسية https://..."
                       className="flex-1 bg-[#FAF5EC] border border-[#E5D7BF] focus:border-[#C1841A] rounded-xl px-3 py-2.5 text-xs text-[#24160F]"
                     />
                     <label className="cursor-pointer shrink-0 bg-[#F4EAD9] hover:bg-[#E5D7BF] border border-[#E5D7BF] rounded-xl px-4 py-2.5 text-xs font-bold text-[#8F5D0F] flex items-center justify-center transition-colors">
                       رفع صورة
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="hidden"
-                      />
+                      <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                     </label>
                   </div>
                 </div>
 
+                {/* Additional Images (Multiple angles) */}
+                <div className="md:col-span-2 lg:col-span-3 bg-[#FAF5EC] p-3.5 rounded-2xl border border-[#E5D7BF]/70 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-[#8F5D0F] flex items-center gap-1.5">
+                      <Camera className="w-4 h-4 text-[#C1841A]" />
+                      <span>زوايا وصور إضافية للزجاجة والعلبة (تفاصيل العطر)</span>
+                    </label>
+                    <span className="text-[11px] text-gray-500">
+                      {newAdditionalImages.length} صور مضافة
+                    </span>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <input
+                      type="url"
+                      value={newAdditionalUrlInput}
+                      onChange={(e) => setNewAdditionalUrlInput(e.target.value)}
+                      placeholder="أدخل رابط زاوية إضافية (الغطاء، العلبة، الجانب...)"
+                      className="flex-1 bg-white border border-[#E5D7BF] rounded-xl px-3 py-2 text-xs text-[#24160F]"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddAdditionalImage}
+                      className="bg-[#1A1A1A] text-white px-3 py-2 rounded-xl text-xs font-bold hover:bg-[#8C7342]"
+                    >
+                      إضافة رابط
+                    </button>
+                    <label className="cursor-pointer shrink-0 bg-white hover:bg-gray-50 border border-[#E5D7BF] rounded-xl px-3 py-2 text-xs font-bold text-[#8F5D0F] flex items-center justify-center transition-colors">
+                      <ImagePlus className="w-3.5 h-3.5 ml-1" />
+                      رفع زاوية
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAdditionalImageUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+
+                  {/* Previews of additional angles */}
+                  {newAdditionalImages.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      {newAdditionalImages.map((img, idx) => (
+                        <div
+                          key={idx}
+                          className="relative w-14 h-14 rounded-xl border border-gray-300 overflow-hidden group bg-white"
+                        >
+                          <ProductImage src={img} alt="" className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveAdditionalImage(idx)}
+                            className="absolute inset-0 bg-red-600/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            title="حذف هذه الزاوية"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 {/* Notes */}
-                <div className="md:col-span-2">
+                <div className="md:col-span-2 lg:col-span-3">
                   <label className="block text-xs font-bold text-[#8F5D0F] mb-1">
                     المكونات والنوتات العطرية (مفصولة بفاصلة)
                   </label>
@@ -414,17 +635,15 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     type="text"
                     value={newNotes}
                     onChange={(e) => setNewNotes(e.target.value)}
-                    placeholder="مثال: عود كمبودي, مسك أبيض, عنبر"
+                    placeholder="مثال: دهن عود سيوفي، عنبر طبيعي، مسك أبيض، زهور الطائف"
                     className="w-full bg-[#FAF5EC] border border-[#E5D7BF] focus:border-[#C1841A] rounded-xl px-3 py-2.5 text-xs text-[#24160F]"
                   />
                 </div>
 
                 {/* Description + AI Generator */}
-                <div className="md:col-span-2">
+                <div className="md:col-span-2 lg:col-span-3">
                   <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs font-bold text-[#8F5D0F]">
-                      وصف المنتج
-                    </label>
+                    <label className="text-xs font-bold text-[#8F5D0F]">وصف وميزات المنتج</label>
                     <button
                       type="button"
                       onClick={handleGenerateAIDesc}
@@ -439,19 +658,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     rows={2}
                     value={newDescription}
                     onChange={(e) => setNewDescription(e.target.value)}
-                    placeholder="وصف مختصر ومغري عن ميزات ورائحة هذا المنتج..."
+                    placeholder="وصف فاخر عن مميزات ورائحة هذا المنتج..."
                     className="w-full bg-[#FAF5EC] border border-[#E5D7BF] focus:border-[#C1841A] rounded-xl p-3 text-xs text-[#24160F]"
                   />
                 </div>
 
                 {/* Submit button */}
-                <div className="md:col-span-2 pt-2">
+                <div className="md:col-span-2 lg:col-span-3 pt-2">
                   <button
                     type="submit"
                     className="w-full gold-gradient text-white py-3 rounded-xl font-bold text-sm shadow-md hover:scale-[1.01] transition-transform flex items-center justify-center gap-2"
                   >
                     <Plus className="w-4 h-4" />
-                    <span>إضافة المنتج إلى قائمة المتجر</span>
+                    <span>إضافة المنتج إلى كتالوج المتجر</span>
                   </button>
                 </div>
               </form>
@@ -459,183 +678,336 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
             {/* Existing Products Management List */}
             <div className="space-y-4">
-              <h3 className="font-display font-bold text-lg text-[#24160F] flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-[#C1841A]" />
-                <span>إدارة وتعديل المنتجات الحالية ({products.length})</span>
+              <h3 className="font-display font-bold text-lg text-[#24160F] flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-[#C1841A]" />
+                  <span>إدارة وتعديل المنتجات الحالية ({products.length})</span>
+                </div>
               </h3>
 
               <div className="space-y-3">
-                {products.map((p) => (
-                  <div
-                    key={p.id}
-                    className={`bg-white rounded-2xl p-4 border transition-all ${
-                      p.active
-                        ? 'border-[#E5D7BF] shadow-sm'
-                        : 'border-gray-200 bg-gray-50/70 opacity-75'
-                    }`}
-                  >
-                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                      
-                      {/* Product Thumbnail & Basic Info */}
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <label className="relative cursor-pointer group">
-                          <div className="w-14 h-14 shrink-0 overflow-hidden rounded-xl bg-[#F4EAD9]">
-                            <ProductImage
-                              src={p.image}
-                              alt={p.name}
-                              className="w-full h-full object-cover group-hover:opacity-75 transition-opacity"
-                            />
-                          </div>
-                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <span className="bg-black/60 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">تغيير</span>
-                          </div>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => handleEditImageUpload(p.id, e)}
-                            className="hidden"
-                          />
-                        </label>
+                {products.map((p) => {
+                  const isStock = p.inStock !== false;
+                  const isAnglesOpen = expandedAnglesProductId === p.id;
+                  const productImages = p.images && p.images.length > 0 ? p.images : (p.image ? [p.image] : []);
 
-                        <div className="space-y-1 min-w-0 flex-1">
-                          {/* Name Input */}
-                          <input
-                            type="text"
-                            value={p.name}
-                            onChange={(e) =>
-                              handleUpdateField(p.id, 'name', e.target.value)
-                            }
-                            className="font-bold text-sm text-[#24160F] bg-transparent border-b border-transparent hover:border-[#C1841A] focus:border-[#C1841A] focus:bg-[#FAF5EC] px-1 rounded transition-colors w-full"
-                          />
-
-                          <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
-                            {/* Category Selector */}
-                            <select
-                              value={p.category}
-                              onChange={(e) =>
-                                handleUpdateField(p.id, 'category', e.target.value)
-                              }
-                              className="bg-[#FAF5EC] border border-[#E5D7BF] rounded-lg px-2 py-0.5 text-xs text-[#8F5D0F]"
-                            >
-                              <option value="perfumes">العطور والروائح</option>
-                              <option value="incense">البخور</option>
-                              <option value="clothes">الملابس</option>
-                              <option value="oils">الزيوت الطبيعية</option>
-                              <option value="other">منتجات أخرى</option>
-                            </select>
-
-                            {p.volume && (
-                              <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md">
-                                {p.volume}
+                  return (
+                    <div
+                      key={p.id}
+                      className={`bg-white rounded-2xl p-4 border transition-all ${
+                        p.active ? 'border-[#E5D7BF] shadow-sm' : 'border-gray-200 bg-gray-50/70 opacity-80'
+                      }`}
+                    >
+                      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                        {/* Product Thumbnail & Basic Info */}
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <label className="relative cursor-pointer group">
+                            <div className="w-14 h-14 shrink-0 overflow-hidden rounded-xl bg-[#F4EAD9]">
+                              <ProductImage
+                                src={p.image}
+                                alt={p.name}
+                                className="w-full h-full object-cover group-hover:opacity-75 transition-opacity"
+                              />
+                            </div>
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <span className="bg-black/60 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
+                                تغيير
                               </span>
-                            )}
+                            </div>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => handleEditImageUpload(p.id, e)}
+                              className="hidden"
+                            />
+                          </label>
+
+                          <div className="space-y-1 min-w-0 flex-1">
+                            {/* Name Input */}
+                            <input
+                              type="text"
+                              value={p.name}
+                              onChange={(e) => handleUpdateField(p.id, 'name', e.target.value)}
+                              className="font-bold text-sm text-[#24160F] bg-transparent border-b border-transparent hover:border-[#C1841A] focus:border-[#C1841A] focus:bg-[#FAF5EC] px-1 rounded transition-colors w-full"
+                            />
+
+                            <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                              {/* Category Selector */}
+                              <select
+                                value={p.category}
+                                onChange={(e) => handleUpdateField(p.id, 'category', e.target.value)}
+                                className="bg-[#FAF5EC] border border-[#E5D7BF] rounded-lg px-2 py-0.5 text-xs text-[#8F5D0F]"
+                              >
+                                <option value="perfumes">العطور والروائح</option>
+                                <option value="incense">البخور والعود</option>
+                                <option value="clothes">الملابس</option>
+                                <option value="oils">الزيوت الطبيعية</option>
+                                <option value="wholesale">البيع بالجملة</option>
+                                <option value="other">منتجات أخرى</option>
+                              </select>
+
+                              {/* Gender Selector */}
+                              <select
+                                value={p.gender || 'unisex'}
+                                onChange={(e) => handleUpdateField(p.id, 'gender', e.target.value)}
+                                className="bg-[#FAF5EC] border border-[#E5D7BF] rounded-lg px-2 py-0.5 text-xs text-[#8F5D0F]"
+                              >
+                                <option value="unisex">للجنسين</option>
+                                <option value="men">رجالي</option>
+                                <option value="women">نسائي</option>
+                              </select>
+
+                              {p.volume && (
+                                <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md">
+                                  {p.volume}
+                                </span>
+                              )}
+
+                              {/* Angle images counter button */}
+                              <button
+                                type="button"
+                                onClick={() => setExpandedAnglesProductId(isAnglesOpen ? null : p.id)}
+                                className="bg-[#8C7342]/10 hover:bg-[#8C7342]/20 text-[#8C7342] px-2 py-0.5 rounded-md font-bold flex items-center gap-1"
+                              >
+                                <Camera className="w-3 h-3" />
+                                <span>{productImages.length} زوايا</span>
+                                {isAnglesOpen ? (
+                                  <ChevronUp className="w-3 h-3" />
+                                ) : (
+                                  <ChevronDown className="w-3 h-3" />
+                                )}
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      {/* Inline Price Editor & Visibility Toggle */}
-                      <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
-                        
-                        {/* Price Input */}
-                        <div className="flex items-center gap-1">
-                          <label className="text-xs text-[#8F5D0F] font-bold">السعر:</label>
-                          <input
-                            type="number"
-                            min="0"
-                            value={p.price}
-                            onChange={(e) =>
-                              handleUpdateField(
-                                p.id,
-                                'price',
-                                parseFloat(e.target.value) || 0
-                              )
-                            }
-                            className="w-20 bg-[#FAF5EC] border border-[#E5D7BF] focus:border-[#C1841A] rounded-xl px-2.5 py-1 text-xs font-bold text-[#24160F] text-center"
-                          />
-                          <span className="text-xs text-gray-500">درهم</span>
+                        {/* Price, Stock Toggle & Controls */}
+                        <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto justify-between lg:justify-end">
+                          {/* Price Input */}
+                          <div className="flex items-center gap-1">
+                            <label className="text-xs text-[#8F5D0F] font-bold">السعر:</label>
+                            <input
+                              type="number"
+                              min="0"
+                              value={p.price}
+                              onChange={(e) =>
+                                handleUpdateField(p.id, 'price', parseFloat(e.target.value) || 0)
+                              }
+                              className="w-20 bg-[#FAF5EC] border border-[#E5D7BF] focus:border-[#C1841A] rounded-xl px-2 py-1 text-xs font-bold text-[#24160F] text-center"
+                            />
+                            <span className="text-xs text-gray-500">درهم</span>
+                          </div>
+
+                          {/* In Stock / Out of Stock Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleToggleStock(p.id)}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
+                              isStock
+                                ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border border-emerald-200'
+                                : 'bg-rose-100 text-rose-800 hover:bg-rose-200 border border-rose-200'
+                            }`}
+                            title={isStock ? 'انقر لتغيير الحالة إلى نفد من المخزن' : 'انقر لتغيير الحالة إلى متوفر بالمخزن'}
+                          >
+                            {isStock ? (
+                              <>
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                                <span>متوفر بالمخزن</span>
+                              </>
+                            ) : (
+                              <>
+                                <XCircle className="w-3.5 h-3.5 text-rose-700" />
+                                <span>نفد من المخزن</span>
+                              </>
+                            )}
+                          </button>
+
+                          {/* Visibility Toggle Button */}
+                          <button
+                            onClick={() => handleToggleActive(p.id)}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors ${
+                              p.active
+                                ? 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                                : 'bg-amber-100 text-amber-800 hover:bg-amber-200'
+                            }`}
+                            title={p.active ? 'المنتج ظاهر للزوار' : 'المنتج مخفي عن الزوار'}
+                          >
+                            {p.active ? (
+                              <>
+                                <Eye className="w-3.5 h-3.5" />
+                                <span>ظاهر</span>
+                              </>
+                            ) : (
+                              <>
+                                <EyeOff className="w-3.5 h-3.5" />
+                                <span>مخفي</span>
+                              </>
+                            )}
+                          </button>
+
+                          {/* Delete Button */}
+                          <button
+                            onClick={() => handleDeleteProduct(p.id, p.name)}
+                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                            title="حذف المنتج النهائي"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
-
-                        {/* Visibility Toggle Button */}
-                        <button
-                          onClick={() => handleToggleActive(p.id)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors ${
-                            p.active
-                              ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
-                              : 'bg-amber-100 text-amber-800 hover:bg-amber-200'
-                          }`}
-                          title={p.active ? 'المنتج ظاهر للزوار' : 'المنتج مخفي عن الزوار'}
-                        >
-                          {p.active ? (
-                            <>
-                              <Eye className="w-3.5 h-3.5" />
-                              <span>ظاهر</span>
-                            </>
-                          ) : (
-                            <>
-                              <EyeOff className="w-3.5 h-3.5" />
-                              <span>مخفي</span>
-                            </>
-                          )}
-                        </button>
-
-                        {/* Delete Button */}
-                        <button
-                          onClick={() => handleDeleteProduct(p.id, p.name)}
-                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
-                          title="حذف المنتج النهائي"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-
                       </div>
 
+                      {/* Expanded Angles Editor for Existing Product */}
+                      {isAnglesOpen && (
+                        <div className="mt-3 pt-3 border-t border-gray-100 bg-[#FAF5EC]/60 p-3 rounded-xl space-y-3 animate-fadeIn">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-[#8F5D0F] flex items-center gap-1">
+                              <Layers className="w-3.5 h-3.5" />
+                              <span>صور وزوايا العطر المتوفرة لهذا المنتج:</span>
+                            </span>
+                            <span className="text-[11px] text-gray-500">
+                              (اضغط على الزاوية لتعيينها كصورة رئيسية)
+                            </span>
+                          </div>
+
+                          {/* Image Angle Thumbnails */}
+                          <div className="flex flex-wrap gap-2">
+                            {productImages.map((imgUrl, i) => (
+                              <div
+                                key={i}
+                                className={`relative w-16 h-16 rounded-xl border-2 overflow-hidden bg-white group ${
+                                  imgUrl === p.image ? 'border-[#C1841A] ring-2 ring-[#C1841A]/30' : 'border-gray-200'
+                                }`}
+                              >
+                                <ProductImage src={imgUrl} alt="" className="w-full h-full object-cover" />
+                                {imgUrl === p.image && (
+                                  <span className="absolute bottom-0 inset-x-0 bg-[#C1841A] text-white text-[8px] text-center font-bold">
+                                    الرئيسية
+                                  </span>
+                                )}
+                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-1 transition-opacity">
+                                  {imgUrl !== p.image && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleSetAngleAsPrimary(p.id, imgUrl)}
+                                      className="p-1 bg-white text-gray-900 rounded text-[9px] font-bold"
+                                      title="تعيين كرئيسية"
+                                    >
+                                      رئيسية
+                                    </button>
+                                  )}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveAngleFromProduct(p.id, imgUrl)}
+                                    className="p-1 bg-red-600 text-white rounded"
+                                    title="حذف الزاوية"
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Add New Angle to Product Form */}
+                          <div className="flex gap-2 pt-1">
+                            <input
+                              type="url"
+                              value={editAdditionalUrlInput[p.id] || ''}
+                              onChange={(e) =>
+                                setEditAdditionalUrlInput({
+                                  ...editAdditionalUrlInput,
+                                  [p.id]: e.target.value,
+                                })
+                              }
+                              placeholder="أدخل رابط صورة زاوية جديدة..."
+                              className="flex-1 bg-white border border-[#E5D7BF] rounded-xl px-3 py-1.5 text-xs text-[#24160F]"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleAddAngleToProduct(p.id)}
+                              className="bg-[#1A1A1A] hover:bg-[#8C7342] text-white px-3 py-1.5 rounded-xl text-xs font-bold transition-colors"
+                            >
+                              إضافة رابط
+                            </button>
+                            <label className="cursor-pointer shrink-0 bg-white hover:bg-gray-50 border border-[#E5D7BF] rounded-xl px-3 py-1.5 text-xs font-bold text-[#8F5D0F] flex items-center justify-center transition-colors">
+                              <Camera className="w-3 h-3 ml-1" />
+                              رفع زاوية
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => handleUploadAngleToProduct(p.id, e)}
+                                className="hidden"
+                              />
+                            </label>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
-
           </div>
         )}
-
 
         {/* Action Message Toast */}
         {actionMessage && (
-          <div className="fixed bottom-4 right-4 bg-red-600 text-white px-4 py-2 rounded-xl shadow-xl flex items-center gap-2 z-[60]">
+          <div className="fixed bottom-4 right-4 bg-[#1A1A1A] text-white border border-[#8C7342] px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 z-[60]">
             <span>{actionMessage}</span>
-            <button onClick={() => setActionMessage('')}><X className="w-4 h-4" /></button>
+            <button onClick={() => setActionMessage('')}>
+              <X className="w-4 h-4" />
+            </button>
           </div>
         )}
-        
-        
+
         {/* Reset Confirm Modal */}
         {resetConfirm && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
             <div className="bg-white p-6 rounded-3xl max-w-sm w-full text-center space-y-6">
               <h3 className="text-xl font-bold text-gray-900">تأكيد الاستعادة</h3>
-              <p className="text-gray-600">هل أنت متأكد من استعادة البيانات الافتراضية؟ سيتم مسح جميع المنتجات الحالية واستبدالها بالمنتجات الأساسية.</p>
+              <p className="text-gray-600">
+                هل أنت متأكد من استعادة البيانات الافتراضية؟ سيتم مسح جميع المنتجات الحالية واستبدالها بالمنتجات الأساسية.
+              </p>
               <div className="flex gap-4">
-                <button onClick={() => setResetConfirm(false)} className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition-colors">
+                <button
+                  onClick={() => setResetConfirm(false)}
+                  className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition-colors"
+                >
                   إلغاء
                 </button>
-                <button onClick={() => { onResetProducts(); setResetConfirm(false); }} className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-colors">
+                <button
+                  onClick={() => {
+                    onResetProducts();
+                    setResetConfirm(false);
+                  }}
+                  className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-colors"
+                >
                   نعم، استعادة
                 </button>
               </div>
             </div>
           </div>
         )}
-\n        {/* Delete Confirm Modal */}
+
+        {/* Delete Confirm Modal */}
         {deleteConfirm && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
             <div className="bg-white p-6 rounded-3xl max-w-sm w-full text-center space-y-6">
               <h3 className="text-xl font-bold text-gray-900">تأكيد الحذف</h3>
-              <p className="text-gray-600">هل أنت متأكد من حذف المنتج "{deleteConfirm.name}"؟ لا يمكن التراجع عن هذه الخطوة.</p>
+              <p className="text-gray-600">
+                هل أنت متأكد من حذف المنتج "{deleteConfirm.name}"؟ لا يمكن التراجع عن هذه الخطوة.
+              </p>
               <div className="flex gap-4">
-                <button onClick={() => setDeleteConfirm(null)} className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition-colors">
+                <button
+                  onClick={() => setDeleteConfirm(null)}
+                  className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition-colors"
+                >
                   إلغاء
                 </button>
-                <button onClick={confirmDelete} className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-colors">
+                <button
+                  onClick={confirmDelete}
+                  className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-colors"
+                >
                   نعم، احذف
                 </button>
               </div>

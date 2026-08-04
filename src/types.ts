@@ -1,5 +1,16 @@
 export type CategoryType = 'perfumes' | 'incense' | 'clothes' | 'oils' | 'wholesale' | 'other';
 
+export type GenderType = 'men' | 'women' | 'unisex' | 'all';
+
+export type ProductTypeCategory = 
+  | 'eau_de_parfum' 
+  | 'oil_attar' 
+  | 'oud_incense' 
+  | 'body_care' 
+  | 'traditional_wear' 
+  | 'wholesale_pack'
+  | 'other';
+
 export interface Review {
   id: string;
   authorName: string;
@@ -15,9 +26,13 @@ export interface Product {
   price: number; // in MAD (درهم مغربي)
   originalPrice?: number; // for discount badge
   description: string;
-  image: string;
+  image: string; // Primary image
+  images?: string[]; // Multiple angle images: e.g. bottle front, cap detail, packaging box
   volume?: string; // e.g. "100 مل", "1 كجم", "قطعة واحدة"
   active: boolean; // true = visible, false = hidden
+  inStock?: boolean; // true = In stock / متوفر بالمخزن, false = Out of stock / نفد من المخزن (default: true)
+  gender?: GenderType; // 'men' | 'women' | 'unisex'
+  productType?: string; // 'ماء عطر فاخر', 'دهن عود وزيت', 'بخور ومبخرة', 'أزياء تقليدية', etc.
   isFeatured?: boolean;
   notes?: string[]; // Fragrance notes or product features (e.g. ["عود كمبودي", "مسك أبيض", "عنبر"])
   createdAt?: string;

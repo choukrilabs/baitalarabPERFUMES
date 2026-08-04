@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Product, SHOP_CONFIG, Review, CategoryType } from '../types';
@@ -16,9 +16,16 @@ import {
   CheckCheck,
   MapPin,
   ChevronRight,
+  ChevronLeft,
   Plus,
   Minus,
   Package,
+  Camera,
+  Maximize2,
+  X,
+  XCircle,
+  Layers,
+  Truck,
 } from 'lucide-react';
 import { ProductImage } from './ProductImage';
 import { useWishlist } from '../context/WishlistContext';
@@ -51,16 +58,53 @@ export const ProductPage: React.FC<ProductPageProps> = ({
   const [newReview, setNewReview] = useState({ authorName: '', rating: 5, comment: '' });
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
+  // Multi-angle gallery state
+  const [selectedAngleIndex, setSelectedAngleIndex] = useState<number>(0);
+  const [isZoomModalOpen, setIsZoomModalOpen] = useState<boolean>(false);
+
   const isFav = isFavorite(product.id);
   const cartItem = cartItems.find((item) => item.product.id === product.id);
   const isInCart = Boolean(cartItem);
+  const isOutOfStock = product.inStock === false;
 
-  // Scroll to top when product changes
+  // Compile all bottle images
+  const allImages = useMemo(() => {
+    if (product.images && product.images.length > 0) {
+      const list = [product.image, ...product.images.filter(img => img !== product.image)];
+      return list.filter(Boolean);
+    }
+    return product.image ? [product.image] : [];
+  }, [product.image, product.images]);
+
+  // Current active angle image
+  const currentImage = allImages[selectedAngleIndex] || product.image;
+
+  // Reset angle index on product change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setQuantity(1);
     setCopiedLink(false);
+    setSelectedAngleIndex(0);
+    setIsZoomModalOpen(false);
   }, [product.id]);
+
+  // Angle labels for perfume presentation
+  const getAngleLabel = (idx: number, total: number) => {
+    if (total === 1) return 'واجهة المنتج';
+    if (idx === 0) return 'واجهة القارورة والتصميم';
+    if (idx === 1) return 'الزاوية الجانبية وتفاصيل السائل';
+    if (idx === 2) return 'غطاء العطر ورشاش الفوهة';
+    if (idx === 3) return 'علبة التغليف الفاخرة';
+    return `الزاوية ${idx + 1}`;
+  };
+
+  const handleNextAngle = () => {
+    setSelectedAngleIndex((prev) => (prev + 1) % allImages.length);
+  };
+
+  const handlePrevAngle = () => {
+    setSelectedAngleIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
+  };
 
   // Find index and previous / next product for quick carousel switching
   const activeProducts = allProducts.filter((p) => p.active);
@@ -85,6 +129,13 @@ export const ProductPage: React.FC<ProductPageProps> = ({
 
   const currentCategoryName = categoryLabels[product.category] || 'الكتالوج';
 
+  const getGenderLabel = (g?: string) => {
+    if (g === 'men') return 'عطر رجالي';
+    if (g === 'women') return 'عطر نسائي';
+    if (g === 'unisex') return 'مناسب للجنسين';
+    return null;
+  };
+
   // Calculate Average Rating
   const reviews = product.reviews || [];
   const averageRating =
@@ -95,13 +146,20 @@ export const ProductPage: React.FC<ProductPageProps> = ({
   // Handle WhatsApp direct checkout message
   const totalPriceMAD = product.price * quantity;
   const whatsappMsg = encodeURIComponent(
-    `مرحباً عطور بيت العرب، أود طلب المنتج التالي:\n` +
-      `• *اسم المنتج:* ${product.name}\n` +
-      `• *الكمية:* ${quantity}\n` +
-      `• *السعر الإجمالي:* ${totalPriceMAD} درهم مغربي\n` +
-      (product.volume ? `• *الحجم/الوزن:* ${product.volume}\n` : '') +
-      `• *رابط المنتج:* ${window.location.origin}/?product=${product.id}\n\n` +
-      `يرجى تأكيد التوفر وترتيب التوصيل إلى عنواني.`
+    isOutOfStock
+      ? `مرحباً عطور بيت العرب، أود الاستفسار عن موعد توفر وحجز المنتج:\n` +
+        `• *اسم المنتج:* ${product.name}\n` +
+        `• *السعر:* ${product.price} درهم\n` +
+        (product.volume ? `• *الحجم:* ${product.volume}\n` : '') +
+        `• *رابط المنتج:* ${window.location.origin}/?product=${product.id}\n\n` +
+        `هل يمكن إشعاري أو حجزه فور توفره بالمخزن؟`
+      : `مرحباً عطور بيت العرب، أود طلب المنتج التالي:\n` +
+        `• *اسم المنتج:* ${product.name}\n` +
+        `• *الكمية:* ${quantity}\n` +
+        `• *السعر الإجمالي:* ${totalPriceMAD} درهم مغربي\n` +
+        (product.volume ? `• *الحجم/الوزن:* ${product.volume}\n` : '') +
+        `• *رابط المنتج:* ${window.location.origin}/?product=${product.id}\n\n` +
+        `يرجى تأكيد التوفر وترتيب التوصيل إلى عنواني.`
   );
   const directWhatsappUrl = `https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=${whatsappMsg}`;
 
@@ -158,6 +216,7 @@ export const ProductPage: React.FC<ProductPageProps> = ({
   };
 
   const handleAddToCartWithQuantity = () => {
+    if (isOutOfStock) return;
     for (let i = 0; i < quantity; i++) {
       onAddToCart(product);
     }
@@ -235,36 +294,42 @@ export const ProductPage: React.FC<ProductPageProps> = ({
 
         {/* Main Product Presentation Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 bg-white rounded-3xl p-6 sm:p-8 lg:p-10 border border-gray-200/80 shadow-sm mb-12">
-          {/* Column 1: Image & Visual Showcase (5 Cols) */}
+          
+          {/* Column 1: Multi-Angle Bottle & Packaging Showcase (5 Cols) */}
           <div className="lg:col-span-5 space-y-4">
-            <div className="relative aspect-square sm:aspect-[4/3] lg:aspect-square bg-gradient-to-b from-gray-50 to-gray-100 rounded-2xl overflow-hidden border border-gray-200 shadow-inner group">
+            {/* Main Viewing Stage */}
+            <div className="relative aspect-square sm:aspect-[4/3] lg:aspect-square bg-gradient-to-b from-gray-50 to-gray-100 rounded-3xl overflow-hidden border border-gray-200 shadow-inner group">
               <ProductImage
-                src={product.image}
-                alt={product.name}
-                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                src={currentImage}
+                alt={`${product.name} - ${getAngleLabel(selectedAngleIndex, allImages.length)}`}
+                className={`w-full h-full object-cover object-center transition-all duration-500 ${
+                  isOutOfStock ? 'grayscale-[35%] opacity-85' : 'group-hover:scale-105'
+                }`}
               />
 
               {/* Floating Status Badges */}
-              <div className="absolute top-4 right-4 flex flex-col gap-1.5 pointer-events-none">
-                {product.isFeatured && (
+              <div className="absolute top-4 right-4 flex flex-col gap-1.5 pointer-events-none z-10">
+                {isOutOfStock ? (
+                  <span className="bg-rose-700 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md flex items-center gap-1">
+                    <XCircle className="w-3.5 h-3.5" /> نفد من المخزن مؤقتاً
+                  </span>
+                ) : product.isFeatured ? (
                   <span className="gold-gradient text-white text-xs font-bold px-3 py-1 rounded-full shadow-md flex items-center gap-1">
                     <Sparkles className="w-3.5 h-3.5" /> مميز والأكثر طلباً
                   </span>
-                )}
-
-                {product.originalPrice && product.originalPrice > product.price && (
+                ) : product.originalPrice && product.originalPrice > product.price ? (
                   <span className="bg-[#8C7342] text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
                     خصم {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
                   </span>
-                )}
+                ) : null}
 
                 <span className="bg-[#1A1A1A]/80 backdrop-blur-md text-white text-[11px] font-medium px-2.5 py-1 rounded-full shadow flex items-center gap-1">
-                  <ShieldCheck className="w-3 h-3 text-[#8C7342]" /> أصلي 100%
+                  <ShieldCheck className="w-3 h-3 text-[#8C7342]" /> أصلي ومضمون 100%
                 </span>
               </div>
 
-              {/* Quick Actions (Wishlist & Share) */}
-              <div className="absolute top-4 left-4 flex flex-col gap-2">
+              {/* Quick Actions (Wishlist, Share, Zoom) */}
+              <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
                 <button
                   type="button"
                   onClick={() => toggleFavorite(product)}
@@ -292,19 +357,113 @@ export const ProductPage: React.FC<ProductPageProps> = ({
                     <Share2 className="w-5 h-5" />
                   )}
                 </button>
+
+                {/* Zoom / Inspect Bottle Lightbox Button */}
+                <button
+                  type="button"
+                  onClick={() => setIsZoomModalOpen(true)}
+                  className="w-10 h-10 rounded-full bg-white/90 text-gray-700 hover:bg-[#1A1A1A] hover:text-white flex items-center justify-center backdrop-blur-md transition-all shadow-md"
+                  title="تكبير ومعاينة تفاصيل الزجاجة بدقة عالية"
+                  aria-label="تكبير الصورة"
+                >
+                  <Maximize2 className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Navigation Arrows for Angles */}
+              {allImages.length > 1 && (
+                <div className="absolute inset-y-0 left-3 right-3 flex items-center justify-between pointer-events-none z-10">
+                  <button
+                    type="button"
+                    onClick={handlePrevAngle}
+                    className="pointer-events-auto w-9 h-9 rounded-full bg-white/90 hover:bg-white text-gray-800 flex items-center justify-center shadow-lg transition-transform active:scale-95"
+                    title="الزاوية السابقة"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleNextAngle}
+                    className="pointer-events-auto w-9 h-9 rounded-full bg-white/90 hover:bg-white text-gray-800 flex items-center justify-center shadow-lg transition-transform active:scale-95"
+                    title="الزاوية التالية"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                </div>
+              )}
+
+              {/* Bottom Angle Description Bar */}
+              <div className="absolute bottom-3 inset-x-3 bg-[#1A1A1A]/85 backdrop-blur-md text-white py-1.5 px-3 rounded-xl flex items-center justify-between text-xs font-medium shadow-md">
+                <div className="flex items-center gap-1.5">
+                  <Camera className="w-3.5 h-3.5 text-[#C1841A]" />
+                  <span>{getAngleLabel(selectedAngleIndex, allImages.length)}</span>
+                </div>
+                {allImages.length > 1 && (
+                  <span className="text-[11px] text-[#C1841A] font-bold">
+                    {selectedAngleIndex + 1} / {allImages.length}
+                  </span>
+                )}
               </div>
             </div>
+
+            {/* Thumbnails Gallery Strip */}
+            {allImages.length > 1 && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs text-gray-500">
+                  <span className="font-bold text-[#8C7342] flex items-center gap-1">
+                    <Layers className="w-3.5 h-3.5" /> زوايا ورؤى مختلفة للزجاجة:
+                  </span>
+                  <span>انقر للمعاينة</span>
+                </div>
+
+                <div className="grid grid-cols-4 gap-2.5">
+                  {allImages.map((img, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setSelectedAngleIndex(idx)}
+                      className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all group ${
+                        selectedAngleIndex === idx
+                          ? 'border-[#C1841A] ring-2 ring-[#C1841A]/30 scale-[1.02] shadow-md'
+                          : 'border-gray-200 hover:border-[#C1841A]/60 opacity-70 hover:opacity-100'
+                      }`}
+                    >
+                      <ProductImage
+                        src={img}
+                        alt={`زاوية ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <span className="absolute bottom-1 right-1 bg-black/75 text-white text-[9px] font-bold px-1.5 py-0.2 rounded">
+                        {idx + 1}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Column 2: Product Information & Purchase Controls (7 Cols) */}
           <div className="lg:col-span-7 flex flex-col justify-between space-y-6">
             <div className="space-y-4">
-              {/* Category Pill & Volume */}
+              {/* Category Pill, Gender, and Stock Badge */}
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#8C7342]/10 text-[#8C7342] text-xs font-bold">
                   <Sparkles className="w-3.5 h-3.5" />
                   {currentCategoryName}
                 </span>
+
+                {getGenderLabel(product.gender) && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-bold border border-amber-200">
+                    {getGenderLabel(product.gender)}
+                  </span>
+                )}
+
+                {product.productType && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100 text-gray-800 text-xs font-medium">
+                    {product.productType}
+                  </span>
+                )}
 
                 {product.volume && (
                   <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-medium">
@@ -313,10 +472,18 @@ export const ProductPage: React.FC<ProductPageProps> = ({
                   </span>
                 )}
 
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  متوفر في المتجر
-                </span>
+                {/* Stock Status Badge */}
+                {isOutOfStock ? (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-rose-50 text-rose-700 text-xs font-bold border border-rose-200">
+                    <span className="w-2 h-2 rounded-full bg-rose-600"></span>
+                    نفد من المخزن مؤقتاً
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    متوفر بالمخزن • جاهز للشحن
+                  </span>
+                )}
               </div>
 
               {/* Product Main Title */}
@@ -388,51 +555,73 @@ export const ProductPage: React.FC<ProductPageProps> = ({
                   </div>
                 </div>
               )}
+
+              {/* Shipping and Authenticity Highlights */}
+              <div className="grid grid-cols-2 gap-3 pt-2">
+                <div className="bg-[#FAF9F6] p-3 rounded-xl border border-gray-200/80 flex items-center gap-2.5 text-xs text-gray-700">
+                  <Truck className="w-4 h-4 text-[#8C7342] shrink-0" />
+                  <span>توصيل سريع لجميع المدن المغربية والدفع عند الاستلام</span>
+                </div>
+                <div className="bg-[#FAF9F6] p-3 rounded-xl border border-gray-200/80 flex items-center gap-2.5 text-xs text-gray-700">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>ضمان الجودة والأصالة من متجرنا في حي الحبوس</span>
+                </div>
+              </div>
             </div>
 
             {/* Quantity Selector & Dual Order Actions */}
             <div className="space-y-4 pt-4 border-t border-gray-200">
               {/* Quantity row */}
-              <div className="flex items-center gap-4">
-                <span className="text-xs font-bold text-gray-700">الكمية المطلوبة:</span>
-                <div className="flex items-center border border-gray-300 rounded-xl bg-gray-50 overflow-hidden shadow-inner">
-                  <button
-                    type="button"
-                    onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
-                    className="p-2.5 hover:bg-gray-200 text-gray-700 transition-colors"
-                    aria-label="تقليل الكمية"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </button>
-                  <span className="px-4 py-1 font-display font-bold text-base text-[#1A1A1A]">
-                    {quantity}
+              {!isOutOfStock && (
+                <div className="flex items-center gap-4">
+                  <span className="text-xs font-bold text-gray-700">الكمية المطلوبة:</span>
+                  <div className="flex items-center border border-gray-300 rounded-xl bg-gray-50 overflow-hidden shadow-inner">
+                    <button
+                      type="button"
+                      onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+                      className="p-2.5 hover:bg-gray-200 text-gray-700 transition-colors"
+                      aria-label="تقليل الكمية"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <span className="px-4 py-1 font-display font-bold text-base text-[#1A1A1A]">
+                      {quantity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setQuantity((prev) => prev + 1)}
+                      className="p-2.5 hover:bg-gray-200 text-gray-700 transition-colors"
+                      aria-label="زيادة الكمية"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <span className="text-xs text-gray-500">
+                    (المجموع: <strong className="text-[#1A1A1A] font-bold">{totalPriceMAD} درهم</strong>)
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => setQuantity((prev) => prev + 1)}
-                    className="p-2.5 hover:bg-gray-200 text-gray-700 transition-colors"
-                    aria-label="زيادة الكمية"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
                 </div>
-                <span className="text-xs text-gray-500">
-                  (المجموع: <strong className="text-[#1A1A1A] font-bold">{totalPriceMAD} درهم</strong>)
-                </span>
-              </div>
+              )}
 
               {/* Action Buttons: Add to Cart & WhatsApp Order */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 <button
                   type="button"
                   onClick={handleAddToCartWithQuantity}
+                  disabled={isOutOfStock}
                   className={`py-3.5 px-6 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg ${
-                    isInCart
+                    isOutOfStock
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed border border-gray-300 shadow-none'
+                      : isInCart
                       ? 'bg-[#1E5C48] text-white hover:bg-[#164435]'
                       : 'gold-gradient text-white hover:scale-102 hover:shadow-[#C1841A]/30'
                   }`}
                 >
-                  {isInCart ? (
+                  {isOutOfStock ? (
+                    <>
+                      <XCircle className="w-5 h-5" />
+                      <span>نفد من المخزن حالياً</span>
+                    </>
+                  ) : isInCart ? (
                     <>
                       <Check className="w-5 h-5" />
                       <span>في السلة • إضافة المزيد ({quantity})</span>
@@ -449,10 +638,14 @@ export const ProductPage: React.FC<ProductPageProps> = ({
                   href={directWhatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-[#25D366] hover:bg-[#20bd5a] text-white py-3.5 px-6 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg hover:scale-102"
+                  className={`py-3.5 px-6 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg hover:scale-102 ${
+                    isOutOfStock
+                      ? 'bg-amber-600 hover:bg-amber-700 text-white'
+                      : 'bg-[#25D366] hover:bg-[#20bd5a] text-white'
+                  }`}
                 >
                   <MessageCircle className="w-5 h-5" />
-                  <span>طلب فوري عبر الواتساب</span>
+                  <span>{isOutOfStock ? 'حجز واستفسار بالواتساب' : 'طلب فوري عبر الواتساب'}</span>
                 </a>
               </div>
             </div>
@@ -675,6 +868,87 @@ export const ProductPage: React.FC<ProductPageProps> = ({
           </div>
         )}
       </div>
+
+      {/* Lightbox High-Resolution Zoom Modal for Perfume Bottle Inspection */}
+      {isZoomModalOpen && (
+        <div 
+          className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn"
+          onClick={() => setIsZoomModalOpen(false)}
+        >
+          <div 
+            className="relative max-w-4xl w-full bg-[#1A1A1A] rounded-3xl overflow-hidden border border-[#8C7342]/40 shadow-2xl p-4 flex flex-col items-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Top Close Bar */}
+            <div className="w-full flex items-center justify-between pb-3 border-b border-gray-800 text-white">
+              <div className="flex items-center gap-2">
+                <Camera className="w-5 h-5 text-[#C1841A]" />
+                <h3 className="font-bold text-sm sm:text-base">
+                  معاينة دقيقة: {product.name} ({getAngleLabel(selectedAngleIndex, allImages.length)})
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsZoomModalOpen(false)}
+                className="p-2 rounded-full hover:bg-gray-800 text-gray-300 hover:text-white transition-colors"
+                title="إغلاق المعاينة"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Main Stage Image */}
+            <div className="relative w-full aspect-square sm:aspect-[4/3] max-h-[65vh] flex items-center justify-center my-4 overflow-hidden rounded-2xl bg-black/50">
+              <ProductImage
+                src={currentImage}
+                alt={product.name}
+                className="w-full h-full object-contain"
+              />
+
+              {allImages.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={handlePrevAngle}
+                    className="absolute right-4 w-10 h-10 rounded-full bg-black/60 hover:bg-[#8C7342] text-white flex items-center justify-center transition-colors shadow-lg"
+                    title="الزاوية السابقة"
+                  >
+                    <ChevronRight className="w-6 h-6" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleNextAngle}
+                    className="absolute left-4 w-10 h-10 rounded-full bg-black/60 hover:bg-[#8C7342] text-white flex items-center justify-center transition-colors shadow-lg"
+                    title="الزاوية التالية"
+                  >
+                    <ChevronLeft className="w-6 h-6" />
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Bottom Angles Selector */}
+            {allImages.length > 1 && (
+              <div className="flex items-center gap-3 overflow-x-auto py-2">
+                {allImages.map((img, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setSelectedAngleIndex(idx)}
+                    className={`relative w-16 h-16 rounded-xl overflow-hidden border-2 transition-all shrink-0 ${
+                      selectedAngleIndex === idx
+                        ? 'border-[#C1841A] ring-2 ring-[#C1841A]/50 scale-105'
+                        : 'border-gray-700 opacity-60 hover:opacity-100'
+                    }`}
+                  >
+                    <ProductImage src={img} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

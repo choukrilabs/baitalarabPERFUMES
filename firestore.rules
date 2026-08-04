@@ -11,21 +11,20 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    // Products catalog: Anyone can view, only authenticated admins can manage
-    match /products/{document} {
-      allow read: if true;
-      allow write: if isSignedIn();
+    // Products catalog: Anyone can view, add, and manage products and reviews
+    match /products/{productId} {
+      allow read, write: if true;
     }
     
-    // User Profiles: Users can ONLY read and write their OWN profile data
+    // User Profiles: Users can read and write their own profile data
     match /users/{userId} {
-      allow read, write: if isOwner(userId);
+      allow read, write: if isOwner(userId) || (isSignedIn() && request.auth.uid == userId);
     }
 
-    // Orders: Anyone (guest or registered) can submit an order, but users can only read their own orders
+    // Orders: Anyone (guest or registered) can submit an order, registered users or admin can read and manage
     match /orders/{orderId} {
-      allow create: if true;
-      allow read, update, delete: if isSignedIn() && (resource.data.userId == request.auth.uid || request.auth.token.email == 'choukric148@gmail.com');
+      allow create, read: if true;
+      allow update, delete: if isSignedIn();
     }
   }
 }
