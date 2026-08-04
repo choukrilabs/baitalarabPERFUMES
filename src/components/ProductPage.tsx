@@ -28,6 +28,7 @@ import {
   Truck,
 } from 'lucide-react';
 import { ProductImage } from './ProductImage';
+import { QuickQuestionButton } from './QuickQuestionButton';
 import { useWishlist } from '../context/WishlistContext';
 import { useToast } from '../context/ToastContext';
 import { buildSingleProductWhatsappMessage, getWhatsappUrl, WHATSAPP_TRUST_BANNER } from '../utils/whatsapp';
@@ -651,6 +652,9 @@ export const ProductPage: React.FC<ProductPageProps> = ({
                   <span>{isOutOfStock ? 'حجز واستفسار بالواتساب' : 'طلب فوري عبر الواتساب'}</span>
                 </a>
               </div>
+
+              {/* Quick Question on WhatsApp specifically about availability or scent profile */}
+              <QuickQuestionButton product={product} />
             </div>
           </div>
         </div>

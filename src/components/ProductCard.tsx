@@ -6,26 +6,34 @@ import { useWishlist } from '../context/WishlistContext';
 import { buildSingleProductWhatsappMessage, getWhatsappUrl } from '../utils/whatsapp';
 
 const HighlightText = ({ text, highlight }: { text: string; highlight?: string }) => {
-  if (!highlight || !highlight.trim()) return <>{text}</>;
+  if (!highlight || !highlight.trim() || !text) return <>{text}</>;
   
   const escapeRegExp = (string: string) => {
     return string.replace(/[.*+?^${()|[\]\\]/g, '\\$&');
   };
   
-  const regex = new RegExp(`(${escapeRegExp(highlight.trim())})`, 'gi');
-  const parts = text.split(regex);
-  
-  return (
-    <>
-      {parts.map((part, i) => 
-        regex.test(part) ? (
-          <span key={i} className="bg-yellow-200 text-yellow-900 px-0.5 rounded-sm">{part}</span>
-        ) : (
-          <span key={i}>{part}</span>
-        )
-      )}
-    </>
-  );
+  const words = highlight.trim().split(/\s+/).filter(Boolean);
+  const pattern = words.map(escapeRegExp).join('|');
+  if (!pattern) return <>{text}</>;
+
+  try {
+    const regex = new RegExp(`(${pattern})`, 'gi');
+    const parts = text.split(regex);
+    
+    return (
+      <>
+        {parts.map((part, i) => 
+          regex.test(part) ? (
+            <span key={i} className="bg-amber-200 text-amber-950 font-semibold px-0.5 rounded-xs">{part}</span>
+          ) : (
+            <span key={i}>{part}</span>
+          )
+        )}
+      </>
+    );
+  } catch {
+    return <>{text}</>;
+  }
 };
 
 interface ProductCardProps {

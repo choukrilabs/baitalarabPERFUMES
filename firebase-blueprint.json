@@ -57,6 +57,24 @@
         "createdAt": { "type": "string" }
       },
       "required": ["userId", "items", "totalPrice", "createdAt"]
+    },
+    "PromoBannerConfig": {
+      "title": "PromoBannerConfig",
+      "description": "Storewide promotional banner settings and announcement",
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "badgeText": { "type": "string" },
+        "headline": { "type": "string" },
+        "subtext": { "type": "string" },
+        "couponCode": { "type": "string" },
+        "ctaText": { "type": "string" },
+        "ctaCategory": { "type": "string" },
+        "theme": { "type": "string" },
+        "countdownText": { "type": "string" },
+        "closable": { "type": "boolean" }
+      },
+      "required": ["enabled", "badgeText", "headline", "ctaText"]
     }
   },
   "firestore": {
@@ -71,6 +89,10 @@
     "/orders/{orderId}": {
       "schema": "Order",
       "description": "Customer order records"
+    },
+    "/settings/{settingId}": {
+      "schema": "PromoBannerConfig",
+      "description": "Store configuration and promotional banner settings"
     }
   }
 }

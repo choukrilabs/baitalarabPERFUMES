@@ -17,6 +17,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { ProductImage } from './ProductImage';
+import { QuickQuestionButton } from './QuickQuestionButton';
 import { useWishlist } from '../context/WishlistContext';
 import { useToast } from '../context/ToastContext';
 import { buildSingleProductWhatsappMessage, getWhatsappUrl, WHATSAPP_TRUST_BANNER } from '../utils/whatsapp';
@@ -495,6 +496,9 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 </>
               )}
             </button>
+
+            {/* Quick Question on WhatsApp specifically about availability or scent profile */}
+            <QuickQuestionButton product={product} />
           </div>
         </div>
       </div>

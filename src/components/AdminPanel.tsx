@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Product, CategoryType } from '../types';
+import React, { useState, useEffect } from 'react';
+import { Product, CategoryType, PromoBannerConfig, PromoBannerTheme, DEFAULT_PROMO_BANNER } from '../types';
 import { getAdminPassword } from '../services/storage';
 import { generateProductDescription } from '../services/aiHelper';
 import {
@@ -19,6 +19,16 @@ import {
   Camera,
   ChevronDown,
   ChevronUp,
+  Megaphone,
+  Tag,
+  Flame,
+  ArrowLeft,
+  Copy,
+  Check,
+  Save,
+  Sliders,
+  Palette,
+  Clock,
 } from 'lucide-react';
 
 import { compressImage } from '../utils/imageUtils';
@@ -32,6 +42,8 @@ interface AdminPanelProps {
   onEditProduct: (product: Product) => void;
   onDeleteProduct: (id: string) => void;
   onResetProducts: () => void;
+  promoBanner: PromoBannerConfig;
+  onUpdatePromoBanner: (config: PromoBannerConfig) => Promise<boolean> | void;
 }
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({
@@ -42,6 +54,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   onEditProduct,
   onDeleteProduct,
   onResetProducts,
+  promoBanner,
+  onUpdatePromoBanner,
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [pinInput, setPinInput] = useState('');
@@ -49,6 +63,36 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   const [deleteConfirm, setDeleteConfirm] = useState<{ id: string; name: string } | null>(null);
   const [resetConfirm, setResetConfirm] = useState(false);
   const [actionMessage, setActionMessage] = useState('');
+
+  // Admin Navigation Tabs
+  const [adminTab, setAdminTab] = useState<'products' | 'banner'>('products');
+
+  // Promo Banner Configuration State
+  const [bannerEnabled, setBannerEnabled] = useState<boolean>(promoBanner?.enabled ?? true);
+  const [bannerBadgeText, setBannerBadgeText] = useState<string>(promoBanner?.badgeText || '✨ عرض حصري لفترة محدودة');
+  const [bannerHeadline, setBannerHeadline] = useState<string>(promoBanner?.headline || 'تخفيضات خاصة تصل إلى 30% على أرقى تشكيلات العطور الشرقية ودهن العود الملكي!');
+  const [bannerSubtext, setBannerSubtext] = useState<string>(promoBanner?.subtext || 'استفد من تخفيض فوري وتوصيل سريع مع إمكانية الدفع عند الاستلام لجميع مدن المغرب.');
+  const [bannerCtaText, setBannerCtaText] = useState<string>(promoBanner?.ctaText || 'تسوق العروض الآن');
+  const [bannerCtaCategory, setBannerCtaCategory] = useState<CategoryType | 'all'>(promoBanner?.ctaCategory || 'perfumes');
+  const [bannerTheme, setBannerTheme] = useState<PromoBannerTheme>(promoBanner?.theme || 'gold_dark');
+  const [bannerCountdownText, setBannerCountdownText] = useState<string>(promoBanner?.countdownText || 'ينتهي العرض قريباً');
+  const [bannerClosable, setBannerClosable] = useState<boolean>(promoBanner?.closable ?? true);
+  const [isSavingBanner, setIsSavingBanner] = useState<boolean>(false);
+
+  // Sync state if promoBanner prop updates
+  useEffect(() => {
+    if (promoBanner) {
+      setBannerEnabled(promoBanner.enabled);
+      setBannerBadgeText(promoBanner.badgeText || '');
+      setBannerHeadline(promoBanner.headline || '');
+      setBannerSubtext(promoBanner.subtext || '');
+      setBannerCtaText(promoBanner.ctaText || 'تسوق الآن');
+      setBannerCtaCategory(promoBanner.ctaCategory || 'perfumes');
+      setBannerTheme(promoBanner.theme || 'gold_dark');
+      setBannerCountdownText(promoBanner.countdownText || '');
+      setBannerClosable(promoBanner.closable ?? true);
+    }
+  }, [promoBanner]);
 
   // Form for New Product
   const [newName, setNewName] = useState('');
@@ -69,6 +113,67 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
   // Expanded editor for product angles
   const [expandedAnglesProductId, setExpandedAnglesProductId] = useState<string | null>(null);
   const [editAdditionalUrlInput, setEditAdditionalUrlInput] = useState<{ [id: string]: string }>({});
+
+  const handleSaveBanner = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setIsSavingBanner(true);
+    const updatedConfig: PromoBannerConfig = {
+      enabled: bannerEnabled,
+      badgeText: bannerBadgeText.trim() || '✨ عرض خاص',
+      headline: bannerHeadline.trim() || 'تخفيضات مميزة على تشكيلات العطور الفاخرة',
+      subtext: bannerSubtext.trim() || undefined,
+      ctaText: bannerCtaText.trim() || 'تسوق الآن',
+      ctaCategory: bannerCtaCategory,
+      theme: bannerTheme,
+      countdownText: bannerCountdownText.trim() || undefined,
+      closable: bannerClosable,
+    };
+
+    try {
+      await onUpdatePromoBanner(updatedConfig);
+      setActionMessage('تم حفظ وتحديث الشريط الترويجي بنجاح!');
+    } catch (err) {
+      console.error('Error saving promo banner:', err);
+      setActionMessage('حدث خطأ أثناء حفظ الشريط الترويجي');
+    } finally {
+      setIsSavingBanner(false);
+      setTimeout(() => setActionMessage(''), 3500);
+    }
+  };
+
+  const applyBannerPreset = (preset: {
+    badgeText: string;
+    headline: string;
+    subtext: string;
+    ctaText: string;
+    ctaCategory: CategoryType | 'all';
+    theme: PromoBannerTheme;
+    countdownText: string;
+  }) => {
+    setBannerBadgeText(preset.badgeText);
+    setBannerHeadline(preset.headline);
+    setBannerSubtext(preset.subtext);
+    setBannerCtaText(preset.ctaText);
+    setBannerCtaCategory(preset.ctaCategory);
+    setBannerTheme(preset.theme);
+    setBannerCountdownText(preset.countdownText);
+    setActionMessage('تم تحميل النموذج! اضغط "حفظ ونشر التعديلات" لتطبيقه على المتجر.');
+    setTimeout(() => setActionMessage(''), 3500);
+  };
+
+  const handleResetBannerToDefault = () => {
+    setBannerEnabled(DEFAULT_PROMO_BANNER.enabled);
+    setBannerBadgeText(DEFAULT_PROMO_BANNER.badgeText);
+    setBannerHeadline(DEFAULT_PROMO_BANNER.headline);
+    setBannerSubtext(DEFAULT_PROMO_BANNER.subtext || '');
+    setBannerCtaText(DEFAULT_PROMO_BANNER.ctaText);
+    setBannerCtaCategory(DEFAULT_PROMO_BANNER.ctaCategory || 'perfumes');
+    setBannerTheme(DEFAULT_PROMO_BANNER.theme || 'gold_dark');
+    setBannerCountdownText(DEFAULT_PROMO_BANNER.countdownText || '');
+    setBannerClosable(DEFAULT_PROMO_BANNER.closable ?? true);
+    setActionMessage('تمت استعادة الإعدادات الافتراضية للشريط الترويجي');
+    setTimeout(() => setActionMessage(''), 3000);
+  };
 
   if (!isOpen) return null;
 
@@ -377,20 +482,48 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
           </div>
         ) : (
           /* Authenticated Dashboard Panel */
-          <div className="p-6 sm:p-8 space-y-8 bg-[#FAF9F6] max-h-[82vh] overflow-y-auto">
-            {/* Action Bar Header */}
-            <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-[#E5D7BF]">
-              <div className="flex items-center gap-4 text-xs font-bold text-[#8F5D0F]">
-                <span>إجمالي المنتجات: {products.length}</span>
-                <span className="text-emerald-700">
-                  متوفر بالمخزن: {products.filter((p) => p.inStock !== false).length}
-                </span>
-                <span className="text-rose-600">
-                  نافد من المخزن: {products.filter((p) => p.inStock === false).length}
-                </span>
+          <div className="p-6 sm:p-8 space-y-6 bg-[#FAF9F6] max-h-[82vh] overflow-y-auto">
+            {/* Top Navigation Tabs */}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E5D7BF] pb-4">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setAdminTab('products')}
+                  className={`flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all ${
+                    adminTab === 'products'
+                      ? 'bg-[#1A1A1A] text-white shadow-md'
+                      : 'bg-white text-gray-700 hover:bg-gray-100 border border-[#E5D7BF]'
+                  }`}
+                >
+                  <Layers className="w-4 h-4 text-[#C1841A]" />
+                  <span>إدارة المنتجات والمخزون ({products.length})</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setAdminTab('banner')}
+                  className={`flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-2xl font-bold text-xs sm:text-sm transition-all ${
+                    adminTab === 'banner'
+                      ? 'bg-[#1A1A1A] text-white shadow-md'
+                      : 'bg-white text-gray-700 hover:bg-gray-100 border border-[#E5D7BF]'
+                  }`}
+                >
+                  <Megaphone className="w-4 h-4 text-[#C1841A]" />
+                  <span>الشريط الترويجي والعروض</span>
+                  {bannerEnabled ? (
+                    <span className="flex items-center gap-1 bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-bold">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                      مفعل
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full font-bold">
+                      معطل
+                    </span>
+                  )}
+                </button>
               </div>
 
-              <div className="flex items-center gap-2">
+              {adminTab === 'products' && (
                 <button
                   onClick={() => setResetConfirm(true)}
                   className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-xl font-bold flex items-center gap-1 transition-colors"
@@ -398,15 +531,31 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>استعادة الضبط الافتراضي</span>
                 </button>
-              </div>
+              )}
             </div>
 
-            {/* Add New Product Box */}
-            <div className="bg-white p-6 rounded-3xl border border-[#E5D7BF] shadow-sm space-y-4">
-              <h3 className="font-display font-bold text-lg text-[#24160F] flex items-center gap-2">
-                <Plus className="w-5 h-5 text-[#C1841A]" />
-                <span>إضافة منتج جديد مع زوايا وصور متعددة</span>
-              </h3>
+            {/* TAB 1: PRODUCTS & INVENTORY */}
+            {adminTab === 'products' && (
+              <div className="space-y-8">
+                {/* Action Bar Header */}
+                <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-[#E5D7BF]">
+                  <div className="flex items-center gap-4 text-xs font-bold text-[#8F5D0F]">
+                    <span>إجمالي المنتجات: {products.length}</span>
+                    <span className="text-emerald-700">
+                      متوفر بالمخزن: {products.filter((p) => p.inStock !== false).length}
+                    </span>
+                    <span className="text-rose-600">
+                      نافد من المخزن: {products.filter((p) => p.inStock === false).length}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Add New Product Box */}
+                <div className="bg-white p-6 rounded-3xl border border-[#E5D7BF] shadow-sm space-y-4">
+                  <h3 className="font-display font-bold text-lg text-[#24160F] flex items-center gap-2">
+                    <Plus className="w-5 h-5 text-[#C1841A]" />
+                    <span>إضافة منتج جديد مع زوايا وصور متعددة</span>
+                  </h3>
 
               <form onSubmit={handleAddProduct} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Product Name */}
@@ -947,6 +1096,452 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 })}
               </div>
             </div>
+          </div>
+        )}
+
+        {/* TAB 2: PROMOTIONAL BANNER & OFFERS MANAGEMENT */}
+        {adminTab === 'banner' && (
+          <div className="space-y-6">
+            {/* Header & Status Card */}
+            <div className="bg-white p-6 rounded-3xl border border-[#E5D7BF] shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#C1841A] to-[#8C7342] text-white flex items-center justify-center shadow-md shrink-0">
+                  <Megaphone className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-display font-bold text-lg text-[#24160F] flex items-center gap-2">
+                    <span>إدارة الشريط الترويجي والعروض الخاصة</span>
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    تحكم في تفعيل أو تعطيل الشريط العائم أعلى الصفحة الرئيسية وتخصيص نصوص العروض، أكواد الخصم، والألوان.
+                  </p>
+                </div>
+              </div>
+
+              {/* Enable / Disable Master Toggle */}
+              <div className="flex items-center gap-3 bg-[#FAF9F6] p-2 rounded-2xl border border-[#E5D7BF] self-stretch sm:self-auto justify-between">
+                <div className="text-right">
+                  <span className="block text-xs font-bold text-[#24160F]">
+                    حالة الشريط في المتجر:
+                  </span>
+                  <span
+                    className={`text-[11px] font-bold ${
+                      bannerEnabled ? 'text-emerald-600' : 'text-gray-400'
+                    }`}
+                  >
+                    {bannerEnabled ? '🟢 مفعل وظاهر للزوار' : '⚪ معطل ومخفي'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setBannerEnabled(!bannerEnabled)}
+                  className={`relative inline-flex h-7 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                    bannerEnabled ? 'bg-[#25D366]' : 'bg-gray-300'
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                      bannerEnabled ? '-translate-x-7' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+
+            {/* Live Preview Box */}
+            <div className="bg-white p-6 rounded-3xl border border-[#E5D7BF] shadow-sm space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#8F5D0F] flex items-center gap-1.5">
+                  <Sliders className="w-4 h-4" />
+                  <span>معاينة حية ومباشرة للشريط (كما يراه زوار متجرك)</span>
+                </h4>
+                {!bannerEnabled && (
+                  <span className="text-[11px] bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-0.5 rounded-full font-bold">
+                    ⚠️ ملاحظة: الشريط معطل حالياً ولن يظهر في الصفحة الرئيسية حتى تقوم بتفعيله وحفظ التعديلات
+                  </span>
+                )}
+              </div>
+
+              {/* Render simulated banner */}
+              <div className="p-3 bg-gray-950/5 rounded-2xl border border-gray-200">
+                <div
+                  className={`relative overflow-hidden rounded-2xl border p-3.5 transition-all duration-300 ${
+                    bannerTheme === 'gold_dark'
+                      ? 'bg-gradient-to-r from-[#120F0A] via-[#241B0E] to-[#120F0A] border-[#C1841A]/50 text-white'
+                      : bannerTheme === 'emerald_gold'
+                      ? 'bg-gradient-to-r from-[#071D13] via-[#0E3524] to-[#071D13] border-[#25D366]/40 text-white'
+                      : bannerTheme === 'ruby_gold'
+                      ? 'bg-gradient-to-r from-[#21090F] via-[#3B111B] to-[#21090F] border-[#E14D66]/40 text-white'
+                      : 'bg-gradient-to-r from-[#071424] via-[#0D2442] to-[#071424] border-[#4A90E2]/40 text-white'
+                  }`}
+                >
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0 border border-white/10">
+                        <Flame className="w-5 h-5 text-[#E5B558] animate-pulse" />
+                      </div>
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {bannerBadgeText && (
+                            <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-white/15 text-[#E5B558] border border-white/10">
+                              {bannerBadgeText}
+                            </span>
+                          )}
+                          {bannerCountdownText && (
+                            <span className="text-[10px] text-gray-300 flex items-center gap-1 font-medium">
+                              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+                              {bannerCountdownText}
+                            </span>
+                          )}
+                        </div>
+                        <h4 className="font-bold text-sm text-white leading-tight">
+                          {bannerHeadline || 'عنوان العرض الترويجي'}
+                        </h4>
+                        {bannerSubtext && (
+                          <p className="text-xs text-gray-300/85 line-clamp-1">
+                            {bannerSubtext}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
+                      {bannerCtaText && (
+                        <div className="text-xs font-bold px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#C1841A] to-[#E5B558] text-[#1A1105] flex items-center gap-1">
+                          <span>{bannerCtaText}</span>
+                          <ArrowLeft className="w-3.5 h-3.5" />
+                        </div>
+                      )}
+                      {bannerClosable && (
+                        <div className="p-1 text-gray-400">
+                          <X className="w-3.5 h-3.5" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Preset Templates */}
+            <div className="bg-white p-6 rounded-3xl border border-[#E5D7BF] shadow-sm space-y-3">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[#8F5D0F] flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4" />
+                <span>نماذج وقوالب عروض جاهزة بنقرة واحدة (Presets)</span>
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <button
+                  type="button"
+                  onClick={() =>
+                    applyBannerPreset({
+                      badgeText: '✨ عرض حصري 30%',
+                      headline: 'تخفيضات تصل إلى 30% على أرقى تشكيلات العطور الشرقية الملكية!',
+                      subtext: 'شحن سريع لجميع مدن المغرب مع إمكانية الدفع عند الاستلام.',
+                      ctaText: 'تسوق العروض الآن',
+                      ctaCategory: 'perfumes',
+                      theme: 'gold_dark',
+                      countdownText: 'ينتهي العرض قريباً',
+                    })
+                  }
+                  className="p-3 rounded-2xl border border-[#E5D7BF] hover:border-[#C1841A] hover:bg-[#FAF9F6] text-right transition-all group"
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs font-bold text-[#1A1A1A] group-hover:text-[#C1841A]">
+                      تخفيضات العطور 30%
+                    </span>
+                    <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">
+                      ذهبي ملكي
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-gray-500 line-clamp-2">
+                    تخفيض فوري مباشر على العطور الأكثر طلباً.
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    applyBannerPreset({
+                      badgeText: '👑 دهن العود والمسك',
+                      headline: 'عرض خاص على أرقى أدهان العود الكمبودي والمسك الصافي الفاخر!',
+                      subtext: 'ضمان الجودة والثبات العالي مع عينات مجانية مع كل طلبية.',
+                      ctaText: 'استكشف تشكيلة العود والزيوت',
+                      ctaCategory: 'oils',
+                      theme: 'emerald_gold',
+                      countdownText: 'الكمية محدودة جداً',
+                    })
+                  }
+                  className="p-3 rounded-2xl border border-[#E5D7BF] hover:border-emerald-600 hover:bg-[#FAF9F6] text-right transition-all group"
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs font-bold text-[#1A1A1A] group-hover:text-emerald-700">
+                      عروض دهن العود VIP
+                    </span>
+                    <span className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">
+                      زمردي فاخر
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-gray-500 line-clamp-2">
+                    عرض مخصص لمحبي دهن العود المعتق والمسك والزيوت.
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    applyBannerPreset({
+                      badgeText: '🔥 عرض نهاية الأسبوع',
+                      headline: 'خصم خاص 20% إضافي على مجموعات العطور والمخلطات المميزة!',
+                      subtext: 'تغليف هدايا فاخر وبطاقة إهداء مخصصة مجاناً.',
+                      ctaText: 'شاهد مجموعات العطور',
+                      ctaCategory: 'perfumes',
+                      theme: 'ruby_gold',
+                      countdownText: 'ساري حتى مساء الأحد',
+                    })
+                  }
+                  className="p-3 rounded-2xl border border-[#E5D7BF] hover:border-rose-600 hover:bg-[#FAF9F6] text-right transition-all group"
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs font-bold text-[#1A1A1A] group-hover:text-rose-700">
+                      عرض نهاية الأسبوع
+                    </span>
+                    <span className="text-[10px] bg-rose-100 text-rose-800 px-1.5 py-0.5 rounded font-bold">
+                      ياقوتي ملكي
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-gray-500 line-clamp-2">
+                    تخفيضات نهاية الأسبوع لمجموعات العطور والمناسبات.
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    applyBannerPreset({
+                      badgeText: '🚚 شحن مجاني',
+                      headline: 'توصيل مجاني لجميع مدن المغرب + هدية عينة مسك مع كل طلبية تفوق 300 درهم!',
+                      subtext: 'الدفع عند الاستلام بعد فحص الطلبية.',
+                      ctaText: 'تسوق جميع التشكيلات',
+                      ctaCategory: 'all',
+                      theme: 'midnight_blue',
+                      countdownText: 'عرض هذا الأسبوع',
+                    })
+                  }
+                  className="p-3 rounded-2xl border border-[#E5D7BF] hover:border-blue-600 hover:bg-[#FAF9F6] text-right transition-all group"
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs font-bold text-[#1A1A1A] group-hover:text-blue-700">
+                      شحن مجاني وهدية
+                    </span>
+                    <span className="text-[10px] bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-bold">
+                      أزرق ملكي
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-gray-500 line-clamp-2">
+                    خدمة التوصيل السريع المجاني مع هدية مسك.
+                  </p>
+                </button>
+              </div>
+            </div>
+
+            {/* Edit Form */}
+            <form onSubmit={handleSaveBanner} className="bg-white p-6 rounded-3xl border border-[#E5D7BF] shadow-sm space-y-5">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[#8F5D0F] flex items-center gap-1.5">
+                <Palette className="w-4 h-4" />
+                <span>تعديل محتوى وتصميم الشريط الترويجي</span>
+              </h4>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Badge Text */}
+                <div>
+                  <label className="block text-xs font-bold text-[#24160F] mb-1.5">
+                    نص الشارة العلوية (Badge):
+                  </label>
+                  <input
+                    type="text"
+                    value={bannerBadgeText}
+                    onChange={(e) => setBannerBadgeText(e.target.value)}
+                    placeholder="مثال: ✨ عرض حصري لفترة محدودة"
+                    className="w-full bg-[#FAF9F6] border border-[#E5D7BF] rounded-2xl px-4 py-2.5 text-xs text-[#24160F] focus:outline-none focus:border-[#C1841A]"
+                  />
+                </div>
+
+                {/* Countdown / Urgency Text */}
+                <div>
+                  <label className="block text-xs font-bold text-[#24160F] mb-1.5">
+                    نص التنبيه أو العداد (Urgency):
+                  </label>
+                  <input
+                    type="text"
+                    value={bannerCountdownText}
+                    onChange={(e) => setBannerCountdownText(e.target.value)}
+                    placeholder="مثال: ينتهي العرض قريباً / الكمية محدودة"
+                    className="w-full bg-[#FAF9F6] border border-[#E5D7BF] rounded-2xl px-4 py-2.5 text-xs text-[#24160F] focus:outline-none focus:border-[#C1841A]"
+                  />
+                </div>
+
+                {/* Headline */}
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-bold text-[#24160F] mb-1.5">
+                    العنوان الرئيسي للإعلان (Headline) * :
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={bannerHeadline}
+                    onChange={(e) => setBannerHeadline(e.target.value)}
+                    placeholder="أدخل عنوان العرض الترويجي الجذاب..."
+                    className="w-full bg-[#FAF9F6] border border-[#E5D7BF] rounded-2xl px-4 py-2.5 text-xs font-bold text-[#24160F] focus:outline-none focus:border-[#C1841A]"
+                  />
+                </div>
+
+                {/* CTA Button Text */}
+                <div>
+                  <label className="block text-xs font-bold text-[#24160F] mb-1.5">
+                    نص زر التفاعل (CTA Button):
+                  </label>
+                  <input
+                    type="text"
+                    value={bannerCtaText}
+                    onChange={(e) => setBannerCtaText(e.target.value)}
+                    placeholder="مثال: تسوق العروض الآن"
+                    className="w-full bg-[#FAF9F6] border border-[#E5D7BF] rounded-2xl px-4 py-2.5 text-xs text-[#24160F] focus:outline-none focus:border-[#C1841A]"
+                  />
+                </div>
+
+                {/* Subtext Description */}
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-bold text-[#24160F] mb-1.5">
+                    النص التوضيحي الإضافي (Subtext):
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={bannerSubtext}
+                    onChange={(e) => setBannerSubtext(e.target.value)}
+                    placeholder="تفاصيل العرض، مثل الشحن السريع أو الدفع عند الاستلام..."
+                    className="w-full bg-[#FAF9F6] border border-[#E5D7BF] rounded-2xl px-4 py-2.5 text-xs text-[#24160F] focus:outline-none focus:border-[#C1841A]"
+                  />
+                </div>
+
+                {/* CTA Target Category */}
+                <div>
+                  <label className="block text-xs font-bold text-[#24160F] mb-1.5">
+                    القسم المستهدف عند الضغط:
+                  </label>
+                  <select
+                    value={bannerCtaCategory}
+                    onChange={(e) => setBannerCtaCategory(e.target.value as CategoryType | 'all')}
+                    className="w-full bg-[#FAF9F6] border border-[#E5D7BF] rounded-2xl px-4 py-2.5 text-xs text-[#24160F] focus:outline-none focus:border-[#C1841A]"
+                  >
+                    <option value="all">جميع التشكيلات (All)</option>
+                    <option value="perfumes">العطور الشرقية الفاخرة (Perfumes)</option>
+                    <option value="oils">الزيوت الطبيعية وأدهان العود (Oils)</option>
+                    <option value="incense">البخور والمعمول والمباخر (Incense)</option>
+                    <option value="clothes">الملابس والأزياء التقليدية (Clothes)</option>
+                    <option value="wholesale">البيع بالجملة (Wholesale)</option>
+                    <option value="other">منتجات أخرى (Other)</option>
+                  </select>
+                </div>
+
+                {/* Color Theme Selector */}
+                <div>
+                  <label className="block text-xs font-bold text-[#24160F] mb-1.5">
+                    نمط الألوان والتصميم (Theme):
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setBannerTheme('gold_dark')}
+                      className={`p-2 rounded-xl text-[11px] font-bold border text-right transition-all flex items-center gap-1.5 ${
+                        bannerTheme === 'gold_dark'
+                          ? 'bg-[#1A1A1A] text-amber-300 border-[#C1841A] shadow-sm'
+                          : 'bg-[#FAF9F6] text-gray-700 border-[#E5D7BF]'
+                      }`}
+                    >
+                      <span className="w-3 h-3 rounded-full bg-[#C1841A] inline-block" />
+                      <span>أسود وذهبي ملكي</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setBannerTheme('emerald_gold')}
+                      className={`p-2 rounded-xl text-[11px] font-bold border text-right transition-all flex items-center gap-1.5 ${
+                        bannerTheme === 'emerald_gold'
+                          ? 'bg-[#0E3524] text-emerald-300 border-[#25D366] shadow-sm'
+                          : 'bg-[#FAF9F6] text-gray-700 border-[#E5D7BF]'
+                      }`}
+                    >
+                      <span className="w-3 h-3 rounded-full bg-[#25D366] inline-block" />
+                      <span>زمردي فاخر</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setBannerTheme('ruby_gold')}
+                      className={`p-2 rounded-xl text-[11px] font-bold border text-right transition-all flex items-center gap-1.5 ${
+                        bannerTheme === 'ruby_gold'
+                          ? 'bg-[#3B111B] text-rose-300 border-[#E14D66] shadow-sm'
+                          : 'bg-[#FAF9F6] text-gray-700 border-[#E5D7BF]'
+                      }`}
+                    >
+                      <span className="w-3 h-3 rounded-full bg-[#E14D66] inline-block" />
+                      <span>ياقوتي ملكي</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setBannerTheme('midnight_blue')}
+                      className={`p-2 rounded-xl text-[11px] font-bold border text-right transition-all flex items-center gap-1.5 ${
+                        bannerTheme === 'midnight_blue'
+                          ? 'bg-[#0D2442] text-blue-300 border-[#4A90E2] shadow-sm'
+                          : 'bg-[#FAF9F6] text-gray-700 border-[#E5D7BF]'
+                      }`}
+                    >
+                      <span className="w-3 h-3 rounded-full bg-[#4A90E2] inline-block" />
+                      <span>أزرق داكن</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Closable Toggle */}
+                <div className="flex items-center gap-2 pt-6">
+                  <input
+                    type="checkbox"
+                    id="bannerClosable"
+                    checked={bannerClosable}
+                    onChange={(e) => setBannerClosable(e.target.checked)}
+                    className="rounded text-[#C1841A] focus:ring-[#C1841A] w-4 h-4 cursor-pointer"
+                  />
+                  <label htmlFor="bannerClosable" className="text-xs font-bold text-[#24160F] cursor-pointer">
+                    إتاحة زر الإغلاق (X) للزوار بعد مشاهدة الإعلان
+                  </label>
+                </div>
+              </div>
+
+              {/* Submit Actions */}
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-[#E5D7BF]">
+                <button
+                  type="button"
+                  onClick={handleResetBannerToDefault}
+                  className="px-4 py-2.5 rounded-2xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition-colors flex items-center gap-1.5"
+                >
+                  <span>استعادة الإعدادات الافتراضية للشريط</span>
+                </button>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="submit"
+                    disabled={isSavingBanner}
+                    className="bg-gradient-to-r from-[#1A1A1A] to-[#8C7342] hover:from-black hover:to-[#735E35] text-white px-6 py-2.5 rounded-2xl text-xs font-bold shadow-lg transition-all flex items-center gap-2 disabled:opacity-50"
+                  >
+                    <Save className="w-4 h-4" />
+                    <span>{isSavingBanner ? 'جاري الحفظ والنشر...' : 'حفظ ونشر التعديلات على المتجر'}</span>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        )}
           </div>
         )}
 

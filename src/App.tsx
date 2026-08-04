@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Product, CartItem, CategoryType } from './types';
 import { useProducts } from './hooks/useProducts';
+import { usePromoBanner } from './hooks/usePromoBanner';
 import { Header } from './components/Header';
+import { PromoBanner } from './components/PromoBanner';
 import { Hero } from './components/Hero';
 import { ProductGrid } from './components/ProductGrid';
 import { ProductPage } from './components/ProductPage';
@@ -22,6 +24,7 @@ import { WishlistProvider } from './context/WishlistContext';
 
 function StoreApp() {
   const { products, addProduct, editProduct, deleteProduct, resetToDefault } = useProducts();
+  const { promoBanner, updatePromoBanner } = usePromoBanner();
   const { toast } = useToast();
 
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -213,6 +216,18 @@ function StoreApp() {
         onSearchChange={setSearchQuery}
       />
 
+      {/* Floating Promotional Banner for Perfume Collection Offers */}
+      {!activeProduct && (
+        <PromoBanner
+          config={promoBanner}
+          onSelectCategory={(cat) => {
+            setSelectedCategory(cat);
+            scrollToCatalog();
+          }}
+          onExplore={scrollToCatalog}
+        />
+      )}
+
       {/* Main Content Sections: Product Page OR Home Catalog */}
       <main className="flex-1">
         {activeProduct ? (
@@ -319,6 +334,8 @@ function StoreApp() {
         onEditProduct={editProduct}
         onDeleteProduct={deleteProduct}
         onResetProducts={handleResetProducts}
+        promoBanner={promoBanner}
+        onUpdatePromoBanner={updatePromoBanner}
       />
     </div>
   );

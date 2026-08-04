@@ -149,17 +149,6 @@ export const Header: React.FC<HeaderProps> = ({
               <span>تقييم جوجل</span>
             </a>
 
-            {/* Direct WhatsApp Callout Button */}
-            <a
-              href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden lg:flex items-center gap-2 bg-[#25D366] hover:bg-[#20bd5a] text-white px-3.5 py-2 rounded-full text-xs font-bold transition-transform hover:scale-105 shadow-md"
-            >
-              <Phone className="w-3.5 h-3.5" />
-              <span>{SHOP_CONFIG.phoneFormatted}</span>
-            </a>
-
             {/* Wishlist Trigger */}
             <button
               onClick={onOpenWishlist}

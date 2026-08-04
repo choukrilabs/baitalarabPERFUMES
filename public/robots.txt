@@ -1,0 +1,9 @@
+# robots.txt for Baitalarab Perfumes (عطور بيت العرب)
+# https://baitalarab-perfumes.vercel.app/
+
+User-agent: *
+Allow: /
+
+# Sitemap Location for Google Search Console, Bing, and Search Engine Crawlers
+Sitemap: https://baitalarab-perfumes.vercel.app/sitemap.xml
+Sitemap: https://baitalarab.ma/sitemap.xml

@@ -51,7 +51,7 @@ export function updateMetaTags(title: string, description: string, product?: any
     "@context": "https://schema.org",
     "@type": "Store",
     "name": "عطور بيت العرب",
-    "image": "https://baitalarab.com/logo.png", // Replace with real domain if available
+    "image": "https://baitalarab-perfumes.vercel.app/logo.png",
     "description": "تأسس بيت العرب عام 1984 في حي الحبوس بالدار البيضاء. نقدم عطور شرقية، عود، وبخور أصلية 100%.",
     "address": {
       "@type": "PostalAddress",
@@ -60,7 +60,7 @@ export function updateMetaTags(title: string, description: string, product?: any
       "addressRegion": "Casablanca-Settat",
       "addressCountry": "MA"
     },
-    "telephone": "+212-000000000", // Update with real number if available
+    "telephone": "+212-661556093",
     "priceRange": "$$"
   };
 
@@ -73,14 +73,14 @@ export function updateMetaTags(title: string, description: string, product?: any
         "@context": "https://schema.org",
         "@type": "Product",
         "name": product.name,
-        "image": product.image ? (product.image.startsWith('http') ? product.image : `https://baitalarab.com${product.image}`) : "",
+        "image": product.image ? (product.image.startsWith('http') ? product.image : `https://baitalarab-perfumes.vercel.app${product.image}`) : "",
         "description": product.description || product.name,
         "offers": {
           "@type": "Offer",
           "priceCurrency": "MAD",
           "price": product.price,
           "availability": "https://schema.org/InStock",
-          "url": `https://baitalarab.com/?product=${product.id}`
+          "url": `https://baitalarab-perfumes.vercel.app/?product=${product.id}`
         }
       }
     ];

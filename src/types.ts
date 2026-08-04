@@ -159,3 +159,30 @@ export const SHOP_CONFIG: ShopInfo = {
   city: 'الدار البيضاء 20000',
   neighborhood: 'حي الحبوس التاريخي',
 };
+
+export type PromoBannerTheme = 'gold_dark' | 'emerald_gold' | 'ruby_gold' | 'midnight_blue';
+
+export interface PromoBannerConfig {
+  enabled: boolean;
+  badgeText: string;
+  headline: string;
+  subtext?: string;
+  ctaText: string;
+  ctaCategory?: CategoryType | 'all';
+  theme?: PromoBannerTheme;
+  countdownText?: string;
+  closable?: boolean;
+}
+
+export const DEFAULT_PROMO_BANNER: PromoBannerConfig = {
+  enabled: true,
+  badgeText: '✨ عرض حصري لفترة محدودة',
+  headline: 'تخفيضات خاصة تصل إلى 30% على أرقى تشكيلات العطور الشرقية ودهن العود الملكي!',
+  subtext: 'استفد من تخفيض فوري وتوصيل سريع مع إمكانية الدفع عند الاستلام لجميع مدن المغرب.',
+  ctaText: 'تسوق العروض الآن',
+  ctaCategory: 'perfumes',
+  theme: 'gold_dark',
+  countdownText: 'ينتهي العرض قريباً',
+  closable: true,
+};
+

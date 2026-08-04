@@ -26,6 +26,12 @@ service cloud.firestore {
       allow create, read: if true;
       allow update, delete: if isSignedIn();
     }
+
+    // Store settings & promotional banner: Anyone can read, admin/authenticated can write
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if true;
+    }
   }
 }
 

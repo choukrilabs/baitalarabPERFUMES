@@ -1,7 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Product, CartItem, SHOP_CONFIG } from '../types';
 import { ProductCard } from './ProductCard';
 import { CategoryFilter } from './CategoryFilter';
+import { SearchSuggestionsDropdown } from './SearchSuggestionsDropdown';
+import { calculateFuzzyScore } from '../utils/fuzzySearch';
 import {
   Search,
   SlidersHorizontal,
@@ -52,6 +54,27 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   const [selectedType, setSelectedType] = useState<string>('all');
   const [stockFilter, setStockFilter] = useState<'all' | 'inStock' | 'onSale'>('all');
 
+  // Search Suggestions State
+  const [isSuggestionsOpen, setIsSuggestionsOpen] = useState<boolean>(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  // Close search suggestions on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(event.target as Node)
+      ) {
+        setIsSuggestionsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   // Display & Navigation States
   const [sortBy, setSortBy] = useState<'featured' | 'price-asc' | 'price-desc' | 'rating' | 'newest'>('featured');
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState<boolean>(false);
@@ -100,7 +123,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
     setCurrentPage(1);
   };
 
-  // Main Filter Logic
+  // Main Filter Logic with Fuzzy Matching
   const filteredProducts = useMemo(() => {
     let list = products.filter((p) => p.active);
 
@@ -109,16 +132,41 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
       list = list.filter((p) => p.category === selectedCategory);
     }
 
-    // 2. Search Query (name, description, notes, type)
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim();
-      list = list.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.description.toLowerCase().includes(q) ||
-          (p.notes && p.notes.some((n) => n.toLowerCase().includes(q))) ||
-          (p.productType && p.productType.toLowerCase().includes(q))
-      );
+    // 2. Search Query with Fuzzy Matching (name, notes, productType, description, category)
+    const q = searchQuery.trim();
+    let productScores = new Map<string, number>();
+
+    if (q) {
+      list = list.filter((p) => {
+        // Name score
+        const nameScore = calculateFuzzyScore(p.name, q) * 1.4;
+        
+        // Notes score
+        let bestNoteScore = 0;
+        if (p.notes && p.notes.length > 0) {
+          for (const n of p.notes) {
+            const sc = calculateFuzzyScore(n, q);
+            if (sc > bestNoteScore) bestNoteScore = sc;
+          }
+        }
+
+        // Product type score
+        const typeScore = p.productType ? calculateFuzzyScore(p.productType, q) : 0;
+        
+        // Description score
+        const descScore = p.description ? calculateFuzzyScore(p.description, q) * 0.7 : 0;
+
+        // Category score
+        const catScore = p.category ? calculateFuzzyScore(p.category, q) * 0.8 : 0;
+
+        const maxScore = Math.max(nameScore, bestNoteScore * 1.1, typeScore, descScore, catScore);
+
+        if (maxScore >= 25) {
+          productScores.set(p.id, maxScore);
+          return true;
+        }
+        return false;
+      });
     }
 
     // 3. Gender Filter
@@ -158,6 +206,15 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
 
     // 7. Sort
     return list.sort((a, b) => {
+      // If user is actively searching and featured sort is selected, rank by fuzzy match score first
+      if (q && sortBy === 'featured') {
+        const scoreA = productScores.get(a.id) || 0;
+        const scoreB = productScores.get(b.id) || 0;
+        if (Math.abs(scoreA - scoreB) > 5) {
+          return scoreB - scoreA;
+        }
+      }
+
       if (sortBy === 'price-asc') return a.price - b.price;
       if (sortBy === 'price-desc') return b.price - a.price;
       if (sortBy === 'rating') {
@@ -249,14 +306,24 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
         <div className="mt-6 mb-6 bg-white p-4 rounded-3xl border border-gray-200 shadow-sm space-y-4">
           <div className="flex flex-col lg:flex-row gap-3 items-center justify-between">
             
-            {/* Search Input Box */}
-            <div className="relative w-full lg:w-96">
+            {/* Search Input Box with Real-Time Suggestions */}
+            <div ref={searchContainerRef} className="relative w-full lg:w-96">
               <input
                 type="text"
                 value={searchQuery}
+                onFocus={() => setIsSuggestionsOpen(true)}
                 onChange={(e) => {
                   onSearchChange(e.target.value);
+                  setIsSuggestionsOpen(true);
                   setCurrentPage(1);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    setIsSuggestionsOpen(false);
+                  } else if (e.key === 'Enter') {
+                    setIsSuggestionsOpen(false);
+                    setCurrentPage(1);
+                  }
                 }}
                 placeholder="ابحث عن اسم عطر، نوتات عطرية، دهن عود..."
                 className="w-full bg-[#FAF9F6] border border-gray-200 focus:border-[#8C7342] rounded-2xl pr-10 pl-4 py-2.5 text-xs sm:text-sm text-[#1A1A1A] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#8C7342]/20 transition-all"
@@ -265,12 +332,37 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
               {searchQuery && (
                 <button
                   type="button"
-                  onClick={() => onSearchChange('')}
+                  onClick={() => {
+                    onSearchChange('');
+                    setIsSuggestionsOpen(false);
+                  }}
                   className="absolute left-3 top-3 text-gray-400 hover:text-gray-600"
                 >
                   <X className="w-4 h-4" />
                 </button>
               )}
+
+              {/* Real-time Fuzzy Matching Suggestions Dropdown */}
+              <SearchSuggestionsDropdown
+                query={searchQuery}
+                products={products}
+                isOpen={isSuggestionsOpen}
+                onClose={() => setIsSuggestionsOpen(false)}
+                onSelectProduct={(prod) => {
+                  setIsSuggestionsOpen(false);
+                  onQuickView(prod);
+                }}
+                onSelectCategory={(catKey) => {
+                  setIsSuggestionsOpen(false);
+                  onSelectCategory(catKey);
+                  setCurrentPage(1);
+                }}
+                onApplyQuery={(q) => {
+                  setIsSuggestionsOpen(false);
+                  onSearchChange(q);
+                  setCurrentPage(1);
+                }}
+              />
             </div>
 
             {/* Quick Actions & Sorting Controls */}

@@ -86,9 +86,45 @@ export function buildSingleProductWhatsappMessage(
   return msg;
 }
 
+export function buildProductAvailabilityWhatsappMessage(product: Product): string {
+  const vol = product.volume ? ` (${product.volume})` : '';
+  const inStockStatus = product.inStock !== false ? 'متوفر حالياً بالكتالوج' : 'غير متوفر مؤقتاً';
+
+  return `مرحباً بيت العرب للعطور، لدي استفسار سريع بخصوص توفر هذا المنتج:\n\n🏷️ المنتج: ${product.name}${vol}\n💰 السعر: ${product.price} MAD\n📌 حالة المخزن: ${inStockStatus}\n\nهل المنتج متوفر حالياً في متجركم بالحبوس وجاهز للشحن لمدينتي؟ شكراً لكم!`;
+}
+
+export function buildProductScentProfileWhatsappMessage(product: Product): string {
+  const vol = product.volume ? ` (${product.volume})` : '';
+  const notesText = product.notes && product.notes.length > 0
+    ? `\n✨ النوتات المذكورة: ${product.notes.join(' • ')}`
+    : '';
+
+  return `مرحباً بيت العرب للعطور، أود الاستفسار عن الرائحة والنوتات العطرية لهذا المنتج:\n\n🌸 المنتج: ${product.name}${vol}\n💰 السعر: ${product.price} MAD${notesText}\n\nهل يمكن تزويدي بمعلومات أكثر حول:\n• طابع الرائحة ودرجة الفوحان والثبات؟\n• هل العطر مناسب للاستخدام اليومي أم للمناسبات الخاصة؟\n\nشكراً جزيلاً لكم!`;
+}
+
+export function buildQuickQuestionWhatsappMessage(
+  product: Product,
+  topic: 'scent' | 'availability' | 'general' = 'general'
+): string {
+  if (topic === 'scent') {
+    return buildProductScentProfileWhatsappMessage(product);
+  }
+  if (topic === 'availability') {
+    return buildProductAvailabilityWhatsappMessage(product);
+  }
+
+  const vol = product.volume ? ` (${product.volume})` : '';
+  const notesText = product.notes && product.notes.length > 0
+    ? `\n✨ النوتات: ${product.notes.join(' • ')}`
+    : '';
+
+  return `مرحباً بيت العرب للعطور، لدي سؤال سريع حول هذا المنتج:\n\n✨ المنتج: ${product.name}${vol}\n💰 السعر: ${product.price} MAD${notesText}\n\nأود الاستفسار عن توفره حالياً وتفاصيل الرائحة والثبات ومناسبته. شكراً لكم!`;
+}
+
 /**
- * Encodes the WhatsApp URL for direct ordering
+ * Encodes the WhatsApp URL for direct ordering or inquiries
  */
 export function getWhatsappUrl(message: string): string {
   return `https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=${encodeURIComponent(message)}`;
 }
+
