@@ -226,7 +226,9 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
         return bRating - aRating;
       }
       if (sortBy === 'newest') {
-        return (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0);
+        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return timeB - timeA;
       }
       if (sortBy === 'featured') {
         if (a.isFeatured && !b.isFeatured) return -1;

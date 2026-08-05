@@ -16,6 +16,7 @@ interface LanguageContextType {
   getGenderLabel: (gender?: string) => string | null;
   translateCity: (city: string) => string;
   translateProductTerm: (term: string) => string;
+  getPerfumeTerm: (term: string) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -43,8 +44,16 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, []);
 
   const toggleLanguage = useCallback(() => {
-    setLanguage((prev) => (prev === 'ar' ? 'fr' : 'ar'));
-  }, [setLanguage]);
+    setLanguageState((prev) => {
+      const nextLang: Language = prev === 'ar' ? 'fr' : 'ar';
+      try {
+        localStorage.setItem(STORAGE_KEY, nextLang);
+      } catch {
+        // ignore
+      }
+      return nextLang;
+    });
+  }, []);
 
   const dir: 'rtl' | 'ltr' = language === 'ar' ? 'rtl' : 'ltr';
   const isArabic = language === 'ar';
@@ -158,6 +167,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         getGenderLabel,
         translateCity,
         translateProductTerm,
+        getPerfumeTerm: translateProductTerm,
       }}
     >
       {children}

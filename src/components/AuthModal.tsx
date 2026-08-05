@@ -7,10 +7,11 @@ import { X, Mail, Lock, User, Phone, LogIn, UserPlus, KeyRound, AlertCircle, Che
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
   initialTab?: 'login' | 'signup';
 }
 
-export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTab = 'login' }) => {
+export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess, initialTab = 'login' }) => {
   const { loginWithGoogle, loginWithEmail, registerWithEmail, resetPassword } = useAuth();
   const { toast } = useToast();
   const { isFrench } = useLanguage();
@@ -49,6 +50,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTa
       );
       onClose();
       resetForm();
+      onSuccess?.();
     } catch (err: any) {
       console.error(err);
       if (err.code === 'auth/popup-closed-by-user') {
@@ -91,6 +93,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTa
       );
       onClose();
       resetForm();
+      onSuccess?.();
     } catch (err: any) {
       console.error(err);
       if (
@@ -151,6 +154,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTa
       );
       onClose();
       resetForm();
+      onSuccess?.();
     } catch (err: any) {
       console.error(err);
       if (err.code === 'auth/email-already-in-use') {

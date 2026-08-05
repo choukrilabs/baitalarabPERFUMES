@@ -3,6 +3,63 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-C9E21RJH2R"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-C9E21RJH2R');
+    </script>
+
+    <!-- Browser Extension & Web3 Conflict Shield -->
+    <script>
+      (function() {
+        try {
+          const originalDefineProperty = Object.defineProperty;
+          Object.defineProperty = function(obj, prop, descriptor) {
+            if (obj === window && prop === 'ethereum') {
+              try {
+                return originalDefineProperty.call(this, obj, prop, Object.assign({}, descriptor, { configurable: true }));
+              } catch (e) {
+                return obj;
+              }
+            }
+            return originalDefineProperty.apply(this, arguments);
+          };
+
+          window.addEventListener('error', function(event) {
+            if (
+              event &&
+              event.message &&
+              (event.message.includes('Cannot redefine property: ethereum') ||
+               event.message.includes('ethereum'))
+            ) {
+              if (event.preventDefault) event.preventDefault();
+              if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+              return true;
+            }
+          }, true);
+
+          window.addEventListener('unhandledrejection', function(event) {
+            if (
+              event &&
+              event.reason &&
+              (String(event.reason).includes('Cannot redefine property: ethereum') ||
+               String(event.reason.message || '').includes('ethereum'))
+            ) {
+              if (event.preventDefault) event.preventDefault();
+              if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+            }
+          }, true);
+        } catch (err) {
+          // Ignore
+        }
+      })();
+    </script>
+
     <!-- Primary Meta Tags -->
     <title>عطور بيت العرب - عطور شرقية وعود أصلي الدار البيضاء</title>
     <meta name="title" content="عطور بيت العرب - عطور شرقية وعود أصلي الدار البيضاء" />
