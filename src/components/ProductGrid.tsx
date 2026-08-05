@@ -276,39 +276,6 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
           products={products}
         />
 
-        {/* Universal Reassurance Banner */}
-        <div className="mt-4 bg-gradient-to-r from-emerald-950 via-[#132A1C] to-emerald-950 text-[#FAF9F6] p-3.5 rounded-2xl border border-[#25D366]/30 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className={`flex items-center gap-3 text-center ${isFrench ? 'sm:text-left' : 'sm:text-right'}`}>
-            <div className="w-8 h-8 rounded-full bg-[#25D366] text-white flex items-center justify-center shrink-0 shadow-md">
-              <MessageCircle className="w-4 h-4 fill-current" />
-            </div>
-            <div>
-              <p className="text-xs sm:text-sm font-bold text-white leading-tight">
-                {t('trust.badge')}
-              </p>
-              <p className="text-[11px] text-emerald-300 mt-0.5">
-                {isFrench
-                  ? 'Confirmation immédiate et livraison sécurisée partout au Maroc • Paiement à la livraison'
-                  : 'تأكيد مباشر وتوصيل آمن لجميع مدن المغرب • الدفع عند الاستلام بعد المعاينة'}
-              </p>
-            </div>
-          </div>
-
-          <a
-            href={`https://wa.me/${SHOP_CONFIG.whatsappNumber}?text=${encodeURIComponent(
-              isFrench
-                ? 'Bonjour Parfums Bait Al Arab, je souhaite me renseigner sur la livraison dans ma ville.'
-                : 'مرحباً عطور بيت العرب، أود الاستفسار عن التوصيل لمدينتي.'
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="shrink-0 bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs font-bold py-2 px-4 rounded-xl flex items-center gap-1.5 shadow transition-transform hover:scale-105"
-          >
-            <span>{isFrench ? 'Livraison dans ma ville' : 'استفسر عن مدينتك'}</span>
-            <Truck className="w-3.5 h-3.5" />
-          </a>
-        </div>
-
         <div id="catalog-products-top" className="scroll-mt-20" />
 
         {/* Search, Filter Bar & Toolbar */}
